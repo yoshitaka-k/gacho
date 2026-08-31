@@ -3,7 +3,7 @@ mod main;
 mod setting;
 mod modal;
 
-pub use main::view::Render;
+pub use main::render::Render;
 
 use crate::error;
 
@@ -32,6 +32,7 @@ pub(crate) const BOTTOM_PANEL_INNER_MARGIN: egui::Margin = egui::Margin {
 /// ファイルダイアログを表示するためのトークン
 pub struct OpenDialogToken {
     pub file_dialog: bool,
+    pub folder_dialog: bool,
 }
 
 /// 設定タブ

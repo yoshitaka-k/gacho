@@ -6,6 +6,7 @@ pub type Result<T> = std::result::Result<T, GachoError>;
 pub enum GachoError {
     FileNotFound(path::PathBuf),
     FileError(String, path::PathBuf),
+    IndexError(String),
     LockPoisoned,
     InvalidVersion,
     IconLoadFailed,
@@ -18,6 +19,7 @@ impl fmt::Display for GachoError {
         match self {
             GachoError::FileNotFound(path) => write!(f, "File does not exist: {}", path.display()),
             GachoError::FileError(e, path) => write!(f, "File error: {} \n\n{}", e, path.display()),
+            GachoError::IndexError(e) => write!(f, "Index error: {}", e),
             GachoError::LockPoisoned => write!(f, "Lock poisoned"),
             GachoError::InvalidVersion => write!(f, "Invalid version"),
             GachoError::IconLoadFailed => write!(f, "Icon load failed"),
@@ -32,6 +34,7 @@ impl error::Error for GachoError {
         match *self {
             GachoError::FileNotFound(_) => None,
             GachoError::FileError(_, _) => None,
+            GachoError::IndexError(_) => None,
             GachoError::LockPoisoned => None,
             GachoError::InvalidVersion => None,
             GachoError::IconLoadFailed => None,

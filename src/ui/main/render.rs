@@ -1,13 +1,15 @@
-use crate::app;
+use crate::{app, event, file};
 use crate::event::{open, input};
 use crate::ui::{self, modal};
 use crate::ui::assets::svg;
-use crate::ui::main::{top, bottom};
+use crate::ui::main::{top, bottom, middle};
 use crate::ui::setting::view as setting_window;
 
 /// 描画用のウィジェット
 pub struct Render {
     app: app::App,
+    open_files: file::OpenFiles,
+    pending_actions: Vec<event::EventAction>,
 
     // ファイルダイアログを開くタイミング
     open_dialog_token: ui::OpenDialogToken,
@@ -37,8 +39,11 @@ impl Render {
 
         Self {
             app,
+            open_files: file::OpenFiles::new(),
+            pending_actions: Vec::new(),
             open_dialog_token: ui::OpenDialogToken {
                 file_dialog: false,
+                folder_dialog: false,
             },
             setting_token: ui::SettingToken {
                 open: false,
@@ -75,23 +80,26 @@ impl eframe::App for Render {
             style.interaction.selectable_labels = false;
         });
 
-        // ダイアログを開く
-        self.open_dialog();
+        // キーイベントを処理
+        input::arrow_left(ui, &mut self.pending_actions);
+        input::arrow_right(ui, &mut self.pending_actions);
 
-        // ドラッグ&ドロップされたファイルを処理
+        // ファイルを開く
+        self.open_dialog();
         self.drop_files(ui);
+
+        // イベントアクションを処理
+        self.process_actions();
 
         // パネルのスタイルを設定
         // 上部パネルを表示
         top::view(ui, &mut self.setting_token, &mut self.open_dialog_token);
 
         // 下部パネルを表示
-        bottom::view(ui);
+        bottom::view(ui, &self.open_files);
 
         // 中央パネルを表示
-        egui::CentralPanel::default().show(ui, |ui| {
-            ui.label("Gacho");
-        });
+        middle::view(ui, &mut self.open_files, &mut self.error_token);
 
         // 設定ウィンドウを表示
         if self.setting_token.open {
@@ -120,8 +128,22 @@ impl Render {
         // ファイルダイアログを開くボタンが押されてたらファイルダイアログを開く
         if self.open_dialog_token.file_dialog {
             self.open_dialog_token.file_dialog = false;
-            if let Err(e) = open::file() {
+
+            // ファイルを開く
+            if let Err(e) = open::file(&mut self.open_files) {
                 eprintln!("Error opening file: {}", e);
+                self.error_token.open = true;
+                self.error_token.value = Some(e);
+            }
+        }
+
+        // フォルダダイアログを開くボタンが押されてたらフォルダダイアログを開く
+        if self.open_dialog_token.folder_dialog {
+            self.open_dialog_token.folder_dialog = false;
+
+            // フォルダを開く
+            if let Err(e) = open::folder(&mut self.open_files) {
+                eprintln!("Error opening folder: {}", e);
                 self.error_token.open = true;
                 self.error_token.value = Some(e);
             }
@@ -131,10 +153,26 @@ impl Render {
     /// ドラッグ&ドロップされたファイルを処理
     /// * `ui` - UI
     fn drop_files(&mut self, ui: &egui::Ui) {
-        if let Err(e) = input::drop(ui) {
+        // ドラッグ&ドロップされたファイルを処理
+        if let Err(e) = input::drop(ui, &mut self.open_files) {
             eprintln!("Error dropping files: {}", e);
             self.error_token.open = true;
             self.error_token.value = Some(e);
+        }
+    }
+
+    /// イベントアクションを処理
+    /// * `ui` - UI
+    fn process_actions(&mut self) {
+        for action in self.pending_actions.drain(..) {
+            match action {
+                event::EventAction::Left => {
+                    self.open_files.next();
+                }
+                event::EventAction::Right => {
+                    self.open_files.prev();
+                }
+            }
         }
     }
 }

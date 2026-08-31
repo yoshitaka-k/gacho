@@ -24,10 +24,17 @@ pub(crate) fn view(
                 button::setting_open(ui, setting_token);
             }
 
-            let hover_text = "File Open";
+            // フォルダダイアログを開くボタン
+            let hover_text = "Folder Open";
+            let open_button = egui::Image::new(svg::FOLDER_OPEN).max_height(icon::BUTTON_OPEN_ICON_SIZE).tint(button_color);
+            if ui.button(open_button).on_hover_text(hover_text).clicked() {
+                button::folder_open(ui, open_dialog_token);
+            }
+
+            let hover_text = "Files Open";
             let open_button = egui::Image::new(svg::FILE_OPEN).max_height(icon::BUTTON_OPEN_ICON_SIZE).tint(button_color);
             if ui.button(open_button).on_hover_text(hover_text).clicked() {
-                button::file_open(ui, open_dialog_token);
+                button::files_open(ui, open_dialog_token);
             }
         });
     });

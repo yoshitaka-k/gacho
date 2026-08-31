@@ -3,9 +3,20 @@ use crate::{app, ui};
 /// ファイルダイアログを開く
 /// * `ui` - UI
 /// * `open_dialog_token` - ファイルダイアログを開くためのトークン
-pub(crate) fn file_open(ui: &mut egui::Ui, open_dialog_token: &mut ui::OpenDialogToken) {
+pub(crate) fn files_open(ui: &mut egui::Ui, open_dialog_token: &mut ui::OpenDialogToken) {
     // ファイルダイアログを開くタイミングをずらす
     open_dialog_token.file_dialog = true;
+
+    // 再描画を要求
+    ui.ctx().request_repaint();
+}
+
+/// フォルダダイアログを開く
+/// * `ui` - UI
+/// * `open_dialog_token` - フォルダダイアログを開くためのトークン
+pub(crate) fn folder_open(ui: &mut egui::Ui, open_dialog_token: &mut ui::OpenDialogToken) {
+    // フォルダダイアログを開くタイミングをずらす
+    open_dialog_token.folder_dialog = true;
 
     // 再描画を要求
     ui.ctx().request_repaint();

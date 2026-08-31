@@ -21,6 +21,15 @@ impl Extension {
         ]
     }
 
+    /// アーカイブファイルのベクタに変換
+    /// * `return` - アーカイブファイルのベクタ
+    pub fn to_archive_vec() -> Vec<&'static str> {
+        vec![
+            Self::Zip.to_str(),
+            Self::Cbz.to_str(),
+        ]
+    }
+
     /// 文字列から Extension を作成
     /// * `extension` - 文字列
     /// * `return` - Extension

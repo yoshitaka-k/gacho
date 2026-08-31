@@ -1,0 +1,57 @@
+[package]
+name = "gacho"
+version = "0.1.0"
+edition = "2024"
+description = "Comic Book ZIP viewer"
+authors = ["yoshitaka-k"]
+repository = "yoshitaka-k/gacho"
+license = "Apache-2.0"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+
+[package.metadata.bundle]
+identifier = "jp.ktgwya.gacho"
+name = "Gacho"
+icon = ["target/bundle-icons/*.png"]
+category = "Utility"
+short_description = "Comic Book ZIP viewer"
+linux_use_terminal = false
+deb_depends = [
+    "libgtk-3-0",
+    "libxcb-render0",
+    "libxcb-shape0",
+    "libxcb-xfixes0",
+    "libxkbcommon0",
+    "libvulkan1",
+    "libssl3",
+]
+
+[package.metadata.winresource]
+ProductName = "Gacho"
+FileDescription = "Comic Book ZIP viewer"
+OriginalFilename = "Gacho.exe"
+
+[build-dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+image = { version = "0.25.10", default-features = false, features = ["png"] }
+winresource = "0.1.31"
+ico = "0.5"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", features = ["winbase"] }
+
+[dependencies]
+egui = "0.36.1"
+egui_extras = { version = "0.36.1", features = ["svg", "image"] }
+eframe = { version = "0.36.1", features = ["persistence"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+getset = "0.1.7"
+rfd = "0.17.2"
+env_logger = "0.11.11"
+log = "0.4.34"
+ehttp = { version = "0.7.1", features = ["json"] }
+image = { version = "0.25.10", features = ["jpeg", "png"] }

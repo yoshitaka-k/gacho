@@ -1,6 +1,6 @@
 [package]
 name = "gacho"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 description = "Comic Book ZIP viewer"
 authors = ["yoshitaka-k"]

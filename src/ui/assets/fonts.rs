@@ -1,0 +1,27 @@
+use std::sync::Arc;
+use egui::{FontData, FontDefinitions, FontFamily};
+
+mod generated {
+    include!(concat!(env!("OUT_DIR"), "/fonts_generated.rs"));
+}
+
+/// egui に assets/fonts のフォントを登録する
+/// * `ctx` - コンテキスト
+pub fn install(ctx: &egui::Context) {
+    let mut fonts = FontDefinitions::default();
+
+    for &(name, bytes) in generated::FONTS {
+        fonts.font_data
+             .insert(name.to_owned(), Arc::new(FontData::from_static(bytes)));
+
+        // デフォルトフォントに無いフォントはフォールバック
+        if let Some(family) = fonts.families.get_mut(&FontFamily::Proportional) {
+            family.push(name.to_owned());
+        }
+        if let Some(family) = fonts.families.get_mut(&FontFamily::Monospace) {
+            family.push(name.to_owned());
+        }
+    }
+
+    ctx.set_fonts(fonts);
+}

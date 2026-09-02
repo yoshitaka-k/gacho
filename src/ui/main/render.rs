@@ -1,7 +1,7 @@
 use crate::{app, event, file};
 use crate::event::{open, input};
 use crate::ui::{self, modal};
-use crate::ui::assets::svg;
+use crate::ui::assets::{fonts, svg};
 use crate::ui::main::{top, bottom, middle};
 use crate::ui::setting::view as setting_window;
 
@@ -29,7 +29,8 @@ pub struct Render {
 
 impl Render {
     pub fn new(cc: &eframe::CreationContext<'_>, app: app::App) -> Self {
-        // SVG ローダーを登録
+        // フォントと SVG ローダーを追加
+        fonts::install(&cc.egui_ctx);
         svg::install(&cc.egui_ctx);
 
         // 前回保存した App があれば復元（なければ引数の app を使う）

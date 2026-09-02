@@ -49,16 +49,21 @@ impl Image {
     /// 新しい Image を作成
     /// * `path` - ファイルのパス
     /// * `relative_path` - ドロップ基準からの相対パス
+    /// * `file_name` - ファイルの名前
     /// * `return` - Image のインスタンス
-    pub fn new(path: PathBuf, relative_path: String, bytes: Option<Vec<u8>>) -> Result<Self, error::GachoError> {
+    pub fn new(path: PathBuf, relative_path: String, file_name: Option<String>, bytes: Option<Vec<u8>>) -> Result<Self, error::GachoError> {
         // ファイルの一意な ID を発行
         let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
 
         // ファイル名を取得
-        let file_name = if let Some(name) = path.file_name() {
-            name.to_string_lossy().to_string()
+        let file_name = if let Some(file_name) = file_name {
+            file_name
         } else {
-            return Err(error::GachoError::FileError("File name not found".to_string(), path.clone()));
+            if let Some(name) = path.file_name() {
+                name.to_string_lossy().to_string()
+            } else {
+                return Err(error::GachoError::FileError("File name not found".to_string(), path.clone()));
+            }
         };
 
         // ファイル拡張子を取得

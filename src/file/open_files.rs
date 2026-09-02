@@ -148,14 +148,19 @@ impl OpenFiles {
                     archive.unarchive(&path).map_err(|e| error::GachoError::FileError(e.to_string(), path.clone()))?;
 
                     for file in archive.files() {
-                        let image_file = file::Image::new(path.clone(), file.name().clone(), Some(file.bytes().to_vec()))?;
+                        let image_file = file::Image::new(
+                            path.clone(),
+                            file.relative_path().clone(),
+                            Some(file.file_name().clone()),
+                            Some(file.bytes().to_vec()),
+                        )?;
                         self.images.push(image_file);
                     }
 
                     archive.sort();
                 } else {
                     // ファイルを作成
-                    let image_file = file::Image::new(path.clone(), relative_path, None)?;
+                    let image_file = file::Image::new(path.clone(), relative_path, None, None)?;
 
                     // ファイルを追加
                     self.images.push(image_file);

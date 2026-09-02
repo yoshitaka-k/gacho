@@ -1,4 +1,5 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{Cursor, Read, BufReader};
 use getset::{Getters, Setters};
@@ -6,8 +7,13 @@ use getset::{Getters, Setters};
 #[derive(Getters, Setters)]
 pub(crate) struct ArchiveFile {
     #[getset(get = "pub")]
-    name: String,
+    file_name: String,
 
+    /// ファイルのパス
+    #[getset(get = "pub")]
+    relative_path: String,
+
+    /// ファイルのバイト列
     #[getset(get = "pub")]
     bytes: Vec<u8>,
 }
@@ -46,7 +52,7 @@ impl Archive {
 
     /// ファイルを名前でソートする
     pub fn sort(&mut self) {
-        self.files.sort_by_key(|file| file.name.clone());
+        self.files.sort_by_key(|file| file.relative_path.clone());
     }
 
     /// アーカイブを展開する
@@ -73,23 +79,53 @@ impl Archive {
         // アーカイブのファイルを取得する
         for i in 0..self.len {
             let mut file = archive.by_index(i)?;
-
-            let name = file.name().to_string();
             if file.is_dir() {
                 continue;
             }
 
+            // zipファイル内のパスを取得する
+            let path = file.enclosed_name().unwrap_or(PathBuf::new());
+
+            // ファイルが隠しファイルかどうかをチェックする
+            if self.is_hidden_zip_entry(&path) {
+                continue;
+            }
+
+            // zipファイル内のファイル名を取得する
+            let file_name = if let Some(file_name) = path.file_name() {
+                file_name.to_string_lossy().to_string()
+            } else {
+                continue;
+            };
+
+            // zipファイル内の相対パス付きファイル名を取得する
+            let relative_path = file.name().to_string();
+
             let mut bytes = Vec::new();
             file.read_to_end(&mut bytes)?;
 
-            println!("{}: {}", name, bytes.len());
+            println!("{}: {}", file_name, bytes.len());
 
-            self.files.push(ArchiveFile { name, bytes });
+            self.files.push(ArchiveFile {
+                file_name,
+                relative_path,
+                bytes,
+            });
         }
 
         // ファイルを名前でソートする
         self.sort();
 
         Ok(())
+    }
+
+    /// ファイルが隠しファイルかどうかをチェックする
+    /// * `path` - ファイルのパス
+    /// * `return` - ファイルが隠しファイルかどうか
+    fn is_hidden_zip_entry(&self, path: &Path) -> bool {
+        path.components().any(|c| {
+            let s = c.as_os_str().to_string_lossy();
+            s.starts_with('.') || s == "__MACOSX"
+        })
     }
 }

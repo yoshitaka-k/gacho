@@ -10,6 +10,9 @@ pub(crate) fn file(
         .add_filter("Archive", &extensions)
         .pick_file();
 
+    // ファイルをクリア
+    open_files.clear();
+
     // ファイルを追加
     if let Some(path) = path {
         open_files.add_path(path)?;
@@ -36,6 +39,9 @@ pub(crate) fn folder(
     let path = rfd::FileDialog::new()
         .add_filter("Archive", &extensions)
         .pick_folder();
+
+    // ファイルをクリア
+    open_files.clear();
 
     // ファイルを追加
     if let Some(path) = path {

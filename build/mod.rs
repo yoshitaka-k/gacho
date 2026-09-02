@@ -1,5 +1,6 @@
 pub(crate) mod appicon;
 pub(crate) mod svg;
+pub(crate) mod fonts;
 
 use std::{fs, path::Path};
 

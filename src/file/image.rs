@@ -1,16 +1,17 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use getset::{Getters, Setters};
 
 use crate::{error, file};
 use crate::file::extension;
 
-/// ImageFile の一意な ID を発行するカウンタ
+/// Image の一意な ID を発行するカウンタ
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
 /// 画像ファイルを管理する構造体
 #[derive(Clone, Getters, Setters)]
-pub struct ImageFile {
+pub struct Image {
     /// ファイルの一意な ID
     #[getset(get = "pub")]
     id: u64,
@@ -34,14 +35,22 @@ pub struct ImageFile {
     /// ファイルの拡張子
     #[getset(get = "pub")]
     extension: file::Extension,
+
+    /// ファイルのバイト列
+    #[getset(get = "pub")]
+    bytes: Arc<[u8]>,
+
+    /// ファイルのバイト列かどうか
+    #[getset(get = "pub")]
+    is_bytes: bool,
 }
 
-impl ImageFile {
-    /// 新しい ImageFile を作成
+impl Image {
+    /// 新しい Image を作成
     /// * `path` - ファイルのパス
     /// * `relative_path` - ドロップ基準からの相対パス
-    /// * `return` - ImageFile のインスタンス
-    pub fn new(path: PathBuf, relative_path: String) -> Result<Self, error::GachoError> {
+    /// * `return` - Image のインスタンス
+    pub fn new(path: PathBuf, relative_path: String, bytes: Option<Vec<u8>>) -> Result<Self, error::GachoError> {
         // ファイルの一意な ID を発行
         let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
 
@@ -62,7 +71,15 @@ impl ImageFile {
         // 相対パスかどうかを判断
         let is_relative_path = relative_path != file_name;
 
-        println!("id: {}, file_name: {}, relative_path: {}", id, file_name, relative_path);
+        // ファイルの内容を取得
+        let bytes: Arc<[u8]> = if let Some(bytes) = bytes {
+            Arc::from(bytes)
+        } else {
+            Arc::new([])
+        };
+
+        // ファイルのバイト列かどうかを判断
+        let is_bytes = bytes.len() > 0;
 
         Ok(Self {
             id,
@@ -71,6 +88,14 @@ impl ImageFile {
             is_relative_path,
             file_name,
             extension,
+            bytes,
+            is_bytes,
         })
+    }
+
+    /// ファイルがアーカイブかどうかを判断
+    /// * `return` - ファイルがアーカイブかどうか
+    pub fn is_archive(&self) -> bool {
+        matches!(self.extension, file::Extension::Zip | file::Extension::Cbz)
     }
 }

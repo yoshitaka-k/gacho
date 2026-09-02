@@ -1,0 +1,95 @@
+use std::path::Path;
+use std::fs::File;
+use std::io::{Cursor, Read, BufReader};
+use getset::{Getters, Setters};
+
+#[derive(Getters, Setters)]
+pub(crate) struct ArchiveFile {
+    #[getset(get = "pub")]
+    name: String,
+
+    #[getset(get = "pub")]
+    bytes: Vec<u8>,
+}
+
+#[derive(Getters, Setters)]
+pub(crate) struct Archive {
+    #[getset(get = "pub")]
+    archive: Option<zip::ZipArchive<Cursor<Vec<u8>>>>,
+
+    #[getset(get = "pub")]
+    files: Vec<ArchiveFile>,
+
+    #[getset(get = "pub")]
+    len: usize,
+}
+
+impl Archive {
+    pub(crate) fn new() -> Self {
+        Self {
+            archive: None,
+            files: Vec::new(),
+            len: 0,
+        }
+    }
+
+    /// ファイルを取得する
+    /// * `index` - ファイルのインデックス
+    /// * `return` - ファイル
+    pub fn get_file(&self, index: usize) -> Option<&ArchiveFile> {
+        if self.files.is_empty() {
+            return None;
+        }
+
+        self.files.get(index)
+    }
+
+    /// ファイルを名前でソートする
+    pub fn sort(&mut self) {
+        self.files.sort_by_key(|file| file.name.clone());
+    }
+
+    /// アーカイブを展開する
+    /// * `path` - アーカイブのパス
+    /// * `return` - アーカイブを展開した結果
+    pub fn unarchive(&mut self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+        println!("unarchive: {}", path.display());
+
+        let file = File::open(path)?;
+        let mut reader = BufReader::new(file);
+        let mut buffer = Vec::new();
+
+        reader.read_to_end(&mut buffer)?;
+        let mut archive = zip::ZipArchive::new(Cursor::new(buffer))?;
+
+        // アーカイブを保存する
+        self.archive = Some(archive.clone());
+
+        // アーカイブのファイル数を取得する
+        self.len = archive.len();
+
+        println!("archive.len(): {}", self.len);
+
+        // アーカイブのファイルを取得する
+        for i in 0..self.len {
+            let mut file = archive.by_index(i)?;
+
+            let name = file.name().to_string();
+            if file.is_dir() {
+                continue;
+            }
+
+            let mut bytes = Vec::new();
+            file.read_to_end(&mut bytes)?;
+
+            println!("{}: {}", name, bytes.len());
+
+            self.files.push(ArchiveFile { name, bytes });
+        }
+
+        // ファイルを名前でソートする
+        self.sort();
+
+        Ok(())
+    }
+}

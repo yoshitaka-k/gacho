@@ -11,6 +11,9 @@ pub(crate) fn files(
         return Ok(());
     }
 
+    // ファイルをクリア
+    open_files.clear();
+
     // ドロップされたファイルを追加
     for file in files {
         open_files.add_path(file.path().to_path_buf())?;

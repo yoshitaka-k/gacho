@@ -5,11 +5,11 @@ use getset::{Getters, Setters};
 use crate::{file, error};
 
 /// ドロップされたファイルを管理する構造体
-#[derive(Clone, Getters, Setters)]
+#[derive(Getters, Setters)]
 pub struct OpenFiles {
     /// ファイル一覧
     #[getset(get = "pub")]
-    image_files: Vec<file::ImageFile>,
+    images: Vec<file::Image>,
 
     /// 選択されたファイルのインデックス
     #[getset(get = "pub", set = "pub")]
@@ -21,16 +21,22 @@ impl OpenFiles {
     /// * `return` - OpenFiles のインスタンス
     pub fn new() -> Self {
         Self {
-            image_files: vec![],
+            images: vec![],
             selected_index: None,
         }
     }
 
+    /// ファイルをクリア
+    pub fn clear(&mut self) {
+        self.images.clear();
+        self.selected_index = None;
+    }
+
     /// 選択されたファイルのパスを取得
     /// * `return` - 選択されたファイルのパス
-    pub fn selected_index_file(&self) -> Option<&file::ImageFile> {
+    pub fn selected_index_file(&self) -> Option<&file::Image> {
         if let Some(index) = self.selected_index() {
-            Some(&self.image_files[*index])
+            Some(&self.images[*index])
         } else {
             None
         }
@@ -38,13 +44,13 @@ impl OpenFiles {
 
     /// 次のファイルを取得
     /// * `return` - 次のファイル
-    pub fn selected_next_file(&mut self) -> Option<&file::ImageFile> {
+    pub fn selected_next_file(&mut self) -> Option<&file::Image> {
         let Some(index) = self.selected_index() else {
             return None;
         };
 
-        if *index < self.image_files.len() - 1 {
-            return Some(&self.image_files[*index + 1]);
+        if *index < self.images.len() - 1 {
+            return Some(&self.images[*index + 1]);
         }
 
         None
@@ -52,13 +58,13 @@ impl OpenFiles {
 
     /// 前のファイルを取得
     /// * `return` - 前のファイル
-    pub fn selected_prev_file(&mut self) -> Option<&file::ImageFile> {
+    pub fn selected_prev_file(&mut self) -> Option<&file::Image> {
         let Some(index) = self.selected_index() else {
             return None;
         };
 
         if *index > 0 {
-            return Some(&self.image_files[*index - 1]);
+            return Some(&self.images[*index - 1]);
         }
 
         None
@@ -66,7 +72,7 @@ impl OpenFiles {
 
     /// 前のファイルを取得
     /// * `return` - 前のファイル
-    pub fn prev(&mut self) -> Option<&file::ImageFile> {
+    pub fn prev(&mut self) -> Option<&file::Image> {
         if let Some(index) = self.selected_index() {
             if *index > 0 {
                 self.selected_index = Some(*index - 1);
@@ -78,9 +84,9 @@ impl OpenFiles {
 
     /// 次のファイルを取得
     /// * `return` - 次のファイル
-    pub fn next(&mut self) -> Option<&file::ImageFile> {
+    pub fn next(&mut self) -> Option<&file::Image> {
         if let Some(index) = self.selected_index() {
-            if *index < self.image_files.len() - 1 {
+            if *index < self.images.len() - 1 {
                 self.selected_index = Some(*index + 1);
             }
         }
@@ -90,7 +96,7 @@ impl OpenFiles {
 
     /// ファイルをパス順にソート
     pub fn sort(&mut self) {
-        self.image_files.sort_by_key(|file| file.path().clone());
+        self.images.sort_by_key(|file| file.path().clone());
     }
 
     /// パスを追加
@@ -107,7 +113,9 @@ impl OpenFiles {
         self.sort();
 
         // TODO: とりあえず最初のファイルを選択するようにする
-        self.selected_index = Some(0);
+        if !self.images.is_empty() {
+            self.selected_index = Some(0);
+        }
 
         Ok(())
     }
@@ -118,7 +126,7 @@ impl OpenFiles {
     /// * `return` - ファイルのパス
     fn find_file(&mut self,
         path: PathBuf,
-        base_dir: &Path
+        base_dir: &Path,
     ) -> error::Result<()> {
         let metadata = path.metadata().map_err(|e| error::GachoError::FileError(e.to_string(), path.clone()))?;
 
@@ -131,11 +139,27 @@ impl OpenFiles {
                     .to_string_lossy()
                     .into_owned();
 
-                // ファイルを作成
-                let image_file = file::ImageFile::new(path, relative_path)?;
+                // ファイルがアーカイブかどうかを判断
+                if file::is_archive(&path) {
+                    // TODO: アーカイブ
+                    let mut archive = file::Archive::new();
 
-                // ファイルを追加
-                self.image_files.push(image_file);
+                    // TODO: アーカイブを展開
+                    archive.unarchive(&path).map_err(|e| error::GachoError::FileError(e.to_string(), path.clone()))?;
+
+                    for file in archive.files() {
+                        let image_file = file::Image::new(path.clone(), file.name().clone(), Some(file.bytes().to_vec()))?;
+                        self.images.push(image_file);
+                    }
+
+                    archive.sort();
+                } else {
+                    // ファイルを作成
+                    let image_file = file::Image::new(path.clone(), relative_path, None)?;
+
+                    // ファイルを追加
+                    self.images.push(image_file);
+                }
             }
         } else if metadata.is_dir() {
             // ディレクトリを再帰的に探索

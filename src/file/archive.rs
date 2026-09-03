@@ -47,8 +47,6 @@ impl Archive {
     /// * `path` - アーカイブのパス
     /// * `return` - アーカイブを展開した結果
     pub fn unarchive(&mut self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-        println!("unarchive: {}", path.display());
-
         let file = File::open(path)?;
         let mut reader = BufReader::new(file);
         let mut buffer = Vec::new();
@@ -61,8 +59,6 @@ impl Archive {
 
         // アーカイブのファイル数を取得する
         self.len = archive.len();
-
-        println!("archive.len(): {}", self.len);
 
         // アーカイブのファイルを取得する
         for i in 0..self.len {
@@ -91,8 +87,6 @@ impl Archive {
 
             let mut bytes = Vec::new();
             file.read_to_end(&mut bytes)?;
-
-            println!("{}: {}", file_name, bytes.len());
 
             self.files.push(ArchiveFile {
                 file_name,

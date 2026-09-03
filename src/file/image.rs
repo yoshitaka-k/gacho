@@ -65,15 +65,11 @@ impl Image {
             return Err(error::GachoError::FileError("File extension not found".to_string(), path.clone()));
         };
 
-        println!("path: {}", path.display());
         let book_name = if matches!(extension, file::Extension::Zip | file::Extension::Cbz) {
             "".to_string()
         } else {
-            println!("relative_path: {}", relative_path);
             let replace_path = format!("/{}", file_name);
             let book_name = relative_path.replace(&replace_path, "");
-            println!("book_name: {}", book_name);
-
             book_name
         };
 

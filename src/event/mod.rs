@@ -5,6 +5,7 @@ pub(crate) mod drop;
 
 /// イベントアクション
 pub(crate) enum EventAction {
+    Click(egui::Pos2),
     Left,
     Right,
 }

@@ -90,7 +90,7 @@ impl eframe::App for Render {
         self.drop_files(ui);
 
         // イベントアクションを処理
-        self.process_actions();
+        self.process_actions(ui);
 
         // パネルのスタイルを設定
         // 上部パネルを表示
@@ -100,7 +100,7 @@ impl eframe::App for Render {
         bottom::view(ui, &mut self.open_files);
 
         // 中央パネルを表示
-        middle::view(ui, &self.app, &mut self.open_files, &mut self.error_token);
+        middle::view(ui, &self.app, &mut self.open_files, &mut self.pending_actions, &mut self.error_token);
 
         // 設定ウィンドウを表示
         if self.setting_token.open {
@@ -164,9 +164,16 @@ impl Render {
 
     /// イベントアクションを処理
     /// * `ui` - UI
-    fn process_actions(&mut self) {
+    fn process_actions(&mut self, ui: &egui::Ui) {
         for action in self.pending_actions.drain(..) {
             match action {
+                event::EventAction::Click(pos) => {
+                    if pos.x < ui.max_rect().max.x / 2.0 {
+                        self.open_files.next();
+                    } else {
+                        self.open_files.prev();
+                    }
+                }
                 event::EventAction::Left => {
                     self.open_files.next();
                 }

@@ -1,14 +1,25 @@
 use std::sync::Arc;
-use crate::{app, error, file, ui};
+use crate::{app, error, event, file, ui};
 
+/// メインパネルを表示する
+/// * `ui` - UI
+/// * `app` - アプリケーション
+/// * `open_files` - 開いているファイル
+/// * `pending_actions` - 処理予約
+/// * `error_token` - エラートークン
 /// メインパネル
 pub(crate) fn view(
     ui: &mut egui::Ui,
     app: &app::App,
     open_files: &mut file::OpenFiles,
+    pending_actions: &mut Vec<event::EventAction>,
     error_token: &mut ui::ErrorToken,
 ) {
     egui::CentralPanel::default().show(ui, |ui| {
+        // クリックエリアを作成
+        let rect = ui.max_rect();
+        let click = ui.interact(rect, ui.id().with("middle"), egui::Sense::click());
+
         // 中央寄せでレイアウトを指定
         ui.with_layout(egui::Layout::centered_and_justified(egui::Direction::TopDown), |ui| {
             // 本画像の available_size を先に取る
@@ -32,6 +43,13 @@ pub(crate) fn view(
                 }
             }
         });
+
+        // クリックイベントを処理
+        if click.clicked() {
+            if let Some(pos) = click.interact_pointer_pos() {
+                pending_actions.push(event::EventAction::Click(pos));
+            }
+        }
     });
 }
 

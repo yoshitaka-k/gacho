@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use getset::{Getters, MutGetters, Setters};
 
-use crate::{file, error};
+use crate::{app, event, file, error};
 
 const DEFAULT_SELECTED_INDEX: usize = 0;
 
@@ -76,11 +76,10 @@ impl OpenFiles {
 
     /// 前のファイルを取得
     /// * `return` - 前のファイル
-    pub fn prev(&mut self) -> Option<&file::Image> {
-        if let Some(index) = self.selected_index {
-            if index > 0 {
-                self.selected_index = Some(index - 1);
-            }
+    pub fn prev(&mut self, app: &app::App) -> Option<&file::Image> {
+        match app.read_from() {
+            event::ReadFrom::RightToLeft => self.from_prev(),
+            event::ReadFrom::LeftToRight => self.from_next(),
         }
 
         self.selected_index_file()
@@ -88,14 +87,31 @@ impl OpenFiles {
 
     /// 次のファイルを取得
     /// * `return` - 次のファイル
-    pub fn next(&mut self) -> Option<&file::Image> {
+    pub fn next(&mut self, app: &app::App) -> Option<&file::Image> {
+        match app.read_from() {
+            event::ReadFrom::RightToLeft => self.from_next(),
+            event::ReadFrom::LeftToRight => self.from_prev(),
+        }
+
+        self.selected_index_file()
+    }
+
+    /// 前のファイルを取得
+    fn from_prev(&mut self) {
+        if let Some(index) = self.selected_index {
+            if index > 0 {
+                self.selected_index = Some(index - 1);
+            }
+        }
+    }
+
+    /// 次のファイルを取得
+    fn from_next(&mut self) {
         if let Some(index) = self.selected_index {
             if index < self.images.len() - 1 {
                 self.selected_index = Some(index + 1);
             }
         }
-
-        self.selected_index_file()
     }
 
     /// ファイルをパス順にソート

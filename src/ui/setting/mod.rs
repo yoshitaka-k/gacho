@@ -13,8 +13,8 @@ pub(crate) const SETTING_WINDOW_ID: &str = "setting_window";
 const WINDOW_TITLE: &str = "Settings";
 
 // ウィンドウのサイズ
-const WINDOW_WIDTH: f32 = 320.0;
-const WINDOW_HEIGHT: f32 = 270.0;
+const WINDOW_WIDTH: f32 = 460.0;
+const WINDOW_HEIGHT: f32 = 240.0;
 
 // ヘッダーのスペースの幅
 const HEADER_ICON_SPACING: f32 = 4.0;

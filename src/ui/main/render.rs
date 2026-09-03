@@ -97,7 +97,7 @@ impl eframe::App for Render {
         top::view(ui, &self.open_files, &mut self.setting_token, &mut self.open_dialog_token);
 
         // 下部パネルを表示
-        bottom::view(ui, &mut self.open_files);
+        bottom::view(ui, &self.app, &mut self.open_files);
 
         // 中央パネルを表示
         middle::view(ui, &self.app, &mut self.open_files, &mut self.pending_actions, &mut self.error_token);
@@ -169,16 +169,16 @@ impl Render {
             match action {
                 event::EventAction::Click(pos) => {
                     if pos.x < ui.max_rect().max.x / 2.0 {
-                        self.open_files.next();
+                        self.open_files.next(&self.app);
                     } else {
-                        self.open_files.prev();
+                        self.open_files.prev(&self.app);
                     }
                 }
                 event::EventAction::Left => {
-                    self.open_files.next();
+                    self.open_files.next(&self.app);
                 }
                 event::EventAction::Right => {
-                    self.open_files.prev();
+                    self.open_files.prev(&self.app);
                 }
             }
         }

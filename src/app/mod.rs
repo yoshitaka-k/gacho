@@ -5,6 +5,8 @@ pub(crate) use update::{UpdateCheck, UpdateJob, UpdatedToken};
 use getset::{Getters, MutGetters};
 use serde::{Deserialize, Serialize};
 
+use crate::event;
+
 /// GitHub リポジトリ URL
 pub(crate) const GITHUB_URL: &str = "https://github.com/{repository}";
 
@@ -15,18 +17,23 @@ pub(crate) const REQUEST_URL: &str = "https://api.github.com/repos/{repository}/
 const DEFAULT_PRELOADING: usize = 2;
 
 /// アプリケーションの状態
-#[derive(Serialize, Deserialize, Getters, MutGetters)]
+#[derive(Deserialize, Serialize, Getters, MutGetters)]
 #[serde(default)]
 pub struct App {
     /// 前処理数
     #[getset(get = "pub", get_mut = "pub")]
     preloading: usize,
+
+    /// ページ送り方向
+    #[getset(get = "pub", get_mut = "pub")]
+    read_from: event::ReadFrom,
 }
 
 impl Default for App {
     fn default() -> Self {
         Self {
             preloading: DEFAULT_PRELOADING,
+            read_from: event::ReadFrom::RightToLeft,
         }
     }
 }

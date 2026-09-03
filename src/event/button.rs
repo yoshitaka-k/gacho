@@ -48,8 +48,8 @@ pub(crate) fn check_for_update(update_job: &mut app::UpdateJob) {
 /// 次のファイルを表示する
 /// * `ui` - UI
 /// * `open_files` - 開いているファイル
-pub(crate) fn next(ui: &mut egui::Ui, open_files: &mut file::OpenFiles) {
-    open_files.next();
+pub(crate) fn next(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::OpenFiles) {
+    open_files.next(app);
 
     // 再描画を要求
     ui.ctx().request_repaint();
@@ -58,8 +58,8 @@ pub(crate) fn next(ui: &mut egui::Ui, open_files: &mut file::OpenFiles) {
 /// 前のファイルを表示する
 /// * `ui` - UI
 /// * `open_files` - 開いているファイル
-pub(crate) fn prev(ui: &mut egui::Ui, open_files: &mut file::OpenFiles) {
-    open_files.prev();
+pub(crate) fn prev(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::OpenFiles) {
+    open_files.prev(app);
 
     // 再描画を要求
     ui.ctx().request_repaint();

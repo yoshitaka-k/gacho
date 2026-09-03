@@ -38,9 +38,9 @@ impl OpenFiles {
 
     /// 本の名前を取得
     /// * `return` - 本の名前
-    pub fn book_name(&self) -> &str {
+    pub fn title(&self) -> &str {
         if let Some(image) = self.selected_index_file() {
-            &image.book_name()
+            &image.title()
         } else {
             ""
         }
@@ -49,73 +49,35 @@ impl OpenFiles {
     /// 選択されたファイルのパスを取得
     /// * `return` - 選択されたファイルのパス
     pub fn selected_index_file(&self) -> Option<&file::Image> {
-        if let Some(index) = self.selected_index() {
-            Some(&self.images[*index])
-        } else {
-            None
-        }
-    }
-
-    /// 次のファイルを取得
-    /// * `return` - 次のファイル
-    pub fn selected_next_file(&self, next_index: usize) -> Option<&file::Image> {
-        let Some(index) = self.selected_index() else {
-            return None;
-        };
-
-        // 次のファイルのインデックスを計算
-        let max_index = if (index + next_index) < self.images.len() {
-            index + next_index
-        } else {
-            self.images.len() - 1
-        };
-
-        // インデックスを元にファイルを取得
-        if let Some(image) = self.get_image_by_index(max_index) {
-            return Some(image);
-        }
-
-        None
-    }
-
-    /// 前のファイルを取得
-    /// * `return` - 前のファイル
-    pub fn selected_prev_file(&self, prev_index: usize) -> Option<&file::Image> {
-        let Some(index) = self.selected_index() else {
-            return None;
-        };
-
-        // 前のファイルのインデックスを計算
-        let min_index = if (*index as isize - prev_index as isize) > 0 {
-            index - prev_index
-        } else {
-            0
-        };
-
-        // インデックスを元にファイルを取得
-        if let Some(image) = self.get_image_by_index(min_index) {
-            return Some(image);
-        }
-
-        None
-    }
-
-    /// 次のファイルを取得
-    /// * `return` - 次のファイル
-    pub fn get_image_by_index(&self, index: usize) -> Option<&file::Image> {
-        if index < self.images.len() {
+        if let Some(index) = self.selected_index {
             Some(&self.images[index])
         } else {
             None
         }
     }
 
+    /// 次のファイルを取得
+    /// * `offset` - オフセット
+    /// * `return` - 次のファイル
+    pub fn selected_next_file(&self, offset: usize) -> Option<&file::Image> {
+        let index = self.selected_index?;
+        self.images.get(index.checked_add(offset)?)
+    }
+
+    /// 前のファイルを取得
+    /// * `offset` - オフセット
+    /// * `return` - 前のファイル
+    pub fn selected_prev_file(&self, offset: usize) -> Option<&file::Image> {
+        let index = self.selected_index?;
+        self.images.get(index.checked_sub(offset)?)
+    }
+
     /// 前のファイルを取得
     /// * `return` - 前のファイル
     pub fn prev(&mut self) -> Option<&file::Image> {
-        if let Some(index) = self.selected_index() {
-            if *index > 0 {
-                self.selected_index = Some(*index - 1);
+        if let Some(index) = self.selected_index {
+            if index > 0 {
+                self.selected_index = Some(index - 1);
             }
         }
 
@@ -125,9 +87,9 @@ impl OpenFiles {
     /// 次のファイルを取得
     /// * `return` - 次のファイル
     pub fn next(&mut self) -> Option<&file::Image> {
-        if let Some(index) = self.selected_index() {
-            if *index < self.images.len() - 1 {
-                self.selected_index = Some(*index + 1);
+        if let Some(index) = self.selected_index {
+            if index < self.images.len() - 1 {
+                self.selected_index = Some(index + 1);
             }
         }
 

@@ -1,6 +1,6 @@
 [package]
 name = "gacho"
-version = "0.4.3"
+version = "0.4.4"
 edition = "2024"
 description = "Comic Book ZIP viewer"
 authors = ["yoshitaka-k"]
@@ -56,3 +56,4 @@ log = "0.4.34"
 ehttp = { version = "0.7.1", features = ["json"] }
 image = { version = "0.25.10", features = ["jpeg", "png"] }
 zip = "8.6.0"
+regex = "1.13.1"

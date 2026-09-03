@@ -3,6 +3,8 @@ use std::fs::File;
 use std::io::{Cursor, Read, BufReader};
 use getset::{Getters, Setters};
 
+use crate::file;
+
 #[derive(Getters, Setters)]
 pub(crate) struct ArchiveFile {
     #[getset(get = "pub")]
@@ -71,7 +73,7 @@ impl Archive {
             let path = file.enclosed_name().unwrap_or(PathBuf::new());
 
             // ファイルが隠しファイルかどうかをチェックする
-            if self.is_hidden_zip_entry(&path) {
+            if file::is_hidden_entry(&path) {
                 continue;
             }
 
@@ -99,15 +101,5 @@ impl Archive {
         self.sort();
 
         Ok(())
-    }
-
-    /// ファイルが隠しファイルかどうかをチェックする
-    /// * `path` - ファイルのパス
-    /// * `return` - ファイルが隠しファイルかどうか
-    fn is_hidden_zip_entry(&self, path: &Path) -> bool {
-        path.components().any(|c| {
-            let s = c.as_os_str().to_string_lossy();
-            s.starts_with('.') || s == "__MACOSX"
-        })
     }
 }

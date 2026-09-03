@@ -4,7 +4,6 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use getset::{Getters, Setters};
 
 use crate::{error, file};
-use crate::file::extension;
 
 /// Image の一意な ID を発行するカウンタ
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
@@ -22,7 +21,7 @@ pub struct Image {
 
     /// 本の名前
     #[getset(get = "pub")]
-    book_name: String,
+    title: String,
 
     /// 画像ファイルの名前
     #[getset(get = "pub")]
@@ -44,9 +43,6 @@ impl Image {
     /// * `file_name` - ファイルの名前
     /// * `return` - Image のインスタンス
     pub fn new(path: PathBuf, relative_path: String, file_name: Option<String>, bytes: Option<Vec<u8>>) -> Result<Self, error::GachoError> {
-        // ファイルの一意な ID を発行
-        let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
-
         // ファイル名を取得
         let file_name = if let Some(file_name) = file_name {
             file_name
@@ -60,18 +56,26 @@ impl Image {
 
         // ファイル拡張子を取得
         let extension = if let Some(ext) = path.extension() {
-            extension::Extension::from_str(ext)
+            file::Extension::from_str(ext)
         } else {
             return Err(error::GachoError::FileError("File extension not found".to_string(), path.clone()));
         };
 
-        let book_name = if matches!(extension, file::Extension::Zip | file::Extension::Cbz) {
-            "".to_string()
+        // 本の名前を取得
+        let title = if matches!(extension, file::Extension::Zip | file::Extension::Cbz) {
+            let mut path = path.clone();
+            path.set_extension("");
+            if let Some(name) = path.file_name() {
+                name.to_string_lossy().to_string()
+            } else {
+                "".to_string()
+            }
         } else {
             let replace_path = format!("/{}", file_name);
-            let book_name = relative_path.replace(&replace_path, "");
-            book_name
+            relative_path.replace(&replace_path, "")
         };
+
+        let title = file::extract_book_title(&title);
 
         // ファイルの内容を取得
         let bytes: Arc<[u8]> = if let Some(bytes) = bytes {
@@ -80,10 +84,13 @@ impl Image {
             Arc::new([])
         };
 
+        // ファイルの一意な ID を発行
+        let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
+
         Ok(Self {
             id,
             path,
-            book_name,
+            title,
             file_name,
             extension,
             bytes,

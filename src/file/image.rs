@@ -68,7 +68,17 @@ impl Image {
             if let Some(name) = path.file_name() {
                 name.to_string_lossy().to_string()
             } else {
-                "".to_string()
+                file_name.clone()
+            }
+        } else if path.is_file() {
+            if let Some(parent) = path.parent() {
+                if let Some(parent_name) = parent.file_name() {
+                    parent_name.to_string_lossy().to_string()
+                } else {
+                    file_name.clone()
+                }
+            } else {
+                file_name.clone()
             }
         } else {
             let replace_path = format!("/{}", file_name);

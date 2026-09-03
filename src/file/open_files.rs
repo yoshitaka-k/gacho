@@ -4,6 +4,8 @@ use getset::{Getters, MutGetters, Setters};
 
 use crate::{file, error};
 
+const DEFAULT_SELECTED_INDEX: usize = 0;
+
 /// ドロップされたファイルを管理する構造体
 #[derive(Getters, MutGetters, Setters)]
 pub struct OpenFiles {
@@ -101,6 +103,29 @@ impl OpenFiles {
         self.images.sort_by_key(|file| file.path().clone());
     }
 
+    /// ファイル名でindexを取得
+    /// * `file_name` - ファイル名
+    /// * `return` - index
+    pub fn get_index_by_filename(&self, name: &str) -> Option<usize> {
+        // ファイル名が一致するindexを取得
+        self.images.iter().position(|file| {
+            let file_name = if let Some(file_name) = file.path().file_name() {
+                file_name.to_string_lossy().into_owned()
+            } else {
+                return false;
+            };
+
+            file_name == name
+        })
+    }
+
+    /// パスが同じかどうかを判断
+    /// * `path` - パス
+    /// * `return` - パスが同じかどうか
+    pub fn is_same_path(&self, path: &Path) -> bool {
+        self.images.iter().any(|f| *f.path() == *path)
+    }
+
     /// パスを追加
     /// * `path` - ドロップされたファイルのパス
     /// * `return` - 結果
@@ -108,15 +133,40 @@ impl OpenFiles {
         // parent() は path を借りるので、先に PathBuf にして借用を終わらせる
         let base_dir = path.parent().unwrap_or(&path).to_path_buf();
 
-        // ファイルを検索
-        self.find_file(path, &base_dir)?;
+        // ファイル名の控えを用意
+        let mut file_name = None;
+
+        if file::is_image(&path) {
+            // パスが同じかどうかを判断
+            if self.is_same_path(&path) {
+                return Ok(());
+            }
+
+            // 画像ファイルの場合は、同ディレクトリの他の画像ファイルも検索する
+            if let Some(parent) = path.parent() {
+                self.find_file(parent.to_path_buf(), &base_dir)?;
+
+                // 画像ファイルの場合は、ファイル名を控えておく
+                file_name = if let Some(file_name) = path.file_name() {
+                    Some(file_name.to_string_lossy().into_owned())
+                } else {
+                    None
+                };
+            }
+        } else {
+            // ファイルを検索
+            self.find_file(path, &base_dir)?;
+        }
 
         // ファイルをパス順にソート
         self.sort();
 
-        // TODO: とりあえず最初のファイルを選択するようにする
         if !self.images.is_empty() {
-            self.selected_index = Some(0);
+            if let Some(file_name) = file_name {
+                self.selected_index = self.get_index_by_filename(&file_name);
+            } else {
+                self.selected_index = Some(DEFAULT_SELECTED_INDEX);
+            }
         }
 
         Ok(())

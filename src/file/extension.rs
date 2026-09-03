@@ -21,6 +21,15 @@ impl Extension {
         ]
     }
 
+    /// 画像ファイルのベクタに変換
+    /// * `return` - 画像ファイルのベクタ
+    pub fn to_image_vec() -> Vec<&'static str> {
+        vec![
+            Self::Jpeg.to_str(),
+            Self::Png.to_str(),
+        ]
+    }
+
     /// アーカイブファイルのベクタに変換
     /// * `return` - アーカイブファイルのベクタ
     pub fn to_archive_vec() -> Vec<&'static str> {

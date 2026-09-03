@@ -60,6 +60,21 @@ pub(crate) fn is_allowed_extension(path: &PathBuf) -> bool {
     self::extension::Extension::to_vec().iter().any(|e| e.eq_ignore_ascii_case(ext))
 }
 
+/// ファイルが画像かどうかを判断
+/// * `path` - ファイルのパス
+/// * `return` - ファイルが画像かどうか
+pub(crate) fn is_image(path: &PathBuf) -> bool {
+    let Some(ext) = path.extension() else {
+        return false;
+    };
+
+    let Some(ext) = ext.to_str() else {
+        return false;
+    };
+
+    self::extension::Extension::to_image_vec().iter().any(|e| e.eq_ignore_ascii_case(ext))
+}
+
 /// ファイルがアーカイブかどうかを判断
 /// * `path` - ファイルのパス
 /// * `return` - ファイルがアーカイブかどうか

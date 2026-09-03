@@ -19,6 +19,10 @@ pub struct Image {
     #[getset(get= "pub")]
     path: PathBuf,
 
+    /// ファイルの相対パス
+    #[getset(get = "pub")]
+    relative_path: String,
+
     /// 本の名前
     #[getset(get = "pub")]
     title: String,
@@ -32,7 +36,7 @@ pub struct Image {
     extension: file::Extension,
 
     /// ファイルのバイト列
-    #[getset(get = "pub")]
+    #[getset(get = "pub", set = "pub")]
     bytes: Arc<[u8]>,
 }
 
@@ -42,7 +46,12 @@ impl Image {
     /// * `relative_path` - ドロップ基準からの相対パス
     /// * `file_name` - ファイルの名前
     /// * `return` - Image のインスタンス
-    pub fn new(path: PathBuf, relative_path: String, file_name: Option<String>, bytes: Option<Vec<u8>>) -> Result<Self, error::GachoError> {
+    pub fn new(
+        path: PathBuf,
+        relative_path: String,
+        file_name: Option<String>,
+        bytes: Option<Vec<u8>>
+    ) -> Result<Self, error::GachoError> {
         // ファイル名を取得
         let file_name = if let Some(file_name) = file_name {
             file_name
@@ -66,7 +75,7 @@ impl Image {
             let mut path = path.clone();
             path.set_extension("");
             if let Some(name) = path.file_name() {
-                name.to_string_lossy().to_string()
+                name.to_string_lossy().trim().to_string()
             } else {
                 file_name.clone()
             }
@@ -82,7 +91,7 @@ impl Image {
             }
         } else {
             let replace_path = format!("/{}", file_name);
-            relative_path.replace(&replace_path, "")
+            relative_path.clone().replace(&replace_path, "")
         };
 
         let title = file::extract_book_title(&title);
@@ -100,6 +109,7 @@ impl Image {
         Ok(Self {
             id,
             path,
+            relative_path,
             title,
             file_name,
             extension,

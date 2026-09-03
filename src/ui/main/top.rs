@@ -5,7 +5,7 @@ use crate::ui::assets::{self, icon, svg};
 /// 上部パネル
 pub(crate) fn view(
     ui: &mut egui::Ui,
-    open_files: &file::OpenFiles,
+    open_files: &mut file::OpenFiles,
     setting_token: &mut ui::SettingToken,
     open_dialog_token: &mut ui::OpenDialogToken,
 ) {

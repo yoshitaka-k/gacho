@@ -14,7 +14,7 @@ pub(crate) const GITHUB_URL: &str = "https://github.com/{repository}";
 pub(crate) const REQUEST_URL: &str = "https://api.github.com/repos/{repository}/releases/latest";
 
 /// 次の画像の表示数
-const DEFAULT_PRELOADING: usize = 2;
+const DEFAULT_PRELOADING: usize = 5;
 
 /// アプリケーションの状態
 #[derive(Deserialize, Serialize, Getters, MutGetters)]

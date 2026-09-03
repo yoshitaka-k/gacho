@@ -13,6 +13,9 @@ pub struct OpenFiles {
     #[getset(get = "pub")]
     images: Vec<file::Image>,
 
+    /// アーカイブ
+    archive: Option<file::Archive>,
+
     /// 選択されたファイルのインデックス
     #[getset(get = "pub", get_mut = "pub", set = "pub")]
     selected_index: Option<usize>,
@@ -24,6 +27,7 @@ impl OpenFiles {
     pub fn new() -> Self {
         Self {
             images: vec![],
+            archive: None,
             selected_index: None,
         }
     }
@@ -35,12 +39,13 @@ impl OpenFiles {
     /// ファイルをクリア
     pub fn clear(&mut self) {
         self.images.clear();
+        self.archive = None;
         self.selected_index = None;
     }
 
     /// 本の名前を取得
     /// * `return` - 本の名前
-    pub fn title(&self) -> &str {
+    pub fn title(&mut self) -> &str {
         if let Some(image) = self.selected_index_file() {
             &image.title()
         } else {
@@ -50,9 +55,9 @@ impl OpenFiles {
 
     /// 選択されたファイルのパスを取得
     /// * `return` - 選択されたファイルのパス
-    pub fn selected_index_file(&self) -> Option<&file::Image> {
+    pub fn selected_index_file(&mut self) -> Option<&file::Image> {
         if let Some(index) = self.selected_index {
-            Some(&self.images[index])
+            self.get_image_by_index(index)
         } else {
             None
         }
@@ -61,17 +66,38 @@ impl OpenFiles {
     /// 次のファイルを取得
     /// * `offset` - オフセット
     /// * `return` - 次のファイル
-    pub fn selected_next_file(&self, offset: usize) -> Option<&file::Image> {
+    pub fn selected_next_file(&mut self, offset: usize) -> Option<&file::Image> {
         let index = self.selected_index?;
-        self.images.get(index.checked_add(offset)?)
+        self.get_image_by_index(index.checked_add(offset)?)
     }
 
     /// 前のファイルを取得
     /// * `offset` - オフセット
     /// * `return` - 前のファイル
-    pub fn selected_prev_file(&self, offset: usize) -> Option<&file::Image> {
+    pub fn selected_prev_file(&mut self, offset: usize) -> Option<&file::Image> {
         let index = self.selected_index?;
-        self.images.get(index.checked_sub(offset)?)
+        self.get_image_by_index(index.checked_sub(offset)?)
+    }
+
+    /// インデックスからファイルを取得
+    /// * `index` - インデックス
+    /// * `return` - ファイル
+    fn get_image_by_index(&mut self, index: usize) -> Option<&file::Image> {
+        if index < self.images.len() {
+            let image = &mut self.images[index];
+
+            // アーカイブの場合は、アーカイブのファイルを取得
+            if image.is_archive() && image.bytes().is_empty() {
+                let archive = self.archive.as_mut().unwrap();
+                let archive_file = archive.get_zipfile(&image.relative_path()).unwrap();
+
+                image.set_bytes(archive_file.bytes().to_vec().into());
+            }
+
+            Some(image)
+        } else {
+            None
+        }
     }
 
     /// 前のファイルを取得
@@ -122,7 +148,7 @@ impl OpenFiles {
     /// ファイル名でindexを取得
     /// * `file_name` - ファイル名
     /// * `return` - index
-    pub fn get_index_by_filename(&self, name: &str) -> Option<usize> {
+    fn get_index_by_filename(&self, name: &str) -> Option<usize> {
         // ファイル名が一致するindexを取得
         self.images.iter().position(|file| {
             let file_name = if let Some(file_name) = file.path().file_name() {
@@ -209,10 +235,10 @@ impl OpenFiles {
 
                 // ファイルがアーカイブかどうかを判断
                 if file::is_archive(&path) {
-                    // TODO: アーカイブ
                     let mut archive = file::Archive::new();
-
-                    archive.unarchive(&path).map_err(|e| error::GachoError::FileError(e.to_string(), path.clone()))?;
+                    archive.unarchive(&path).map_err(|e| {
+                        error::GachoError::FileError(e.to_string(), path.clone())
+                    })?;
 
                     // TODO: アーカイブのファイルを取得、一度に全部やらないようにしたい
                     for file in archive.files() {
@@ -226,7 +252,7 @@ impl OpenFiles {
                         self.images.push(image_file);
                     }
 
-                    archive.sort();
+                    self.archive = Some(archive);
                 } else {
                     // ファイルを作成
                     let image_file = file::Image::new(path.clone(), relative_path, None, None)?;

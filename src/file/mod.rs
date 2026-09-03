@@ -37,10 +37,10 @@ pub(crate) static RE_BOOK_NAME_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
 pub(crate) fn extract_book_title(name: &str) -> String {
     for re in [&*RE_DOJIN_NAME_PATTERN, &*RE_BOOK_NAME_PATTERN] {
         if let Some(title) = re.captures(name).and_then(|c| c.name("title")) {
-            return title.as_str().to_string();
+            return title.as_str().trim().to_string();
         }
     }
-    name.to_string()
+    name.trim().to_string()
 }
 
 /// ファイルの拡張子が許可されているかどうか

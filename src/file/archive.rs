@@ -56,15 +56,13 @@ impl Archive {
         reader.read_to_end(&mut buffer)?;
         let mut archive = zip::ZipArchive::new(Cursor::new(buffer))?;
 
-        // アーカイブを保存する
-        self.archive = Some(archive.clone());
-
         // アーカイブのファイル数を取得する
         self.len = archive.len();
 
         // アーカイブのファイルを取得する
+        // bytes 以外のデータを取得する（bytes はファイルを指定した時に取得する）
         for i in 0..self.len {
-            let mut file = archive.by_index(i)?;
+            let file = archive.by_index(i)?;
             if file.is_dir() {
                 continue;
             }
@@ -87,19 +85,47 @@ impl Archive {
             // zipファイル内の相対パス付きファイル名を取得する
             let relative_path = file.name().to_string();
 
-            let mut bytes = Vec::new();
-            file.read_to_end(&mut bytes)?;
-
             self.files.push(ArchiveFile {
                 file_name,
                 relative_path,
-                bytes,
+                bytes: Vec::new(),
             });
         }
 
         // ファイルを名前でソートする
         self.sort();
 
+        // アーカイブを保存する
+        self.archive = Some(archive);
+
         Ok(())
+    }
+
+    /// アーカイブのファイルを取得する
+    /// * `relative_path` - アーカイブ内のファイルの相対パス
+    /// * `return` - アーカイブのファイル
+    pub fn get_zipfile(&mut self, relative_path: &str) -> Result<ArchiveFile, Box<dyn std::error::Error>> {
+        let archive = self.archive.as_mut().ok_or("archive not loaded")?;
+        let mut file = archive.by_name(relative_path)?;
+
+        if file.is_dir() {
+            return Err("file is a directory".into());
+        }
+
+        let path = file.enclosed_name().unwrap_or_default();
+        let file_name = path.file_name()
+            .ok_or("file name not found")?
+            .to_string_lossy()
+            .into_owned();
+        let relative_path = file.name().to_string();
+
+        let mut bytes = Vec::new();
+        file.read_to_end(&mut bytes)?;
+
+        Ok(ArchiveFile {
+            file_name,
+            relative_path,
+            bytes,
+        })
     }
 }

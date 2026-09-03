@@ -15,9 +15,9 @@ pub(crate) fn files(
     open_files.clear();
 
     // ドロップされたファイルを追加
-    for file in files {
-        open_files.add_path(file.path().to_path_buf())?;
-    }
+    // 最初のファイルのみを追加
+    let path = files[0].path().to_path_buf();
+    open_files.add_path(path)?;
 
     Ok(())
 }

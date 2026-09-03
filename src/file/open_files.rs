@@ -70,8 +70,6 @@ impl OpenFiles {
             self.images.len() - 1
         };
 
-        println!("max_index: {} / page: {}", max_index, (max_index + 1));
-
         // インデックスを元にファイルを取得
         if let Some(image) = self.get_image_by_index(max_index) {
             return Some(image);
@@ -93,8 +91,6 @@ impl OpenFiles {
         } else {
             0
         };
-
-        println!("min_index: {} / page: {}", min_index, (min_index + 1));
 
         // インデックスを元にファイルを取得
         if let Some(image) = self.get_image_by_index(min_index) {

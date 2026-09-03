@@ -1,5 +1,5 @@
-use crate::{file, event, error};
-use crate::event::drop;
+use crate::{file, event, error, ui};
+use crate::event::{drop, button};
 
 /// 左矢印キーが押されたら次に移動する
 /// * `ui` - ウィジェットのUI
@@ -36,4 +36,37 @@ pub fn drop(ui: &egui::Ui, open_files: &mut file::OpenFiles) -> error::Result<()
     })?;
 
     Ok(())
+}
+
+/// Command + O キーが押されたらファイルダイアログを開く
+/// * `ui` - ウィジェットのUI
+/// * `open_dialog_token` - ダイアログトークン
+pub fn command_open(ui: &mut egui::Ui, open_dialog_token: &mut ui::OpenDialogToken) {
+    // Command + O キーが押されたらファイルダイアログを開く
+    if ui.input(|input| {
+        input.modifiers.matches_exact(egui::Modifiers::COMMAND)
+        && input.key_pressed(egui::Key::O)
+    }) {
+        button::files_open(ui, open_dialog_token);
+    }
+
+    // Command + Shift + O キーが押されたらフォルダダイアログを開く
+    if ui.input(|input| {
+        input.modifiers.matches_exact(egui::Modifiers::COMMAND | egui::Modifiers::SHIFT)
+        && input.key_pressed(egui::Key::O)
+    }) {
+        button::folder_open(ui, open_dialog_token);
+    }
+}
+
+/// Command + Comma キーが押されたら設定ウィンドウを開く
+/// * `ui` - ウィジェットのUI
+/// * `setting_token` - 設定ウィンドウトークン
+pub fn command_comma(ui: &mut egui::Ui, setting_token: &mut ui::SettingToken) {
+    if ui.input(|input| {
+        input.modifiers.matches_exact(egui::Modifiers::COMMAND)
+        && input.key_pressed(egui::Key::Comma)
+    }) {
+        button::setting_open(ui, setting_token);
+    }
 }

@@ -81,6 +81,12 @@ impl eframe::App for Render {
             style.interaction.selectable_labels = false;
         });
 
+        // Command + O キーが押されたらファイルダイアログを開く
+        input::command_open(ui, &mut self.open_dialog_token);
+
+        // Command + Comma キーが押されたら設定ウィンドウを開く
+        input::command_comma(ui, &mut self.setting_token);
+
         // キーイベントを処理
         input::arrow_left(ui, &mut self.pending_actions);
         input::arrow_right(ui, &mut self.pending_actions);

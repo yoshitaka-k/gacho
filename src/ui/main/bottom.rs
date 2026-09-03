@@ -32,8 +32,7 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::Ope
                     event::ReadFrom::RightToLeft => "Previous page",
                     event::ReadFrom::LeftToRight => "Next page",
                 };
-                let prev_button = egui::Image::new(svg::ARROW_RIGHT)
-                    .max_height(icon::BUTTON_SETTINGS_ICON_SIZE)
+                let prev_button = egui::Image::new(svg::KEYBOARD_ARROW_RIGHT)
                     .tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(prev_button))
                     .on_hover_text(hover_text).clicked()
@@ -46,8 +45,7 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::Ope
                     event::ReadFrom::RightToLeft => "Next page",
                     event::ReadFrom::LeftToRight => "Previous page",
                 };
-                let next_button = egui::Image::new(svg::ARROW_LEFT)
-                    .max_height(icon::BUTTON_SETTINGS_ICON_SIZE)
+                let next_button = egui::Image::new(svg::KEYBOARD_ARROW_LEFT)
                     .tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(next_button))
                     .on_hover_text(hover_text).clicked()

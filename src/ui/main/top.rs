@@ -23,7 +23,6 @@ pub(crate) fn view(
                 // 設定ボタン
                 let hover_text = "Settings";
                 let settings_button = egui::Image::new(svg::SETTINGS)
-                    .max_height(icon::BUTTON_SETTINGS_ICON_SIZE)
                     .tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(settings_button))
                     .on_hover_text(hover_text).clicked()
@@ -34,7 +33,6 @@ pub(crate) fn view(
                 // フォルダダイアログを開くボタン
                 let hover_text = "Folder Open";
                 let open_button = egui::Image::new(svg::FOLDER_OPEN)
-                    .max_height(icon::BUTTON_OPEN_ICON_SIZE)
                     .tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button))
                     .on_hover_text(hover_text).clicked()
@@ -44,7 +42,6 @@ pub(crate) fn view(
 
                 let hover_text = "Files Open";
                 let open_button = egui::Image::new(svg::FILE_OPEN)
-                    .max_height(icon::BUTTON_OPEN_ICON_SIZE)
                     .tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button))
                     .on_hover_text(hover_text).clicked()

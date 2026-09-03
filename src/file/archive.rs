@@ -1,5 +1,4 @@
 use std::path::{Path, PathBuf};
-use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{Cursor, Read, BufReader};
 use getset::{Getters, Setters};

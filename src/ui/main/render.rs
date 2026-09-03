@@ -94,10 +94,10 @@ impl eframe::App for Render {
 
         // パネルのスタイルを設定
         // 上部パネルを表示
-        top::view(ui, &mut self.setting_token, &mut self.open_dialog_token);
+        top::view(ui, &self.open_files, &mut self.setting_token, &mut self.open_dialog_token);
 
         // 下部パネルを表示
-        bottom::view(ui, &self.open_files);
+        bottom::view(ui, &mut self.open_files);
 
         // 中央パネルを表示
         middle::view(ui, &mut self.open_files, &mut self.error_token);

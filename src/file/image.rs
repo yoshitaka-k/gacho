@@ -28,7 +28,11 @@ pub struct Image {
     #[getset(get = "pub")]
     is_relative_path: bool,
 
-    /// ファイルの名前
+    /// 本の名前
+    #[getset(get = "pub")]
+    book_name: String,
+
+    /// 画像ファイルの名前
     #[getset(get = "pub")]
     file_name: String,
 
@@ -73,6 +77,18 @@ impl Image {
             return Err(error::GachoError::FileError("File extension not found".to_string(), path.clone()));
         };
 
+        println!("path: {}", path.display());
+        let book_name = if matches!(extension, file::Extension::Zip | file::Extension::Cbz) {
+            "".to_string()
+        } else {
+            println!("relative_path: {}", relative_path);
+            let replace_path = format!("/{}", file_name);
+            let book_name = relative_path.replace(&replace_path, "");
+            println!("book_name: {}", book_name);
+
+            book_name
+        };
+
         // 相対パスかどうかを判断
         let is_relative_path = relative_path != file_name;
 
@@ -91,6 +107,7 @@ impl Image {
             path,
             relative_path,
             is_relative_path,
+            book_name,
             file_name,
             extension,
             bytes,

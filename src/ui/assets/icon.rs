@@ -15,3 +15,9 @@ pub(crate) const BUTTON_OPEN_ICON_SIZE: f32 = 18.0;
 // Modal Icon Size
 pub(crate) const MODAL_ERROR_ICON_SIZE: f32 = 20.0;
 pub(crate) const MODAL_UPDATE_ICON_SIZE: f32 = 20.0;
+
+// Icon Button Size
+pub(crate) const ICON_BUTTON_SIZE: egui::Vec2 = egui::Vec2::new(
+    24.0,
+    18.0,
+);

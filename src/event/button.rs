@@ -1,4 +1,4 @@
-use crate::{app, ui};
+use crate::{app, file, ui};
 
 /// ファイルダイアログを開く
 /// * `ui` - UI
@@ -43,4 +43,24 @@ pub(crate) fn setting_open(ui: &mut egui::Ui, setting_token: &mut ui::SettingTok
 /// * `updated_token` - 更新モーダルを表示するためのトークン
 pub(crate) fn check_for_update(update_job: &mut app::UpdateJob) {
     update_job.run();
+}
+
+/// 次のファイルを表示する
+/// * `ui` - UI
+/// * `open_files` - 開いているファイル
+pub(crate) fn next(ui: &mut egui::Ui, open_files: &mut file::OpenFiles) {
+    open_files.next();
+
+    // 再描画を要求
+    ui.ctx().request_repaint();
+}
+
+/// 前のファイルを表示する
+/// * `ui` - UI
+/// * `open_files` - 開いているファイル
+pub(crate) fn prev(ui: &mut egui::Ui, open_files: &mut file::OpenFiles) {
+    open_files.prev();
+
+    // 再描画を要求
+    ui.ctx().request_repaint();
 }

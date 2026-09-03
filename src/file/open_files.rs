@@ -1,18 +1,18 @@
 use std::fs;
 use std::path::{Path, PathBuf};
-use getset::{Getters, Setters};
+use getset::{Getters, MutGetters, Setters};
 
 use crate::{file, error};
 
 /// ドロップされたファイルを管理する構造体
-#[derive(Getters, Setters)]
+#[derive(Getters, MutGetters, Setters)]
 pub struct OpenFiles {
     /// ファイル一覧
     #[getset(get = "pub")]
     images: Vec<file::Image>,
 
     /// 選択されたファイルのインデックス
-    #[getset(get = "pub", set = "pub")]
+    #[getset(get = "pub", get_mut = "pub", set = "pub")]
     selected_index: Option<usize>,
 }
 
@@ -26,10 +26,24 @@ impl OpenFiles {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.images.len()
+    }
+
     /// ファイルをクリア
     pub fn clear(&mut self) {
         self.images.clear();
         self.selected_index = None;
+    }
+
+    /// 本の名前を取得
+    /// * `return` - 本の名前
+    pub fn book_name(&self) -> &str {
+        if let Some(image) = self.selected_index_file() {
+            &image.book_name()
+        } else {
+            ""
+        }
     }
 
     /// 選択されたファイルのパスを取得
@@ -144,9 +158,9 @@ impl OpenFiles {
                     // TODO: アーカイブ
                     let mut archive = file::Archive::new();
 
-                    // TODO: アーカイブを展開
                     archive.unarchive(&path).map_err(|e| error::GachoError::FileError(e.to_string(), path.clone()))?;
 
+                    // TODO: アーカイブのファイルを取得、一度に全部やらないようにしたい
                     for file in archive.files() {
                         let image_file = file::Image::new(
                             path.clone(),
@@ -154,6 +168,7 @@ impl OpenFiles {
                             Some(file.file_name().clone()),
                             Some(file.bytes().to_vec()),
                         )?;
+
                         self.images.push(image_file);
                     }
 

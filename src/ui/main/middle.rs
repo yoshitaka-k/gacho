@@ -39,7 +39,7 @@ pub(crate) fn view(
 /// * `return` - 画像
 fn ui_image(image_file: &file::Image) -> egui::Image<'static> {
     // バイト列かどうかを判断
-    let image = if *image_file.is_bytes() {
+    let image = if image_file.is_archive() {
         let uri = format!("bytes://{}/{}", image_file.file_name(), image_file.id());
         egui::Image::from_bytes(uri, Arc::clone(&image_file.bytes()))
     } else {

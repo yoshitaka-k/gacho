@@ -1,10 +1,14 @@
-use crate::ui;
+use crate::{app, ui};
 use crate::ui::assets::svg;
 use crate::ui::setting;
 
-/// 並行処理数を表示
+const MIN_PRELOADING: usize = 0;
+const MAX_PRELOADING: usize = 10;
+
+/// 前処理数を表示
+/// * `app` - アプリケーション
 /// * `ui` - UI
-pub(crate) fn view(ui: &mut egui::Ui) {
+pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
     // ヘッダーパネルを表示
     setting::header_panel(ui, svg::SETTINGS, "General", None);
 
@@ -16,7 +20,13 @@ pub(crate) fn view(ui: &mut egui::Ui) {
 
     // フレームを表示
     egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
-        ui::add_label(ui, "General Settings", setting::GENERAL_LABEL_WIDTH);
+        ui.horizontal(|ui| {
+            ui::add_label(ui, "Preloading:", setting::GENERAL_LABEL_WIDTH);
+            ui.scope(|ui| {
+                ui.spacing_mut().slider_width = setting::remaining_slider_width(ui);
+                ui.add(egui::Slider::new(app.preloading_mut(), MIN_PRELOADING..=MAX_PRELOADING));
+            });
+        });
 
         // 同じパスはスキップの注意書きを表示
         setting::warning_note(ui, "warning note.");

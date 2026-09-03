@@ -22,7 +22,7 @@ const HEADER_BOTTOM_SPACING: f32 = 2.0;
 const WARNING_ICON_SPACING: f32 = 3.0;
 
 // ラベルの幅
-pub(crate) const GENERAL_LABEL_WIDTH: f32 = 90.0;
+pub(crate) const GENERAL_LABEL_WIDTH: f32 = 70.0;
 
 // 追加のスペースの幅
 pub(crate) const SETTING_ADD_SPACING: f32 = 4.0;
@@ -75,4 +75,12 @@ pub(crate) fn warning_note(ui: &mut egui::Ui, text: &str) {
             egui::RichText::new(text).weak(),
         ));
     });
+}
+
+/// ラベル後の残り幅に合わせてスライダーのレール幅を決める
+/// * `ui` - UI
+/// * `return` - スライダーのレール幅
+pub(crate) fn remaining_slider_width(ui: &egui::Ui) -> f32 {
+    let spacing = ui.spacing();
+    (ui.available_width() - spacing.item_spacing.x - spacing.interact_size.x).max(0.0)
 }

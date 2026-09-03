@@ -1,9 +1,10 @@
 use std::sync::Arc;
-use crate::{error, file, ui};
+use crate::{app, error, file, ui};
 
 /// メインパネル
 pub(crate) fn view(
     ui: &mut egui::Ui,
+    app: &app::App,
     open_files: &mut file::OpenFiles,
     error_token: &mut ui::ErrorToken,
 ) {
@@ -17,18 +18,24 @@ pub(crate) fn view(
                 image_load(ui, image, image_file, true, error_token);
             }
 
-            // 次の画像を表示
-            if let Some(image_file) = open_files.selected_next_file() {
-                let image = ui_image(image_file)
-                    .fit_to_exact_size(egui::vec2(0.0, 0.0));
-                image_load(ui, image, image_file, false, error_token);
-            }
+            if *app.preloading() > 0 {
+                for i in 1..=*app.preloading() {
+                    // 次の画像を表示
+                    if let Some(image_file) = open_files.selected_next_file(i) {
+                        let image = ui_image(image_file)
+                            .fit_to_exact_size(egui::vec2(0.0, 0.0));
+                        image_load(ui, image, image_file, false, error_token);
+                    }
+                }
 
-            // 前の画像を表示
-            if let Some(image_file) = open_files.selected_prev_file() {
-                let image = ui_image(image_file)
-                    .fit_to_exact_size(egui::vec2(0.0, 0.0));
-                image_load(ui, image, image_file, false, error_token);
+                for i in 1..=*app.preloading() {
+                    // 前の画像を表示
+                    if let Some(image_file) = open_files.selected_prev_file(i) {
+                        let image = ui_image(image_file)
+                            .fit_to_exact_size(egui::vec2(0.0, 0.0));
+                        image_load(ui, image, image_file, false, error_token);
+                    }
+                }
             }
         });
     });

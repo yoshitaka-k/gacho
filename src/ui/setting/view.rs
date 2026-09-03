@@ -10,7 +10,7 @@ use crate::ui::{self, modal};
 /// * `updated_token` - アップデートトークン
 pub(crate) fn view(
     ctx: &egui::Context,
-    _app: &mut app::App,
+    app: &mut app::App,
     setting_token: &mut ui::SettingToken,
     updated_token: &mut app::UpdatedToken,
     mut update_job: &mut app::UpdateJob,
@@ -80,7 +80,7 @@ pub(crate) fn view(
         egui::CentralPanel::default().show(ctx, |ui| {
             // タブに応じて表示内容を切り替え
             match setting_token.tab {
-                ui::SettingTab::General => general::view(ui),
+                ui::SettingTab::General => general::view(ui, app),
                 ui::SettingTab::About => about::view(ui, &mut update_job),
             }
         });

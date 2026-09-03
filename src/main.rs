@@ -9,8 +9,8 @@ const APP_NAME: &str = "Gacho";
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// ウィンドウのサイズ
-const WINDOW_WIDTH: f32 = 640.0;
-const WINDOW_HEIGHT: f32 = 480.0;
+const WINDOW_WIDTH: f32 = 430.0;
+const WINDOW_HEIGHT: f32 = 610.0;
 const MIN_WINDOW_WIDTH: f32 = 320.0;
 const MIN_WINDOW_HEIGHT: f32 = 240.0;
 

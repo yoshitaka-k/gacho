@@ -58,13 +58,23 @@ impl OpenFiles {
 
     /// 次のファイルを取得
     /// * `return` - 次のファイル
-    pub fn selected_next_file(&mut self) -> Option<&file::Image> {
+    pub fn selected_next_file(&self, next_index: usize) -> Option<&file::Image> {
         let Some(index) = self.selected_index() else {
             return None;
         };
 
-        if *index < self.images.len() - 1 {
-            return Some(&self.images[*index + 1]);
+        // 次のファイルのインデックスを計算
+        let max_index = if (index + next_index) < self.images.len() {
+            index + next_index
+        } else {
+            self.images.len() - 1
+        };
+
+        println!("max_index: {} / page: {}", max_index, (max_index + 1));
+
+        // インデックスを元にファイルを取得
+        if let Some(image) = self.get_image_by_index(max_index) {
+            return Some(image);
         }
 
         None
@@ -72,16 +82,36 @@ impl OpenFiles {
 
     /// 前のファイルを取得
     /// * `return` - 前のファイル
-    pub fn selected_prev_file(&mut self) -> Option<&file::Image> {
+    pub fn selected_prev_file(&self, prev_index: usize) -> Option<&file::Image> {
         let Some(index) = self.selected_index() else {
             return None;
         };
 
-        if *index > 0 {
-            return Some(&self.images[*index - 1]);
+        // 前のファイルのインデックスを計算
+        let min_index = if (*index as isize - prev_index as isize) > 0 {
+            index - prev_index
+        } else {
+            0
+        };
+
+        println!("min_index: {} / page: {}", min_index, (min_index + 1));
+
+        // インデックスを元にファイルを取得
+        if let Some(image) = self.get_image_by_index(min_index) {
+            return Some(image);
         }
 
         None
+    }
+
+    /// 次のファイルを取得
+    /// * `return` - 次のファイル
+    pub fn get_image_by_index(&self, index: usize) -> Option<&file::Image> {
+        if index < self.images.len() {
+            Some(&self.images[index])
+        } else {
+            None
+        }
     }
 
     /// 前のファイルを取得

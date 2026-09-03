@@ -100,7 +100,7 @@ impl eframe::App for Render {
         bottom::view(ui, &mut self.open_files);
 
         // 中央パネルを表示
-        middle::view(ui, &mut self.open_files, &mut self.error_token);
+        middle::view(ui, &self.app, &mut self.open_files, &mut self.error_token);
 
         // 設定ウィンドウを表示
         if self.setting_token.open {

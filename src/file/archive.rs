@@ -38,17 +38,6 @@ impl Archive {
         }
     }
 
-    /// ファイルを取得する
-    /// * `index` - ファイルのインデックス
-    /// * `return` - ファイル
-    pub fn get_file(&self, index: usize) -> Option<&ArchiveFile> {
-        if self.files.is_empty() {
-            return None;
-        }
-
-        self.files.get(index)
-    }
-
     /// ファイルを名前でソートする
     pub fn sort(&mut self) {
         self.files.sort_by_key(|file| file.relative_path.clone());

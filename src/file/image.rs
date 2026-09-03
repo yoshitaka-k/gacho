@@ -20,14 +20,6 @@ pub struct Image {
     #[getset(get= "pub")]
     path: PathBuf,
 
-    /// ドロップ基準からの相対パス
-    #[getset(get = "pub")]
-    relative_path: String,
-
-    /// 相対パスかどうか
-    #[getset(get = "pub")]
-    is_relative_path: bool,
-
     /// 本の名前
     #[getset(get = "pub")]
     book_name: String,
@@ -43,10 +35,6 @@ pub struct Image {
     /// ファイルのバイト列
     #[getset(get = "pub")]
     bytes: Arc<[u8]>,
-
-    /// ファイルのバイト列かどうか
-    #[getset(get = "pub")]
-    is_bytes: bool,
 }
 
 impl Image {
@@ -89,9 +77,6 @@ impl Image {
             book_name
         };
 
-        // 相対パスかどうかを判断
-        let is_relative_path = relative_path != file_name;
-
         // ファイルの内容を取得
         let bytes: Arc<[u8]> = if let Some(bytes) = bytes {
             Arc::from(bytes)
@@ -99,19 +84,13 @@ impl Image {
             Arc::new([])
         };
 
-        // ファイルのバイト列かどうかを判断
-        let is_bytes = bytes.len() > 0;
-
         Ok(Self {
             id,
             path,
-            relative_path,
-            is_relative_path,
             book_name,
             file_name,
             extension,
             bytes,
-            is_bytes,
         })
     }
 

@@ -8,7 +8,7 @@ pub(crate) use open_files::OpenFiles;
 pub(crate) use image::Image;
 pub(crate) use archive::Archive;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 use regex::Regex;
 
@@ -91,7 +91,7 @@ pub(crate) fn is_archive(path: &PathBuf) -> bool {
 /// ファイルが隠しファイルかどうかをチェックする
 /// * `path` - ファイルのパス
 /// * `return` - ファイルが隠しファイルかどうか
-pub(crate) fn is_hidden_entry(path: &PathBuf) -> bool {
+pub(crate) fn is_hidden_entry(path: &Path) -> bool {
     path.components().any(|c| {
         let s = c.as_os_str().to_string_lossy();
         s.starts_with('.') || s == "__MACOSX"

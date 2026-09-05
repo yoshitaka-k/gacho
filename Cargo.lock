@@ -1329,6 +1329,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "encoding_rs"
+version = "0.8.35"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75030f3c4f45dafd7586dd6780965a8c7e8e285a5ecb86713e63a79c5b2766f3"
+dependencies = [
+ "cfg-if",
+]
+
+[[package]]
 name = "endi"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1688,12 +1697,13 @@ dependencies = [
 
 [[package]]
 name = "gacho"
-version = "0.5.1"
+version = "0.5.2"
 dependencies = [
  "eframe",
  "egui",
  "egui_extras",
  "ehttp",
+ "encoding_rs",
  "env_logger",
  "getset",
  "ico",

@@ -179,7 +179,7 @@ impl OpenFiles {
                 )
             })?;
 
-            let archive_file = archive.get_zipfile(&image.relative_path()).map_err(|e| {
+            let archive_file = archive.get_zipfile(*image.archive_index()).map_err(|e| {
                 error::GachoError::ArchiveError(
                     format!("{} : {}", e.to_string(), image.relative_path())
                 )
@@ -267,6 +267,7 @@ impl OpenFiles {
                             file.relative_path().clone(),
                             Some(file.file_name().clone()),
                             Some(file.bytes().to_vec()),
+                            Some(*file.index()),
                         )?;
 
                         self.images.push(image_file);
@@ -275,7 +276,13 @@ impl OpenFiles {
                     self.archive = Some(archive);
                 } else {
                     // ファイルを作成
-                    let image_file = file::Image::new(path.clone(), relative_path, None, None)?;
+                    let image_file = file::Image::new(
+                        path.clone(),
+                        relative_path,
+                        None,
+                        None,
+                        None,
+                    )?;
 
                     // ファイルを追加
                     self.images.push(image_file);

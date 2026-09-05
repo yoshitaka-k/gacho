@@ -38,6 +38,10 @@ pub struct Image {
     /// ファイルのバイト列
     #[getset(get = "pub", set = "pub")]
     bytes: Arc<[u8]>,
+
+    /// アーカイブ内のファイルのインデックス
+    #[getset(get = "pub")]
+    archive_index: usize,
 }
 
 impl Image {
@@ -50,7 +54,8 @@ impl Image {
         path: PathBuf,
         relative_path: String,
         file_name: Option<String>,
-        bytes: Option<Vec<u8>>
+        bytes: Option<Vec<u8>>,
+        archive_index: Option<usize>,
     ) -> Result<Self, error::GachoError> {
         // ファイル名を取得
         let file_name = if let Some(file_name) = file_name {
@@ -59,7 +64,9 @@ impl Image {
             if let Some(name) = path.file_name() {
                 name.to_string_lossy().to_string()
             } else {
-                return Err(error::GachoError::FileError("File name not found".to_string(), path.clone()));
+                return Err(error::GachoError::FileError(
+                    "File name not found".to_string(), path.clone()
+                ));
             }
         };
 
@@ -67,7 +74,9 @@ impl Image {
         let extension = if let Some(ext) = path.extension() {
             file::Extension::from_str(ext)
         } else {
-            return Err(error::GachoError::FileError("File extension not found".to_string(), path.clone()));
+            return Err(error::GachoError::FileError(
+                "File extension not found".to_string(), path.clone()
+            ));
         };
 
         // 本の名前を取得
@@ -114,6 +123,7 @@ impl Image {
             file_name,
             extension,
             bytes,
+            archive_index: archive_index.unwrap_or(0),
         })
     }
 

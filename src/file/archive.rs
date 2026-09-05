@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::fs::File;
 use std::io::{Cursor, Read, BufReader};
 use getset::{Getters, Setters};
@@ -7,6 +7,11 @@ use crate::file;
 
 #[derive(Getters, Setters)]
 pub(crate) struct ArchiveFile {
+    /// アーカイブ内のファイルのインデックス
+    #[getset(get = "pub")]
+    index: usize,
+
+    /// ファイル名
     #[getset(get = "pub")]
     file_name: String,
 
@@ -62,29 +67,22 @@ impl Archive {
                 continue;
             }
 
-            // zipファイル内のパスを取得する
-            let path = file.enclosed_name().unwrap_or(PathBuf::new());
+            // zipファイル内の相対パス付きファイル名を取得する
+            let relative_path = self.decode_raw(file.name_raw());
 
             // ファイルが隠しファイルかどうかをチェックする
+            let path = Path::new(&relative_path);
             if file::is_hidden_entry(&path) {
                 continue;
             }
 
             // zipファイル内のファイル名を取得する
-            let file_name = if let Some(file_name) = path.file_name() {
-                file_name.to_string_lossy().to_string()
-            } else {
-                continue;
-            };
-
-            // zipファイル内の相対パス付きファイル名を取得する
-            let name_raw = file.name_raw();
-            let relative_path = match str::from_utf8(name_raw) {
-                Ok(path) => path.to_string(),
-                Err(_) => continue,
-            };
+            let file_name = path.file_name()
+                .map(|name| name.to_string_lossy().into_owned())
+                .unwrap_or_else(|| relative_path.clone());
 
             self.files.push(ArchiveFile {
+                index: i,
                 file_name,
                 relative_path,
                 bytes: Vec::new(),
@@ -103,25 +101,27 @@ impl Archive {
     /// アーカイブのファイルを取得する
     /// * `relative_path` - アーカイブ内のファイルの相対パス
     /// * `return` - アーカイブのファイル
-    pub fn get_zipfile(&mut self, relative_path: &str) -> Result<ArchiveFile, Box<dyn std::error::Error>> {
+    pub fn get_zipfile(&mut self, index: usize) -> Result<ArchiveFile, Box<dyn std::error::Error>> {
+        // アーカイブのファイルからファイル名と相対パスを取得する
+        let (file_name, relative_path) = self.files.iter()
+            .find(|f| f.index == index)
+            .map(|f| (f.file_name.clone(), f.relative_path.clone()))
+            .ok_or("file not found")?;
+
+        // アーカイブファイルを取得する
         let archive = self.archive.as_mut().ok_or("archive not loaded")?;
-        let mut file = archive.by_name(relative_path)?;
+        let mut file = archive.by_index(index)?;
 
         if file.is_dir() {
             return Err("file is a directory".into());
         }
 
-        let path = file.enclosed_name().unwrap_or_default();
-        let file_name = path.file_name()
-            .ok_or("file name not found")?
-            .to_string_lossy()
-            .into_owned();
-        let relative_path = file.name().to_string();
-
+        // アーカイブからファイルのバイト列を取得する
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes)?;
 
         Ok(ArchiveFile {
+            index,
             file_name,
             relative_path,
             bytes,
@@ -131,5 +131,24 @@ impl Archive {
     /// ファイルを名前でソートする
     fn sort(&mut self) {
         self.files.sort_by_key(|file| file.relative_path.clone());
+    }
+
+    /// テキストをデコードする
+    /// * `raw` - デコードするテキストのバイト列
+    /// * `return` - デコードしたテキスト
+    fn decode_raw(&self, raw: &[u8]) -> String {
+        // utf-8 でデコードできる場合は utf-8 でデコード
+        if let Ok(name) = str::from_utf8(raw) {
+            return name.to_string();
+        }
+
+        // utf-8 でデコードできない場合は Shift-JIS でデコード
+        let (decoded, _, errors) = encoding_rs::SHIFT_JIS.decode(raw);
+        if !errors {
+            return decoded.to_string();
+        }
+
+        // utf-8 でも、Shift-JIS でもデコードできない場合はバイト列をそのまま返す
+        String::from_utf8_lossy(raw).to_string()
     }
 }

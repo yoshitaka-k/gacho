@@ -42,8 +42,5 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
                 ui.add(egui::Slider::new(app.preloading_mut(), MIN_PRELOADING..=MAX_PRELOADING));
             });
         });
-
-        // 同じパスはスキップの注意書きを表示
-        setting::warning_note(ui, "warning note.");
     });
 }

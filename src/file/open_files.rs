@@ -214,9 +214,7 @@ impl OpenFiles {
 
             Ok(image)
         } else {
-            Err(error::GachoError::FileError(
-                "Index out of bounds".to_string(), PathBuf::new())
-            )
+            Err(error::GachoError::IndexOutOfBounds)
         }
     }
 

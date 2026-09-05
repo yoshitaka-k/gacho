@@ -42,23 +42,10 @@ impl Render {
             app,
             open_files: file::OpenFiles::new(),
             pending_actions: Vec::new(),
-            open_dialog_token: ui::OpenDialogToken {
-                file_dialog: false,
-                folder_dialog: false,
-            },
-            setting_token: ui::SettingToken {
-                open: false,
-                pos: None,
-                tab: ui::SettingTab::General,
-            },
-            updated_token: app::UpdatedToken {
-                open: false,
-                check: None,
-            },
-            error_token: ui::ErrorToken {
-                open: false,
-                value: None,
-            },
+            open_dialog_token: ui::OpenDialogToken::new(),
+            setting_token: ui::SettingToken::new(),
+            updated_token: app::UpdatedToken::new(),
+            error_token: ui::ErrorToken::new(),
             update_job: app::UpdateJob::new(cc.egui_ctx.clone()),
         }
     }
@@ -100,13 +87,29 @@ impl eframe::App for Render {
 
         // パネルのスタイルを設定
         // 上部パネルを表示
-        top::view(ui, &mut self.open_files, &mut self.setting_token, &mut self.open_dialog_token);
+        top::view(
+            ui,
+            &mut self.open_files,
+            &mut self.setting_token,
+            &mut self.open_dialog_token,
+        );
 
         // 下部パネルを表示
-        bottom::view(ui, &self.app, &mut self.open_files);
+        bottom::view(
+            ui,
+            &self.app,
+            &mut self.open_files,
+            &mut self.error_token,
+        );
 
         // 中央パネルを表示
-        middle::view(ui, &self.app, &mut self.open_files, &mut self.pending_actions, &mut self.error_token);
+        middle::view(
+            ui,
+            &self.app,
+            &mut self.open_files,
+            &mut self.pending_actions,
+            &mut self.error_token,
+        );
 
         // 設定ウィンドウを表示
         if self.setting_token.open {
@@ -136,11 +139,12 @@ impl Render {
         if self.open_dialog_token.file_dialog {
             self.open_dialog_token.file_dialog = false;
 
+            // エラーモーダルをリセット
+            self.error_token.reset();
+
             // ファイルを開く
             if let Err(e) = open::file(&mut self.open_files) {
-                eprintln!("Error opening file: {}", e);
-                self.error_token.open = true;
-                self.error_token.value = Some(e);
+                self.error_token.show(e);
             }
         }
 
@@ -148,11 +152,12 @@ impl Render {
         if self.open_dialog_token.folder_dialog {
             self.open_dialog_token.folder_dialog = false;
 
+            // エラーモーダルをリセット
+            self.error_token.reset();
+
             // フォルダを開く
             if let Err(e) = open::folder(&mut self.open_files) {
-                eprintln!("Error opening folder: {}", e);
-                self.error_token.open = true;
-                self.error_token.value = Some(e);
+                self.error_token.show(e);
             }
         }
     }
@@ -160,31 +165,53 @@ impl Render {
     /// ドラッグ&ドロップされたファイルを処理
     /// * `ui` - UI
     fn drop_files(&mut self, ui: &egui::Ui) {
-        // ドラッグ&ドロップされたファイルを処理
-        if let Err(e) = input::drop(ui, &mut self.open_files) {
-            eprintln!("Error dropping files: {}", e);
-            self.error_token.open = true;
-            self.error_token.value = Some(e);
+        let Some(result) = input::drop(ui, &mut self.open_files) else {
+            return;
+        };
+
+        // 新しいファイルを開いたので、前回閉じたエラーを忘れさせる
+        self.error_token.reset();
+
+        // エラーが発生した場合はエラーモーダルを表示
+        if let Err(e) = result {
+            self.error_token.show(e);
         }
     }
 
     /// イベントアクションを処理
     /// * `ui` - UI
     fn process_actions(&mut self, ui: &egui::Ui) {
+        // イベントアクションがない場合は何もしない
+        if self.pending_actions.is_empty() {
+            return;
+        }
+
+        // エラーモーダルをリセット
+        self.error_token.reset();
+
         for action in self.pending_actions.drain(..) {
             match action {
                 event::EventAction::Click(pos) => {
+                    // クリックした位置が左半分の場合は次のファイルを表示
                     if pos.x < ui.max_rect().max.x / 2.0 {
-                        self.open_files.next(&self.app);
+                        if let Err(e) = self.open_files.next_index(&self.app) {
+                            self.error_token.show(e);
+                        }
                     } else {
-                        self.open_files.prev(&self.app);
+                        if let Err(e) = self.open_files.prev_index(&self.app) {
+                            self.error_token.show(e);
+                        }
                     }
                 }
                 event::EventAction::Left => {
-                    self.open_files.next(&self.app);
+                    if let Err(e) = self.open_files.next_index(&self.app) {
+                        self.error_token.show(e);
+                    }
                 }
                 event::EventAction::Right => {
-                    self.open_files.prev(&self.app);
+                    if let Err(e) = self.open_files.prev_index(&self.app) {
+                        self.error_token.show(e);
+                    }
                 }
             }
         }

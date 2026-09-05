@@ -25,20 +25,27 @@ pub(crate) fn view(
             // 本画像の available_size を先に取る
             let available = ui.available_size();
 
-            // 試しに最初の画像を表示
-            if let Some(image_file) = open_files.selected_index_file() {
-                let image = ui_image(image_file)
-                    .max_size(available);
-                image_load(ui, image, image_file, true, error_token);
-            }
+            // 最初の画像を表示
+            match open_files.selected_index_file() {
+                Ok(Some(image_file)) => {
+                    let image = ui_image(image_file)
+                        .max_size(available);
+                    image_load(ui, image, image_file, true, error_token);
+                },
+                Ok(None) => (),
+                Err(e) => {
+                    error_token.show(e);
+                    ()
+                }
+            };
 
             // 前後の画像を先読み
             for i in 1..=*app.preloading() {
-                if let Some(image_file) = open_files.selected_next_file(i) {
+                if let Ok(Some(image_file)) = open_files.selected_next_file(i) {
                     let _ = ui_image(image_file).load_for_size(ui.ctx(), available);
                 }
 
-                if let Some(image_file) = open_files.selected_prev_file(i) {
+                if let Ok(Some(image_file)) = open_files.selected_prev_file(i) {
                     let _ = ui_image(image_file).load_for_size(ui.ctx(), available);
                 }
             }
@@ -89,10 +96,8 @@ fn image_load(ui: &mut egui::Ui, image: egui::Image<'_>, image_file: &file::Imag
         }
         Err(e) => {
             // 読み込みエラー
-            eprintln!("Error loading image: {}", e);
             let error = error::GachoError::FileError(e.to_string(), image_file.path().clone());
-            error_token.open = true;
-            error_token.value = Some(error);
+            error_token.show(error);
         }
     }
 }

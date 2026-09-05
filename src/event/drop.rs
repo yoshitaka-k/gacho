@@ -1,5 +1,6 @@
-use crate::{file, error};
 use eframe::egui::DroppedFileHandle;
+
+use crate::{file, error};
 
 /// ドロップされたファイルを処理
 /// * `files` - ドロップされたファイル

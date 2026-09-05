@@ -1,4 +1,4 @@
-use crate::{app, file, ui};
+use crate::{app, error, file, ui};
 
 /// ファイルダイアログを開く
 /// * `ui` - UI
@@ -45,22 +45,24 @@ pub(crate) fn check_for_update(update_job: &mut app::UpdateJob) {
     update_job.run();
 }
 
-/// 次のファイルを表示する
-/// * `ui` - UI
+/// 次のインデックスを表示する
+/// * `app` - アプリケーション
 /// * `open_files` - 開いているファイル
-pub(crate) fn next(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::OpenFiles) {
-    open_files.next(app);
-
-    // 再描画を要求
-    ui.ctx().request_repaint();
+/// * `return` - 次のインデックス
+pub(crate) fn next(
+    app: &app::App,
+    open_files: &mut file::OpenFiles
+) -> error::Result<Option<usize>> {
+    open_files.next_index(app)
 }
 
-/// 前のファイルを表示する
-/// * `ui` - UI
+/// 前のインデックスを表示する
+/// * `app` - アプリケーション
 /// * `open_files` - 開いているファイル
-pub(crate) fn prev(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::OpenFiles) {
-    open_files.prev(app);
-
-    // 再描画を要求
-    ui.ctx().request_repaint();
+/// * `return` - 前のインデックス
+pub(crate) fn prev(
+    app: &app::App,
+    open_files: &mut file::OpenFiles
+) -> error::Result<Option<usize>> {
+    open_files.prev_index(app)
 }

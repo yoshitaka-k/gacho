@@ -7,7 +7,12 @@ const MIN_INDEX: usize = 0;
 const DEFAULT_MAX_INDEX: usize = 0;
 
 /// 下部パネル
-pub(crate) fn view(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::OpenFiles) {
+pub(crate) fn view(
+    ui: &mut egui::Ui,
+    app: &app::App,
+    open_files: &mut file::OpenFiles,
+    error_token: &mut ui::ErrorToken,
+) {
     let bottom_panel_style = ui::panel_style(ui, ui::BOTTOM_PANEL_INNER_MARGIN);
     let button_color = assets::button_icon_color(ui);
 
@@ -21,11 +26,18 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::Ope
 
             ui.separator();
 
-            if let Some(image_file) = open_files.selected_index_file() {
-                ui.add(egui::Label::new(image_file.file_name()).truncate());
-            }
+            let file_name = match open_files.selected_index_file() {
+                Ok(Some(image_file)) => image_file.file_name(),
+                Ok(None) => "",
+                Err(e) => {
+                    error_token.show(e);
+                    ""
+                }
+            };
 
-            // 開くボタンと設定ボタンを右寄せに配置
+            ui.add(egui::Label::new(file_name).truncate());
+
+            // ページャーを右寄せに配置
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 // 前のファイル
                 let hover_text = match app.read_from() {
@@ -37,7 +49,13 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::Ope
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(prev_button))
                     .on_hover_text(hover_text).clicked()
                 {
-                    button::prev(ui, &app, open_files);
+                    // エラーモーダルをリセット
+                    error_token.reset();
+
+                    // インデックスを前に戻す
+                    if let Err(e) = button::prev(&app, open_files) {
+                        error_token.show(e);
+                    }
                 }
 
                 // 次のファイル
@@ -50,7 +68,13 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::Ope
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(next_button))
                     .on_hover_text(hover_text).clicked()
                 {
-                    button::next(ui, &app, open_files);
+                    // エラーモーダルをリセット
+                    error_token.reset();
+
+                    // インデックスを次に進める
+                    if let Err(e) = button::next(&app, open_files) {
+                        error_token.show(e);
+                    }
                 }
 
                 ui.separator();
@@ -69,6 +93,10 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &app::App, open_files: &mut file::Ope
 
                     // 選択が変更された場合はインデックスを更新
                     if slider.changed() {
+                        // エラーモーダルをリセット
+                        error_token.reset();
+
+                        // インデックスを更新
                         open_files.set_selected_index(Some(selected));
                     }
                 });

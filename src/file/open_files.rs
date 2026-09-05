@@ -45,88 +45,68 @@ impl OpenFiles {
 
     /// 本の名前を取得
     /// * `return` - 本の名前
-    pub fn title(&mut self) -> &str {
-        if let Some(image) = self.selected_index_file() {
-            &image.title()
-        } else {
-            ""
-        }
+    pub fn title(&mut self) -> error::Result<&str> {
+        let title = match self.selected_index_file() {
+            Ok(Some(image)) => image.title(),
+            Ok(None) => "",
+            Err(e) => {
+                return Err(e);
+            },
+        };
+
+        Ok(title)
     }
 
     /// 選択されたファイルのパスを取得
     /// * `return` - 選択されたファイルのパス
-    pub fn selected_index_file(&mut self) -> Option<&file::Image> {
-        let image = match self.get_image_by_index(self.selected_index) {
-            Ok(image) => image,
-            Err(e) => {
-                eprintln!("Error loading image: {}", e);
-                return None;
-            },
-        };
+    pub fn selected_index_file(&mut self) -> error::Result<Option<&file::Image>> {
+        let Some(index) = self.selected_index else { return Ok(None); };
 
-        Some(image)
+        self.get_image_by_index(index)
     }
 
     /// 指定した次のインデックスを移動させてファイルを取得
     /// * `offset` - オフセット
     /// * `return` - 次のファイル
-    pub fn selected_next_file(&mut self, offset: usize) -> Option<&file::Image> {
-        if let Some(index) = self.selected_index {
-            let image = match self.get_image_by_index(index.checked_add(offset)) {
-                Ok(image) => image,
-                Err(e) => {
-                    eprintln!("Error loading image: {}", e);
-                    return None;
-                },
-            };
+    pub fn selected_next_file(&mut self, offset: usize) -> error::Result<Option<&file::Image>> {
+        let Some(index) = self.selected_index else { return Ok(None); };
+        let Some(add_index) = index.checked_add(offset) else { return Ok(None); };
 
-            return Some(image);
-        }
-
-        None
+        self.get_image_by_index(add_index)
     }
 
     /// 指定した前のインデックスを移動させてファイルを取得
     /// * `offset` - オフセット
     /// * `return` - 前のファイル
-    pub fn selected_prev_file(&mut self, offset: usize) -> Option<&file::Image> {
-        if let Some(index) = self.selected_index {
-            let image = match self.get_image_by_index(index.checked_sub(offset)) {
-                Ok(image) => image,
-                Err(e) => {
-                    eprintln!("Error loading image: {}", e);
-                    return None;
-                },
-            };
+    pub fn selected_prev_file(&mut self, offset: usize) -> error::Result<Option<&file::Image>> {
+        let Some(index) = self.selected_index else { return Ok(None); };
+        let Some(sub_index) = index.checked_sub(offset) else { return Ok(None); };
 
-            return Some(image);
-        }
-
-        None
+        self.get_image_by_index(sub_index)
     }
 
-    /// 次のファイルを取得
-    // 読み込み方向によって前後が変わる
-    /// * `return` - 次のファイル
-    pub fn next(&mut self, app: &app::App) -> Option<&file::Image> {
+    /// 次のインデックス
+    /// * `app` - アプリケーション
+    /// * `return` - 次のインデックス
+    pub fn next_index(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
             event::ReadFrom::RightToLeft => self.from_next(),
             event::ReadFrom::LeftToRight => self.from_prev(),
         }
 
-        self.selected_index_file()
+        Ok(self.selected_index)
     }
 
-    /// 前のファイルを取得
+    /// 前のインデックス
     // 読み込み方向によって前後が変わる
-    /// * `return` - 前のファイル
-    pub fn prev(&mut self, app: &app::App) -> Option<&file::Image> {
+    /// * `return` - 前のインデックス
+    pub fn prev_index(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
             event::ReadFrom::RightToLeft => self.from_prev(),
             event::ReadFrom::LeftToRight => self.from_next(),
         }
 
-        self.selected_index_file()
+        Ok(self.selected_index)
     }
 
     /// パスを追加
@@ -182,40 +162,33 @@ impl OpenFiles {
 
     /// インデックスからファイルを取得
     /// * `index` - インデックス
-    /// * `return` - ファイル
-    fn get_image_by_index(&mut self, index: Option<usize>) -> error::Result<&file::Image> {
-        let Some(index) = index else {
-            return Err(error::GachoError::FileError(
-                "Index out of bounds".to_string(), PathBuf::new())
-            );
-        };
-
-        if index < self.images.len() {
-            let image = &mut self.images[index];
-
-            // アーカイブの場合は、アーカイブのファイルを取得
-            if image.is_archive() && image.bytes().is_empty() {
-                let archive = self.archive.as_mut().ok_or_else(|| {
-                    error::GachoError::FileError(
-                        "Archive is not found".to_string(),
-                        image.path().clone()
-                    )
-                })?;
-
-                let archive_file = archive.get_zipfile(&image.relative_path()).map_err(|e| {
-                    error::GachoError::FileError(
-                        format!("{} ({})", e.to_string(), image.relative_path()),
-                        image.path().clone(),
-                    )
-                })?;
-
-                image.set_bytes(archive_file.bytes().to_vec().into());
-            }
-
-            Ok(image)
-        } else {
-            Err(error::GachoError::IndexOutOfBounds)
+    /// * `return` - Image のインスタンス
+    fn get_image_by_index(&mut self, index: usize) -> error::Result<Option<&file::Image>> {
+        // インデックスが範囲外の場合は None を返す
+        if index >= self.images.len() {
+            return Ok(None);
         }
+
+        let image = &mut self.images[index];
+
+        // アーカイブの場合は、アーカイブからファイルのバイト列を取得
+        if image.is_archive() && image.bytes().is_empty() {
+            let archive = self.archive.as_mut().ok_or_else(|| {
+                error::GachoError::ArchiveError(
+                    format!("Archive not found: {}", image.relative_path())
+                )
+            })?;
+
+            let archive_file = archive.get_zipfile(&image.relative_path()).map_err(|e| {
+                error::GachoError::ArchiveError(
+                    format!("{} : {}", e.to_string(), image.relative_path())
+                )
+            })?;
+
+            image.set_bytes(archive_file.bytes().to_vec().into());
+        }
+
+        Ok(Some(image))
     }
 
     /// 次のファイルを取得
@@ -284,7 +257,7 @@ impl OpenFiles {
                 if file::is_archive(&path) {
                     let mut archive = file::Archive::new();
                     archive.unarchive(&path).map_err(|e| {
-                        error::GachoError::FileError(e.to_string(), path.clone())
+                        error::GachoError::ArchiveError(e.to_string())
                     })?;
 
                     // TODO: アーカイブのファイルを取得、一度に全部やらないようにしたい
@@ -310,8 +283,12 @@ impl OpenFiles {
             }
         } else if metadata.is_dir() {
             // ディレクトリを再帰的に探索
-            for entry in fs::read_dir(&path).map_err(|e| error::GachoError::FileError(e.to_string(), path.clone()))? {
-                let entry = entry.map_err(|e| error::GachoError::FileError(e.to_string(), path.clone()))?;
+            for entry in fs::read_dir(&path).map_err(|e| {
+                error::GachoError::FileError(e.to_string(), path.clone())
+            })? {
+                let entry = entry.map_err(|e| {
+                    error::GachoError::FileError(e.to_string(), path.clone())
+                })?;
                 self.find_file(entry.path(), base_dir)?;
             }
         }

@@ -19,6 +19,15 @@ pub struct UpdatedToken {
     pub check: Option<UpdateCheck>,
 }
 
+impl UpdatedToken {
+    pub fn new() -> Self {
+        Self {
+            open: false,
+            check: None,
+        }
+    }
+}
+
 /// GitHub レスポンスのアップデート情報
 #[derive(Deserialize, Getters)]
 #[getset(get)]

@@ -40,8 +40,7 @@ pub(crate) fn error(ctx: &egui::Context, error_token: &mut ErrorToken) {
 
     // モーダルを閉じたらモーダルを非表示にする
     if modal.should_close() {
-        error_token.open = false;
-        error_token.value = None;
+        error_token.dismiss();
     }
 }
 

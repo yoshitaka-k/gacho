@@ -35,6 +35,15 @@ pub struct OpenDialogToken {
     pub folder_dialog: bool,
 }
 
+impl OpenDialogToken {
+    pub fn new() -> Self {
+        Self {
+            file_dialog: false,
+            folder_dialog: false,
+        }
+    }
+}
+
 /// 設定タブ
 #[derive(PartialEq)]
 pub enum SettingTab {
@@ -58,10 +67,55 @@ pub struct SettingToken {
     pub tab: SettingTab,
 }
 
+impl SettingToken {
+    pub fn new() -> Self {
+        Self {
+            open: false,
+            pos: None,
+            tab: SettingTab::General,
+        }
+    }
+}
 /// エラーモーダルを表示するためのトークン
 pub struct ErrorToken {
     pub open: bool,
     pub value: Option<error::GachoError>,
+    pub dismissed: bool,
+}
+
+impl ErrorToken {
+    pub fn new() -> Self {
+        Self {
+            open: false,
+            value: None,
+            dismissed: false,
+        }
+    }
+
+    /// エラーモーダルを表示
+    /// * `error` - エラー内容
+    pub fn show(&mut self, error: error::GachoError) {
+        if self.dismissed {
+            return;
+        }
+
+        self.open = true;
+        self.value = Some(error);
+    }
+
+    /// エラーモーダルを非表示
+    pub fn dismiss(&mut self) {
+        self.open = false;
+        self.value = None;
+        self.dismissed = true;
+    }
+
+    /// エラーモーダルをリセット
+    pub fn reset(&mut self) {
+        self.open = false;
+        self.value = None;
+        self.dismissed = false;
+    }
 }
 
 /// パネルの背景色

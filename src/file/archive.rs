@@ -78,7 +78,11 @@ impl Archive {
             };
 
             // zipファイル内の相対パス付きファイル名を取得する
-            let relative_path = file.name().to_string();
+            let name_raw = file.name_raw();
+            let relative_path = match str::from_utf8(name_raw) {
+                Ok(path) => path.to_string(),
+                Err(_) => continue,
+            };
 
             self.files.push(ArchiveFile {
                 file_name,

@@ -40,11 +40,6 @@ impl Archive {
         }
     }
 
-    /// ファイルを名前でソートする
-    pub fn sort(&mut self) {
-        self.files.sort_by_key(|file| file.relative_path.clone());
-    }
-
     /// アーカイブを展開する
     /// * `path` - アーカイブのパス
     /// * `return` - アーカイブを展開した結果
@@ -127,5 +122,10 @@ impl Archive {
             relative_path,
             bytes,
         })
+    }
+
+    /// ファイルを名前でソートする
+    fn sort(&mut self) {
+        self.files.sort_by_key(|file| file.relative_path.clone());
     }
 }

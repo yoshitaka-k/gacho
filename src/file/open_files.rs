@@ -79,27 +79,6 @@ impl OpenFiles {
         self.get_image_by_index(index.checked_sub(offset)?)
     }
 
-    /// インデックスからファイルを取得
-    /// * `index` - インデックス
-    /// * `return` - ファイル
-    fn get_image_by_index(&mut self, index: usize) -> Option<&file::Image> {
-        if index < self.images.len() {
-            let image = &mut self.images[index];
-
-            // アーカイブの場合は、アーカイブのファイルを取得
-            if image.is_archive() && image.bytes().is_empty() {
-                let archive = self.archive.as_mut().unwrap();
-                let archive_file = archive.get_zipfile(&image.relative_path()).unwrap();
-
-                image.set_bytes(archive_file.bytes().to_vec().into());
-            }
-
-            Some(image)
-        } else {
-            None
-        }
-    }
-
     /// 前のファイルを取得
     /// * `return` - 前のファイル
     pub fn prev(&mut self, app: &app::App) -> Option<&file::Image> {
@@ -120,52 +99,6 @@ impl OpenFiles {
         }
 
         self.selected_index_file()
-    }
-
-    /// 前のファイルを取得
-    fn from_prev(&mut self) {
-        if let Some(index) = self.selected_index {
-            if index > 0 {
-                self.selected_index = Some(index - 1);
-            }
-        }
-    }
-
-    /// 次のファイルを取得
-    fn from_next(&mut self) {
-        if let Some(index) = self.selected_index {
-            if index < self.images.len() - 1 {
-                self.selected_index = Some(index + 1);
-            }
-        }
-    }
-
-    /// ファイルをパス順にソート
-    pub fn sort(&mut self) {
-        self.images.sort_by_key(|file| file.path().clone());
-    }
-
-    /// ファイル名でindexを取得
-    /// * `file_name` - ファイル名
-    /// * `return` - index
-    fn get_index_by_filename(&self, name: &str) -> Option<usize> {
-        // ファイル名が一致するindexを取得
-        self.images.iter().position(|file| {
-            let file_name = if let Some(file_name) = file.path().file_name() {
-                file_name.to_string_lossy().into_owned()
-            } else {
-                return false;
-            };
-
-            file_name == name
-        })
-    }
-
-    /// パスが同じかどうかを判断
-    /// * `path` - パス
-    /// * `return` - パスが同じかどうか
-    pub fn is_same_path(&self, path: &Path) -> bool {
-        self.images.iter().any(|f| *f.path() == *path)
     }
 
     /// パスを追加
@@ -212,6 +145,73 @@ impl OpenFiles {
         }
 
         Ok(())
+    }
+
+    /// ファイルをパス順にソート
+    fn sort(&mut self) {
+        self.images.sort_by_key(|file| file.path().clone());
+    }
+
+    /// インデックスからファイルを取得
+    /// * `index` - インデックス
+    /// * `return` - ファイル
+    fn get_image_by_index(&mut self, index: usize) -> Option<&file::Image> {
+        if index < self.images.len() {
+            let image = &mut self.images[index];
+
+            // アーカイブの場合は、アーカイブのファイルを取得
+            if image.is_archive() && image.bytes().is_empty() {
+                let archive = self.archive.as_mut().unwrap();
+                let archive_file = archive.get_zipfile(&image.relative_path()).unwrap();
+
+                image.set_bytes(archive_file.bytes().to_vec().into());
+            }
+
+            Some(image)
+        } else {
+            None
+        }
+    }
+
+    /// 前のファイルを取得
+    fn from_prev(&mut self) {
+        if let Some(index) = self.selected_index {
+            if index > 0 {
+                self.selected_index = Some(index - 1);
+            }
+        }
+    }
+
+    /// 次のファイルを取得
+    fn from_next(&mut self) {
+        if let Some(index) = self.selected_index {
+            if index < self.images.len() - 1 {
+                self.selected_index = Some(index + 1);
+            }
+        }
+    }
+
+    /// ファイル名でindexを取得
+    /// * `file_name` - ファイル名
+    /// * `return` - index
+    fn get_index_by_filename(&self, name: &str) -> Option<usize> {
+        // ファイル名が一致するindexを取得
+        self.images.iter().position(|file| {
+            let file_name = if let Some(file_name) = file.path().file_name() {
+                file_name.to_string_lossy().into_owned()
+            } else {
+                return false;
+            };
+
+            file_name == name
+        })
+    }
+
+    /// パスが同じかどうかを判断
+    /// * `path` - パス
+    /// * `return` - パスが同じかどうか
+    fn is_same_path(&self, path: &Path) -> bool {
+        self.images.iter().any(|f| *f.path() == *path)
     }
 
     /// ファイルを検索

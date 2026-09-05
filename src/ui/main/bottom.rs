@@ -1,4 +1,3 @@
-use crate::event::button;
 use crate::{app, event, file, ui};
 use crate::ui::assets::{self, icon, svg};
 
@@ -11,6 +10,7 @@ pub(crate) fn view(
     ui: &mut egui::Ui,
     app: &app::App,
     open_files: &mut file::OpenFiles,
+    pending_actions: &mut Vec<event::EventAction>,
     error_token: &mut ui::ErrorToken,
 ) {
     let bottom_panel_style = ui::panel_style(ui, ui::BOTTOM_PANEL_INNER_MARGIN);
@@ -49,13 +49,7 @@ pub(crate) fn view(
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(prev_button))
                     .on_hover_text(hover_text).clicked()
                 {
-                    // エラーモーダルをリセット
-                    error_token.reset();
-
-                    // インデックスを前に戻す
-                    if let Err(e) = button::prev(&app, open_files) {
-                        error_token.show(e);
-                    }
+                    pending_actions.push(event::EventAction::Right);
                 }
 
                 // 次のファイル
@@ -68,13 +62,7 @@ pub(crate) fn view(
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(next_button))
                     .on_hover_text(hover_text).clicked()
                 {
-                    // エラーモーダルをリセット
-                    error_token.reset();
-
-                    // インデックスを次に進める
-                    if let Err(e) = button::next(&app, open_files) {
-                        error_token.show(e);
-                    }
+                    pending_actions.push(event::EventAction::Left);
                 }
 
                 ui.separator();

@@ -101,6 +101,7 @@ impl eframe::App for Render {
             ui,
             &self.app,
             &mut self.open_files,
+            &mut self.pending_actions,
             &mut self.error_token,
         );
 

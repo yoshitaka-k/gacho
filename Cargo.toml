@@ -1,6 +1,6 @@
 [package]
 name = "gacho"
-version = "0.4.10"
+version = "0.5.0"
 edition = "2024"
 description = "Comic Book ZIP viewer"
 authors = ["yoshitaka-k"]
@@ -19,6 +19,15 @@ icon = ["target/bundle-icons/*.png"]
 category = "Utility"
 short_description = "Comic Book ZIP viewer"
 linux_use_terminal = false
+linux_exec_args = "%f"
+linux_mime_types = [
+    "application/zip",
+    "application/vnd.comicbook+zip",
+    "application/x-cbz",
+    "image/jpeg",
+    "image/png",
+]
+osx_info_plist_exts = ["assets/macos/info_plist_ext.xml"]
 deb_depends = [
     "libgtk-3-0",
     "libxcb-render0",
@@ -42,6 +51,11 @@ ico = "0.5"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["winbase"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6.4"
+objc2-app-kit = { version = "0.3.2", default-features = false, features = ["NSApplication"] }
+objc2-foundation = { version = "0.3.2", default-features = false, features = ["NSArray", "NSObject", "NSString", "NSURL"] }
 
 [dependencies]
 egui = "0.36.1"

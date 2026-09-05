@@ -32,6 +32,7 @@ impl Render {
         // フォントと SVG ローダーを追加
         fonts::install(&cc.egui_ctx);
         svg::install(&cc.egui_ctx);
+        event::launch::set_ctx(cc.egui_ctx.clone());
 
         // 前回保存した App があれば復元（なければ引数の app を使う）
         let app = cc.storage
@@ -80,6 +81,7 @@ impl eframe::App for Render {
 
         // ファイルを開く
         self.open_dialog();
+        self.open_from_os();
         self.drop_files(ui);
 
         // イベントアクションを処理
@@ -159,6 +161,19 @@ impl Render {
             if let Err(e) = open::folder(&mut self.open_files) {
                 self.error_token.show(e);
             }
+        }
+    }
+
+    /// OS の「このアプリで開く」やコマンドライン引数のファイルを処理
+    fn open_from_os(&mut self) {
+        let Some(path) = event::launch::take_path() else {
+            return;
+        };
+
+        self.error_token.reset();
+
+        if let Err(e) = event::drop::path(path, &mut self.open_files) {
+            self.error_token.show(e);
         }
     }
 

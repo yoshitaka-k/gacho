@@ -18,6 +18,9 @@ const MIN_WINDOW_HEIGHT: f32 = 240.0;
 fn main() -> eframe::Result {
     env_logger::init();
 
+    // Finder などからの「このアプリで開く」を受け取る
+    gacho::install_open_handler();
+
     // アプリケーションを作成
     let app = App::new();
 

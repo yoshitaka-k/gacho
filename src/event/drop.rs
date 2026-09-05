@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use eframe::egui::DroppedFileHandle;
 
 use crate::{file, error};
@@ -8,17 +10,20 @@ pub(crate) fn files(
     files: &[DroppedFileHandle],
     open_files: &mut file::OpenFiles,
 ) -> error::Result<()> {
-    if files.is_empty() {
+    let Some(file) = files.first() else {
         return Ok(());
-    }
+    };
 
-    // ファイルをクリア
+    path(file.path().to_path_buf(), open_files)
+}
+
+/// パスからファイルを開く
+/// * `path` - ファイルのパス
+/// * `open_files` - 開いているファイル
+pub(crate) fn path(
+    path: PathBuf,
+    open_files: &mut file::OpenFiles,
+) -> error::Result<()> {
     open_files.clear();
-
-    // ドロップされたファイルを追加
-    // 最初のファイルのみを追加
-    let path = files[0].path().to_path_buf();
-    open_files.add_path(path)?;
-
-    Ok(())
+    open_files.add_path(path)
 }

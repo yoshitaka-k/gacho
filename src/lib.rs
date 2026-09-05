@@ -9,6 +9,12 @@ mod error;
 pub use app::App;
 pub use ui::Render;
 
+/// OS の「このアプリで開く」を受け取る準備をする。
+/// `eframe::run_native` より前に呼ぶ。
+pub fn install_open_handler() {
+    event::launch::install();
+}
+
 /// ファイルサイズをフォーマットするマクロ
 pub fn filesize_format(size: u64) -> String {
     if size < 1024 {

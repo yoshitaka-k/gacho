@@ -1688,7 +1688,7 @@ dependencies = [
 
 [[package]]
 name = "gacho"
-version = "0.4.10"
+version = "0.5.0"
 dependencies = [
  "eframe",
  "egui",
@@ -1699,6 +1699,9 @@ dependencies = [
  "ico",
  "image",
  "log",
+ "objc2 0.6.4",
+ "objc2-app-kit 0.3.2",
+ "objc2-foundation 0.3.2",
  "regex",
  "rfd",
  "serde",

@@ -7,7 +7,7 @@
 ![Lines of code](https://www.aschey.tech/tokei/github/yoshitaka-k/gacho)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/yoshitaka-k/gacho)
 
-Rust の勉強がてら、自分用に CBZビューア を作ってみようと思って作成なぅ
+Rust の勉強がてら、自分用に CBZビューア ってことで、Gacho（画帳）を作ってみようと思って作成なぅ
 
 ## License
 [Apache-2.0](https://github.com/yoshitaka-k/gacho/blob/main/LICENSE)

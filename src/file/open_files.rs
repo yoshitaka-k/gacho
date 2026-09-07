@@ -245,57 +245,64 @@ impl OpenFiles {
         })?;
 
         if metadata.is_file() {
-            if file::is_allowed_extension(&path) {
-                // strip_prefix は path を借りるので、
-                // 先に String にして into_owned()で所有権を移す
-                let relative_path = path.strip_prefix(base_dir)
-                    .unwrap_or(&path)
-                    .to_string_lossy()
-                    .into_owned();
+            // strip_prefix は path を借りるので、
+            // 先に String にして into_owned()で所有権を移す
+            let relative_path = path.strip_prefix(base_dir)
+                .unwrap_or(&path)
+                .to_string_lossy()
+                .into_owned();
 
-                // ファイルがアーカイブかどうかを判断
-                if file::is_archive(&path) {
-                    let mut archive = file::Archive::new();
-                    archive.unarchive(&path).map_err(|e| {
-                        error::GachoError::ArchiveError(e.to_string())
-                    })?;
+            // ファイルがアーカイブかどうかを判断
+            if file::is_archive(&path) && self.images.is_empty() {
+                let mut archive = file::Archive::new();
+                archive.unarchive(&path).map_err(|e| {
+                    error::GachoError::ArchiveError(e.to_string())
+                })?;
 
-                    // TODO: アーカイブのファイルを取得、一度に全部やらないようにしたい
-                    for file in archive.files() {
-                        let image_file = file::Image::new(
-                            path.clone(),
-                            file.relative_path().clone(),
-                            Some(file.file_name().clone()),
-                            Some(file.bytes().to_vec()),
-                            Some(*file.index()),
-                        )?;
-
-                        self.images.push(image_file);
-                    }
-
-                    self.archive = Some(archive);
-                } else {
-                    // ファイルを作成
+                for file in archive.files() {
                     let image_file = file::Image::new(
                         path.clone(),
-                        relative_path,
-                        None,
-                        None,
-                        None,
+                        file.relative_path().clone(),
+                        Some(file.file_name().clone()),
+                        Some(file.bytes().to_vec()),
+                        Some(*file.index()),
                     )?;
 
-                    // ファイルを追加
                     self.images.push(image_file);
                 }
+
+                self.archive = Some(archive);
+            } else if file::is_image(&path) {
+                // ファイルを作成
+                let image_file = file::Image::new(
+                    path.clone(),
+                    relative_path,
+                    None,
+                    None,
+                    None,
+                )?;
+
+                // ファイルを追加
+                self.images.push(image_file);
             }
         } else if metadata.is_dir() {
-            // ディレクトリを再帰的に探索
+            // ディレクトリの中のファイルを探索
             for entry in fs::read_dir(&path).map_err(|e| {
                 error::GachoError::FileError(e.to_string(), path.clone())
             })? {
                 let entry = entry.map_err(|e| {
                     error::GachoError::FileError(e.to_string(), path.clone())
                 })?;
+
+                let metadata = entry.path().metadata().map_err(|e| {
+                    error::GachoError::FileError(e.to_string(), path.clone())
+                })?;
+
+                // ディレクトリの中のディレクトリはスキップ
+                if metadata.is_dir() {
+                    continue;
+                }
+
                 self.find_file(entry.path(), base_dir)?;
             }
         }

@@ -35,14 +35,14 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
         ui.horizontal(|ui| {
             ui::add_label(ui, "Page Layout:", setting::GENERAL_LABEL_WIDTH);
             ui.scope(|ui| {
-                ui.radio_value(app.page_layout_mut(), event::PageLayout::None, event::PageLayout::None.to_string());
+                ui.radio_value(app.page_layout_mut(), event::PageLayout::Default, event::PageLayout::Default.to_string());
                 ui.radio_value(app.page_layout_mut(), event::PageLayout::Single, event::PageLayout::Single.to_string());
                 ui.radio_value(app.page_layout_mut(), event::PageLayout::Spread, event::PageLayout::Spread.to_string());
             });
         });
 
         // 注意書きを表示
-        setting::warning_note(ui, "The page layout is not available for the None option.");
+        setting::warning_note(ui, "The page layout is not available for the Default option.");
     });
 
     ui.add_space(setting::SETTING_ADD_SPACING);

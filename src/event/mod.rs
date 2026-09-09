@@ -32,7 +32,7 @@ impl ReadFrom {
 /// ページ送り表示方式
 #[derive(Deserialize, Serialize, PartialEq)]
 pub(crate) enum PageLayout {
-    None,
+    Default,
     Single,
     Spread,
 }
@@ -40,7 +40,7 @@ pub(crate) enum PageLayout {
 impl PageLayout {
     pub(crate) fn to_string(&self) -> &str {
         match self {
-            PageLayout::None => "None",
+            PageLayout::Default => "Default",
             PageLayout::Single => "Single Page",
             PageLayout::Spread => "Two-Page Spread",
         }

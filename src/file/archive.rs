@@ -6,33 +6,28 @@ use getset::{Getters, Setters};
 use crate::file;
 
 #[derive(Getters, Setters)]
+#[getset(get = "pub")]
 pub(crate) struct ArchiveFile {
     /// アーカイブ内のファイルのインデックス
-    #[getset(get = "pub")]
     index: usize,
 
     /// ファイル名
-    #[getset(get = "pub")]
     file_name: String,
 
     /// ファイルのパス
-    #[getset(get = "pub")]
     relative_path: String,
 
     /// ファイルのバイト列
-    #[getset(get = "pub")]
     bytes: Vec<u8>,
 }
 
 #[derive(Getters, Setters)]
+#[getset(get = "pub")]
 pub(crate) struct Archive {
-    #[getset(get = "pub")]
     archive: Option<zip::ZipArchive<Cursor<Vec<u8>>>>,
 
-    #[getset(get = "pub")]
     files: Vec<ArchiveFile>,
 
-    #[getset(get = "pub")]
     len: usize,
 }
 

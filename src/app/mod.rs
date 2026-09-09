@@ -18,18 +18,16 @@ const DEFAULT_PRELOADING: usize = 5;
 
 /// アプリケーションの状態
 #[derive(Deserialize, Serialize, Getters, MutGetters)]
+#[getset(get = "pub", get_mut = "pub")]
 #[serde(default)]
 pub struct App {
     /// 前処理数
-    #[getset(get = "pub", get_mut = "pub")]
     preloading: usize,
 
     /// ページ送り方向
-    #[getset(get = "pub", get_mut = "pub")]
     read_from: event::ReadFrom,
 
     /// ページ送り表示方式
-    #[getset(get = "pub", get_mut = "pub")]
     page_layout: event::PageLayout,
 }
 

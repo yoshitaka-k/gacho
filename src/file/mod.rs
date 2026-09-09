@@ -43,21 +43,6 @@ pub(crate) fn extract_book_title(name: &str) -> String {
     name.trim().to_string()
 }
 
-/// ファイルの拡張子が許可されているかどうか
-/// * `path` - ファイルのパス
-/// * `return` - ファイルの拡張子が許可されているかどうか
-pub(crate) fn is_allowed_extension(path: &PathBuf) -> bool {
-    let Some(ext) = path.extension() else {
-        return false;
-    };
-
-    let Some(ext) = ext.to_str() else {
-        return false;
-    };
-
-    self::extension::Extension::to_vec().iter().any(|e| e.eq_ignore_ascii_case(ext))
-}
-
 /// ファイルが画像かどうかを判断
 /// * `path` - ファイルのパス
 /// * `return` - ファイルが画像かどうか

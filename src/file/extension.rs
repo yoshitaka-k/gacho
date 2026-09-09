@@ -10,17 +10,6 @@ pub enum Extension {
 }
 
 impl Extension {
-    /// Extension をベクタに変換
-    /// * `return` - ベクタ
-    pub fn to_vec() -> Vec<&'static str> {
-        vec![
-            Self::Jpeg.to_str(),
-            Self::Png.to_str(),
-            Self::Zip.to_str(),
-            Self::Cbz.to_str(),
-        ]
-    }
-
     /// 画像ファイルのベクタに変換
     /// * `return` - 画像ファイルのベクタ
     pub fn to_image_vec() -> Vec<&'static str> {

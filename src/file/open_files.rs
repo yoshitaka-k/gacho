@@ -57,6 +57,20 @@ impl OpenFiles {
         Ok(title)
     }
 
+    /// 選択されたファイルのファイル名を取得
+    /// * `return` - 選択されたファイルのファイル名
+    pub fn file_name(&mut self) -> error::Result<&str> {
+        let file_name = match self.selected_index_file() {
+            Ok(Some(image)) => image.file_name(),
+            Ok(None) => "",
+            Err(e) => {
+                return Err(e);
+            },
+        };
+
+        Ok(file_name)
+    }
+
     /// 選択されたファイルのパスを取得
     /// * `return` - 選択されたファイルのパス
     pub fn selected_index_file(&mut self) -> error::Result<Option<&file::Image>> {

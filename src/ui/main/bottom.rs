@@ -26,15 +26,7 @@ pub(crate) fn view(
 
             ui.separator();
 
-            let file_name = match open_files.selected_index_file() {
-                Ok(Some(image_file)) => image_file.file_name(),
-                Ok(None) => "",
-                Err(e) => {
-                    error_token.show(e);
-                    ""
-                }
-            };
-
+            let file_name = open_files.file_name().unwrap_or("");
             ui.add(egui::Label::new(file_name).truncate());
 
             // ページャーを右寄せに配置

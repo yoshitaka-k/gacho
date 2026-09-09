@@ -126,4 +126,10 @@ impl Image {
     pub fn is_archive(&self) -> bool {
         matches!(self.extension, file::Extension::Zip | file::Extension::Cbz)
     }
+
+    /// ファイルのバイト列が空かどうかを判断
+    /// * `return` - ファイルのバイト列が空かどうか
+    pub fn is_empty_bytes(&self) -> bool {
+        self.bytes.is_empty()
+    }
 }

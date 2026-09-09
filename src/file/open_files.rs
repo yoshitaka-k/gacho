@@ -186,7 +186,7 @@ impl OpenFiles {
         let image = &mut self.images[index];
 
         // アーカイブの場合は、アーカイブからファイルのバイト列を取得
-        if image.is_archive() && image.bytes().is_empty() {
+        if image.is_archive() && image.is_empty_bytes() {
             let archive = self.archive.as_mut().ok_or_else(|| {
                 error::GachoError::ArchiveError(
                     format!("Archive not found: {}", image.relative_path())

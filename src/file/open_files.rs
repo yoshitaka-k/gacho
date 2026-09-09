@@ -46,29 +46,19 @@ impl OpenFiles {
     /// 本の名前を取得
     /// * `return` - 本の名前
     pub fn title(&mut self) -> error::Result<&str> {
-        let title = match self.selected_index_file() {
-            Ok(Some(image)) => image.title(),
-            Ok(None) => "",
-            Err(e) => {
-                return Err(e);
-            },
-        };
+        let Some(index) = self.selected_index else { return Ok(""); };
+        if index >= self.images.len() { return Ok(""); }
 
-        Ok(title)
+        Ok(self.images[index].title())
     }
 
     /// 選択されたファイルのファイル名を取得
     /// * `return` - 選択されたファイルのファイル名
     pub fn file_name(&mut self) -> error::Result<&str> {
-        let file_name = match self.selected_index_file() {
-            Ok(Some(image)) => image.file_name(),
-            Ok(None) => "",
-            Err(e) => {
-                return Err(e);
-            },
-        };
+        let Some(index) = self.selected_index else { return Ok(""); };
+        if index >= self.images.len() { return Ok(""); }
 
-        Ok(file_name)
+        Ok(self.images[index].file_name())
     }
 
     /// 選択されたファイルのパスを取得
@@ -135,9 +125,7 @@ impl OpenFiles {
 
         if file::is_image(&path) {
             // パスが同じかどうかを判断
-            if self.is_same_path(&path) {
-                return Ok(());
-            }
+            if self.is_same_path(&path) { return Ok(()); }
 
             // 画像ファイルの場合は、同ディレクトリの他の画像ファイルも検索する
             if let Some(parent) = path.parent() {
@@ -179,10 +167,7 @@ impl OpenFiles {
     /// * `return` - Image のインスタンス
     fn get_image_by_index(&mut self, index: usize) -> error::Result<Option<&file::Image>> {
         // インデックスが範囲外の場合は None を返す
-        if index >= self.images.len() {
-            return Ok(None);
-        }
-
+        if index >= self.images.len() { return Ok(None); }
         let image = &mut self.images[index];
 
         // アーカイブの場合は、アーカイブからファイルのバイト列を取得

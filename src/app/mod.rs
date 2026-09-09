@@ -27,6 +27,10 @@ pub struct App {
     /// ページ送り方向
     #[getset(get = "pub", get_mut = "pub")]
     read_from: event::ReadFrom,
+
+    /// ページ送り表示方式
+    #[getset(get = "pub", get_mut = "pub")]
+    page_layout: event::PageLayout,
 }
 
 impl Default for App {
@@ -34,6 +38,7 @@ impl Default for App {
         Self {
             preloading: DEFAULT_PRELOADING,
             read_from: event::ReadFrom::RightToLeft,
+            page_layout: event::PageLayout::None,
         }
     }
 }

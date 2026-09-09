@@ -18,6 +18,7 @@ pub(crate) struct ArchiveFile {
     relative_path: String,
 
     /// ファイルのバイト列
+    #[getset(set = "pub")]
     bytes: Vec<u8>,
 }
 
@@ -93,17 +94,20 @@ impl Archive {
         Ok(())
     }
 
-    /// アーカイブのファイルを取得する
-    /// * `relative_path` - アーカイブ内のファイルの相対パス
-    /// * `return` - アーカイブのファイル
-    pub fn get_zipfile(&mut self, index: usize) -> Result<ArchiveFile, Box<dyn std::error::Error>> {
-        // アーカイブのファイルからファイル名と相対パスを取得する
-        let (file_name, relative_path) = self.files.iter()
+    /// アーカイブファイルを取得する
+    /// * `index` - アーカイブ内のファイルのインデックス
+    /// * `return` - ArchiveFile のインスタンス
+    pub fn get_zipfile(&mut self, index: usize) -> Result<&ArchiveFile, Box<dyn std::error::Error>> {
+        // アーカイブファイルを取得する
+        let archive_file = self.files.iter_mut()
             .find(|f| f.index == index)
-            .map(|f| (f.file_name.clone(), f.relative_path.clone()))
             .ok_or("file not found")?;
 
-        // アーカイブファイルを取得する
+        if !archive_file.bytes.is_empty() {
+            return Ok(archive_file);
+        }
+
+        // アーカイブを取得する
         let archive = self.archive.as_mut().ok_or("archive not loaded")?;
         let mut file = archive.by_index(index)?;
 
@@ -115,12 +119,9 @@ impl Archive {
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes)?;
 
-        Ok(ArchiveFile {
-            index,
-            file_name,
-            relative_path,
-            bytes,
-        })
+        archive_file.set_bytes(bytes.clone());
+
+        Ok(archive_file)
     }
 
     /// ファイルを名前でソートする

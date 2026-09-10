@@ -34,7 +34,6 @@ impl ReadFrom {
 /// ページ送り表示方式
 #[derive(Deserialize, Serialize, PartialEq)]
 pub(crate) enum PageLayout {
-    Default,
     Single,
     Spread,
 }
@@ -44,7 +43,6 @@ impl PageLayout {
     /// * `return` - 文字列
     pub(crate) fn to_string(&self) -> &str {
         match self {
-            PageLayout::Default => "Default",
             PageLayout::Single => "Single Page",
             PageLayout::Spread => "Two-Page Spread",
         }
@@ -54,7 +52,6 @@ impl PageLayout {
     /// * `return` - オフセット
     pub(crate) fn to_offset(&self) -> usize {
         match self {
-            PageLayout::Default => 0,
             PageLayout::Single => 0,
             PageLayout::Spread => 1,
         }

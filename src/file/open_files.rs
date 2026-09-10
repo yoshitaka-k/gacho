@@ -66,7 +66,7 @@ impl OpenFiles {
 
         let mut images = vec![];
         match app.page_layout() {
-            event::PageLayout::Default | event::PageLayout::Single => {
+            event::PageLayout::Single => {
                 let image = self.ensure_image_by_index(index)?;
                 if let Some(image) = image {
                     images.push(image);

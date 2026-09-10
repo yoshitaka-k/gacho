@@ -36,7 +36,7 @@ impl Default for App {
         Self {
             preloading: DEFAULT_PRELOADING,
             read_from: event::ReadFrom::RightToLeft,
-            page_layout: event::PageLayout::Default,
+            page_layout: event::PageLayout::Single,
         }
     }
 }

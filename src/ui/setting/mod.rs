@@ -4,7 +4,7 @@ mod about;
 
 use crate::app;
 use crate::event::button;
-use crate::ui::assets::{self, icon, svg};
+use crate::ui::assets::{self, icon};
 
 // ウィンドウのID
 pub(crate) const SETTING_WINDOW_ID: &str = "setting_window";
@@ -19,7 +19,6 @@ const WINDOW_HEIGHT: f32 = 240.0;
 // ヘッダーのスペースの幅
 const HEADER_ICON_SPACING: f32 = 4.0;
 const HEADER_BOTTOM_SPACING: f32 = 2.0;
-const WARNING_ICON_SPACING: f32 = 3.0;
 
 // ラベルの幅
 pub(crate) const GENERAL_LABEL_WIDTH: f32 = 76.0;
@@ -64,23 +63,4 @@ pub(crate) fn header_panel(
 pub(crate) fn remaining_slider_width(ui: &egui::Ui) -> f32 {
     let spacing = ui.spacing();
     (ui.available_width() - spacing.item_spacing.x - spacing.interact_size.x).max(0.0)
-}
-
-/// 警告ノートを表示
-/// * `ui` - UI
-/// * `text` - 警告ノートのテキスト
-/// * `return` - 警告ノートのリッチテキスト
-pub(crate) fn warning_note(ui: &mut egui::Ui, text: &str) {
-    // デフォルトのスペースの幅を避けておく
-    let spacing = ui.spacing().item_spacing.x;
-
-    // 出力パスの注意書きを表示
-    ui.horizontal(|ui| {
-        ui.spacing_mut().item_spacing.x = WARNING_ICON_SPACING;
-        ui.add(egui::Image::new(svg::WARNING).max_height(icon::WARNING_ICON_SIZE).tint(assets::warning_color(ui)));
-        ui.spacing_mut().item_spacing.x = spacing;
-        ui.add(egui::Label::new(
-            egui::RichText::new(text).weak(),
-        ));
-    });
 }

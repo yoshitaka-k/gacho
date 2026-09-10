@@ -1,0 +1,119 @@
+name: Rust Bundle Build
+
+on:
+  push:
+    # 「v1.0」や「v0.1.0-alpha」なタグがプッシュされたら動く
+    tags:
+      - 'v*'
+  # GitHubの画面から手動でいつでも走らせられるように
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build for ${{ matrix.job.target }}
+    runs-on: ${{ matrix.job.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        job:
+          # Windows (Ubuntu上でクロスコンパイル)
+          - { os: ubuntu-latest, target: x86_64-pc-windows-gnu, artifact-name: windows }
+          # Linux (Ubuntu上でネイティブビルド)
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu, artifact-name: linux }
+          # macOS (macOS Intel環境でネイティブビルド)
+          - { os: macos-latest,  target: x86_64-apple-darwin, artifact-name: macos-intel }
+          # macOS (macOS Apple Silicon環境でネイティブビルド)
+          - { os: macos-latest,  target: aarch64-apple-darwin, artifact-name: macos-apple-silicon }
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.job.target }}
+
+    - name: Install cargo-bundle
+      run: cargo install cargo-bundle --locked
+
+    # Windowsの時だけMinGWをインストール
+    - name: Install MinGW (Only for Windows cross-build)
+      if: matrix.job.target == 'x86_64-pc-windows-gnu'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-mingw-w64-x86-64
+
+    # Install system dependencies for Linux build
+    - name: Install Linux dependencies
+      if: matrix.job.target == 'x86_64-unknown-linux-gnu'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libasound2-dev
+
+    - name: Build and bundle
+      run: |
+        case "${{ matrix.job.target }}" in
+          x86_64-pc-windows-gnu)
+            cargo bundle --release --target ${{ matrix.job.target }} -f exe
+            # cargo-bundle 0.11.0 が .exe を二重付けするため修正
+            for f in target/x86_64-pc-windows-gnu/release/bundle/exe/*.exe.exe; do
+              mv "$f" "${f%.exe}"
+            done
+            ;;
+          x86_64-unknown-linux-gnu)
+            cargo bundle --release --target ${{ matrix.job.target }} -f deb
+            ;;
+          x86_64-apple-darwin | aarch64-apple-darwin)
+            cargo bundle --release --target ${{ matrix.job.target }} -f osx
+            ;;
+        esac
+
+    # 出来上がったバイナリを整理して成果物としてアップ
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        # 名前を「⚪︎⚪︎⚪︎⚪︎-v1.0.0-windows」な感じに揃える
+        name: ${{ github.event.repository.name }}-${{ github.ref_name }}-${{ matrix.job.artifact-name }}
+        path: |
+          target/${{ matrix.job.target }}/release/bundle/**/*
+        if-no-files-found: error
+
+  # Actions の成果物 zip をそのまま draft Release に載せる
+  release:
+    name: Create draft release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+    - name: Download artifact zips
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        mkdir -p dist
+        gh api "/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+          --jq '.artifacts[] | [.name, .archive_download_url] | @tsv' \
+          | while IFS=$'\t' read -r name url; do
+              echo "Downloading ${name}.zip"
+              curl -sL \
+                -H "Authorization: Bearer ${GH_TOKEN}" \
+                -H "Accept: application/vnd.github+json" \
+                -o "dist/${name}.zip" \
+                "$url"
+              ls -lh "dist/${name}.zip"
+            done
+        test "$(ls dist/*.zip | wc -l)" -ge 1
+        for zip in dist/*.zip; do
+          unzip -t "$zip"
+        done
+
+    - name: Create draft release
+      uses: softprops/action-gh-release@v2
+      with:
+        draft: true
+        generate_release_notes: true
+        files: dist/*.zip
+        fail_on_unmatched_files: true

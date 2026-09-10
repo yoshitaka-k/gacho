@@ -149,6 +149,9 @@ impl Render {
             if let Err(e) = open::file(&mut self.open_files) {
                 self.error_token.show(e);
             }
+
+            // 選択されたインデックスを設定
+            self.set_selected_index();
         }
 
         // フォルダダイアログを開くボタンが押されてたらフォルダダイアログを開く
@@ -162,6 +165,9 @@ impl Render {
             if let Err(e) = open::folder(&mut self.open_files) {
                 self.error_token.show(e);
             }
+
+            // 選択されたインデックスを設定
+            self.set_selected_index();
         }
     }
 
@@ -171,16 +177,22 @@ impl Render {
             return;
         };
 
+        // 新しいファイルを開いたので、前回閉じたエラーを忘れさせる
         self.error_token.reset();
 
+        // ファイルを開く
         if let Err(e) = event::drop::path(path, &mut self.open_files) {
             self.error_token.show(e);
         }
+
+        // 選択されたインデックスを設定
+        self.set_selected_index();
     }
 
     /// ドラッグ&ドロップされたファイルを処理
     /// * `ui` - UI
     fn drop_files(&mut self, ui: &egui::Ui) {
+        // ドラッグ&ドロップされたファイルを処理
         let Some(result) = input::drop(ui, &mut self.open_files) else {
             return;
         };
@@ -188,9 +200,26 @@ impl Render {
         // 新しいファイルを開いたので、前回閉じたエラーを忘れさせる
         self.error_token.reset();
 
+        // 選択されたインデックスを設定
+        self.set_selected_index();
+
         // エラーが発生した場合はエラーモーダルを表示
         if let Err(e) = result {
             self.error_token.show(e);
+        }
+    }
+
+    /// 選択されたインデックスを設定
+    fn set_selected_index(&mut self) {
+        // 見開きの場合は、奇数の場合は前のインデックスを設定
+        if matches!(self.app.page_layout(), event::PageLayout::Spread) {
+            if let Some(index) = self.open_files.selected_index() {
+                if index % 2 != 0 {
+                    self.open_files.set_selected_index(Some(index - 1));
+                } else {
+                    self.open_files.set_selected_index(Some(*index));
+                }
+            }
         }
     }
 

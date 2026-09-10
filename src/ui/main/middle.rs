@@ -24,7 +24,7 @@ pub(crate) fn view(
         let available_rect = ui.available_rect_before_wrap();
         let available = available_rect.size();
 
-        match open_files.selected_index_file(app) {
+        match open_files.selected_index_files(app) {
             Ok(images) if !images.is_empty() => {
                 let n = images.len() as f32;
                 let max_each = egui::vec2(available.x / n, available.y);

@@ -53,18 +53,15 @@ impl OpenFiles {
         Ok(self.images[index].title())
     }
 
-    /// 選択されたファイルのファイル名を取得
-    /// * `return` - 選択されたファイルのファイル名
-    pub fn file_name(&mut self) -> error::Result<&str> {
-        let Some(index) = self.selected_index else { return Ok(""); };
-        if index >= self.images.len() { return Ok(""); }
-
-        Ok(self.images[index].file_name())
+    /// ファイルのIDを取得
+    /// * `return` - ファイルのIDリスト
+    pub fn image_ids(&self) -> Vec<u64> {
+        self.images.iter().map(|image| *image.id()).collect()
     }
 
     /// 選択されたファイルのパスを取得
     /// * `return` - 選択されたファイルのパス
-    pub fn selected_index_file(&mut self, app: &app::App) -> error::Result<Vec<file::Image>> {
+    pub fn selected_index_files(&mut self, app: &app::App) -> error::Result<Vec<file::Image>> {
         let Some(index) = self.selected_index else { return Ok(vec![]); };
 
         let mut images = vec![];
@@ -126,6 +123,16 @@ impl OpenFiles {
             event::ReadFrom::LeftToRight => self.from_prev(app.page_layout().to_offset()),
         }
 
+        // 見開き
+        if matches!(app.page_layout(), event::PageLayout::Spread) {
+            if let Some(index) = self.selected_index {
+                // 最後のページの調整
+                if index % 2 != 0 {
+                    self.selected_index = Some(index - 1);
+                }
+            }
+        }
+
         Ok(self.selected_index)
     }
 
@@ -136,6 +143,16 @@ impl OpenFiles {
         match app.read_from() {
             event::ReadFrom::RightToLeft => self.from_prev(app.page_layout().to_offset()),
             event::ReadFrom::LeftToRight => self.from_next(app.page_layout().to_offset()),
+        }
+
+        // 見開き
+        if matches!(app.page_layout(), event::PageLayout::Spread) {
+            if let Some(index) = self.selected_index {
+                // 最後のページの調整
+                if index % 2 != 0 {
+                    self.selected_index = Some(index - 1);
+                }
+            }
         }
 
         Ok(self.selected_index)
@@ -175,6 +192,7 @@ impl OpenFiles {
         self.sort();
 
         if !self.images.is_empty() {
+            // 画像ファイルから開かれたら
             if let Some(file_name) = file_name {
                 self.selected_index = self.get_index_by_filename(&file_name);
             } else {
@@ -254,7 +272,6 @@ impl OpenFiles {
             } else {
                 return false;
             };
-
             file_name == name
         })
     }

@@ -20,36 +20,53 @@ pub(crate) fn view(
         let rect = ui.max_rect();
         let click = ui.interact(rect, ui.id().with("middle"), egui::Sense::click());
 
-        // 中央寄せでレイアウトを指定
-        ui.with_layout(egui::Layout::centered_and_justified(egui::Direction::TopDown), |ui| {
-            // 本画像の available_size を先に取る
-            let available = ui.available_size();
+        // 本画像の available_size を先に取る
+        let available_rect = ui.available_rect_before_wrap();
+        let available = available_rect.size();
 
-            // 最初の画像を表示
-            match open_files.selected_index_file() {
-                Ok(Some(image_file)) => {
-                    let image = ui_image(image_file)
-                        .max_size(available);
-                    image_load(ui, image, image_file, true, error_token);
-                },
-                Ok(None) => (),
-                Err(e) => {
-                    error_token.show(e);
-                    ()
-                }
-            };
+        match open_files.selected_index_file(app) {
+            Ok(images) if !images.is_empty() => {
+                let n = images.len() as f32;
+                let max_each = egui::vec2(available.x / n, available.y);
+                let sizes: Vec<egui::Vec2> = images.iter().map(|image| image.fit_to(max_each)).collect();
 
-            // 前後の画像を先読み
-            for i in 1..=*app.preloading() {
-                if let Ok(Some(image_file)) = open_files.selected_next_file(i) {
-                    let _ = ui_image(image_file).load_for_size(ui.ctx(), available);
-                }
+                let total_width: f32 = sizes.iter().map(|size| size.x).sum();
+                let total_height = sizes.iter().map(|size| size.y).fold(0.0_f32, f32::max);
+                let rect = egui::Align2::CENTER_CENTER
+                    .align_size_within_rect(egui::vec2(total_width, total_height), available_rect);
 
-                if let Ok(Some(image_file)) = open_files.selected_prev_file(i) {
-                    let _ = ui_image(image_file).load_for_size(ui.ctx(), available);
-                }
+                ui.scope_builder(egui::UiBuilder::new().max_rect(rect), |ui| {
+                    ui.spacing_mut().item_spacing.x = 0.0;
+                    ui.horizontal(|ui| {
+                        let mut pages: Vec<(&file::Image, egui::Vec2)> =
+                            images.iter().zip(sizes).collect();
+                        if matches!(app.read_from(), event::ReadFrom::RightToLeft) {
+                            pages.reverse();
+                        }
+
+                        for (image_file, size) in pages {
+                            let image = ui_image(image_file).fit_to_exact_size(size);
+                            image_load(ui, image, image_file, size, true, error_token);
+                        }
+                    });
+                });
             }
-        });
+            Ok(_) => (),
+            Err(e) => {
+                error_token.show(e);
+            }
+        };
+
+        // 前後の画像を先読み
+        for i in 1..=*app.preloading() {
+            if let Ok(Some(image_file)) = open_files.selected_next_file(i) {
+                let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
+            }
+
+            if let Ok(Some(image_file)) = open_files.selected_prev_file(i) {
+                let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
+            }
+        }
 
         // クリックイベントを処理
         if click.clicked() {
@@ -82,8 +99,15 @@ fn ui_image(image_file: &file::Image) -> egui::Image<'static> {
 /// * `image` - 画像
 /// * `error_token` - エラートークン
 /// * `return` - 読み込み完了
-fn image_load(ui: &mut egui::Ui, image: egui::Image<'_>, image_file: &file::Image, is_loading: bool, error_token: &mut ui::ErrorToken) {
-    match image.load_for_size(ui.ctx(), ui.available_size()) {
+fn image_load(
+    ui: &mut egui::Ui,
+    image: egui::Image<'_>,
+    image_file: &file::Image,
+    size: egui::Vec2,
+    is_loading: bool,
+    error_token: &mut ui::ErrorToken,
+) {
+    match image.load_for_size(ui.ctx(), size) {
         Ok(egui::load::TexturePoll::Ready { .. }) => {
             // 読み込み完了
             ui.add(image);

@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::collections::HashSet;
 use getset::{Getters, MutGetters, Setters};
 
 use crate::{app, event, file, error};
@@ -63,30 +64,57 @@ impl OpenFiles {
 
     /// 選択されたファイルのパスを取得
     /// * `return` - 選択されたファイルのパス
-    pub fn selected_index_file(&mut self) -> error::Result<Option<&file::Image>> {
-        let Some(index) = self.selected_index else { return Ok(None); };
+    pub fn selected_index_file(&mut self, app: &app::App) -> error::Result<Vec<file::Image>> {
+        let Some(index) = self.selected_index else { return Ok(vec![]); };
 
-        self.get_image_by_index(index)
+        let mut images = vec![];
+        match app.page_layout() {
+            event::PageLayout::Default | event::PageLayout::Single => {
+                let image = self.ensure_image_by_index(index)?;
+                if let Some(image) = image {
+                    images.push(image);
+                }
+            }
+            event::PageLayout::Spread => {
+                for offset in 0..=app.page_layout().to_offset() {
+                    let Some(add_index) = index.checked_add(offset) else { continue; };
+                    let image = self.ensure_image_by_index(add_index)?;
+                    if let Some(image) = image {
+                        images.push(image);
+                    }
+                }
+
+                // 重複を削除
+                let mut seen = HashSet::new();
+                let unique_images = images.into_iter()
+                    .filter(|image| seen.insert(*image.id()))
+                    .collect();
+
+                images = unique_images;
+            }
+        }
+
+        Ok(images)
     }
 
     /// 指定した次のインデックスを移動させてファイルを取得
     /// * `offset` - オフセット
     /// * `return` - 次のファイル
-    pub fn selected_next_file(&mut self, offset: usize) -> error::Result<Option<&file::Image>> {
+    pub fn selected_next_file(&mut self, offset: usize) -> error::Result<Option<file::Image>> {
         let Some(index) = self.selected_index else { return Ok(None); };
         let Some(add_index) = index.checked_add(offset) else { return Ok(None); };
 
-        self.get_image_by_index(add_index)
+        self.ensure_image_by_index(add_index)
     }
 
     /// 指定した前のインデックスを移動させてファイルを取得
     /// * `offset` - オフセット
     /// * `return` - 前のファイル
-    pub fn selected_prev_file(&mut self, offset: usize) -> error::Result<Option<&file::Image>> {
+    pub fn selected_prev_file(&mut self, offset: usize) -> error::Result<Option<file::Image>> {
         let Some(index) = self.selected_index else { return Ok(None); };
         let Some(sub_index) = index.checked_sub(offset) else { return Ok(None); };
 
-        self.get_image_by_index(sub_index)
+        self.ensure_image_by_index(sub_index)
     }
 
     /// 次のインデックス
@@ -94,8 +122,8 @@ impl OpenFiles {
     /// * `return` - 次のインデックス
     pub fn next_index(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
-            event::ReadFrom::RightToLeft => self.from_next(),
-            event::ReadFrom::LeftToRight => self.from_prev(),
+            event::ReadFrom::RightToLeft => self.from_next(app.page_layout().to_offset()),
+            event::ReadFrom::LeftToRight => self.from_prev(app.page_layout().to_offset()),
         }
 
         Ok(self.selected_index)
@@ -106,8 +134,8 @@ impl OpenFiles {
     /// * `return` - 前のインデックス
     pub fn prev_index(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
-            event::ReadFrom::RightToLeft => self.from_prev(),
-            event::ReadFrom::LeftToRight => self.from_next(),
+            event::ReadFrom::RightToLeft => self.from_prev(app.page_layout().to_offset()),
+            event::ReadFrom::LeftToRight => self.from_next(app.page_layout().to_offset()),
         }
 
         Ok(self.selected_index)
@@ -165,10 +193,12 @@ impl OpenFiles {
     /// インデックスからファイルを取得
     /// * `index` - インデックス
     /// * `return` - Image のインスタンス
-    fn get_image_by_index(&mut self, index: usize) -> error::Result<Option<&file::Image>> {
+    fn ensure_image_by_index(&mut self, index: usize) -> error::Result<Option<file::Image>> {
         // インデックスが範囲外の場合は None を返す
         if index >= self.images.len() { return Ok(None); }
-        let image = &mut self.images[index];
+        let image = self.images.get_mut(index).ok_or_else(|| {
+            error::GachoError::IndexError(index)
+        })?;
 
         // アーカイブの場合は、アーカイブからファイルのバイト列を取得
         if image.is_archive() && image.is_empty_bytes() {
@@ -185,25 +215,30 @@ impl OpenFiles {
             })?;
 
             image.set_bytes(archive_file.bytes().to_vec().into());
+            image.set_size(*archive_file.size());
         }
 
-        Ok(Some(image))
+        Ok(Some(image.clone()))
     }
 
     /// 次のファイルを取得
-    fn from_next(&mut self) {
+    fn from_next(&mut self, offset: usize) {
         if let Some(index) = self.selected_index {
-            if index < self.images.len() - 1 {
-                self.selected_index = Some(index + 1);
+            if index + offset < self.images.len() - 1 {
+                self.selected_index = Some(index + offset + 1);
+            } else {
+                self.selected_index = Some(self.images.len() - 1);
             }
         }
     }
 
     /// 前のファイルを取得
-    fn from_prev(&mut self) {
+    fn from_prev(&mut self, offset: usize) {
         if let Some(index) = self.selected_index {
-            if index > 0 {
-                self.selected_index = Some(index - 1);
+            if (index as isize - offset as isize) > 0 {
+                self.selected_index = Some(index - offset - 1);
+            } else {
+                self.selected_index = Some(0);
             }
         }
     }

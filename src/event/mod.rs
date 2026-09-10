@@ -21,6 +21,8 @@ pub(crate) enum ReadFrom {
 }
 
 impl ReadFrom {
+    /// 文字列を取得
+    /// * `return` - 文字列
     pub(crate) fn to_string(&self) -> &str {
         match self {
             ReadFrom::RightToLeft => "Right to Left",
@@ -38,11 +40,23 @@ pub(crate) enum PageLayout {
 }
 
 impl PageLayout {
+    /// 文字列を取得
+    /// * `return` - 文字列
     pub(crate) fn to_string(&self) -> &str {
         match self {
             PageLayout::Default => "Default",
             PageLayout::Single => "Single Page",
             PageLayout::Spread => "Two-Page Spread",
+        }
+    }
+
+    /// オフセットを取得
+    /// * `return` - オフセット
+    pub(crate) fn to_offset(&self) -> usize {
+        match self {
+            PageLayout::Default => 0,
+            PageLayout::Single => 0,
+            PageLayout::Spread => 1,
         }
     }
 }

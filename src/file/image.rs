@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use getset::{Getters, Setters};
+use image::ImageReader;
 
 use crate::{error, file};
 
@@ -29,6 +30,10 @@ pub struct Image {
 
     /// ファイルの拡張子
     extension: file::Extension,
+
+    /// 画像ファイルの幅・高さ
+    #[getset(set = "pub")]
+    size: egui::Vec2,
 
     /// ファイルのバイト列
     #[getset(set = "pub")]
@@ -99,6 +104,20 @@ impl Image {
 
         let title = file::extract_book_title(&title);
 
+        // ファイルの幅・高さを取得
+        let size = if file::is_image(&path) {
+            let reader = ImageReader::open(&path).map_err(|e| {
+                error::GachoError::FileError(e.to_string(), path.clone())
+            })?;
+            let (width, height) = reader.into_dimensions().map_err(|e| {
+                error::GachoError::FileError(e.to_string(), path.clone())
+            })?;
+
+            egui::Vec2::new(width as f32, height as f32)
+        } else {
+            egui::Vec2::new(0.0, 0.0)
+        };
+
         // ファイルの内容を取得
         let bytes: Arc<[u8]> = if let Some(bytes) = bytes {
             Arc::from(bytes)
@@ -116,6 +135,7 @@ impl Image {
             title,
             file_name,
             extension,
+            size,
             bytes,
             archive_index: archive_index.unwrap_or(0),
         })
@@ -131,5 +151,24 @@ impl Image {
     /// * `return` - ファイルのバイト列が空かどうか
     pub fn is_empty_bytes(&self) -> bool {
         self.bytes.is_empty()
+    }
+
+    /// 指定した領域に収まる表示サイズを返す
+    /// * `max` - 最大サイズ
+    /// * `return` - 表示サイズ
+    pub fn fit_to(&self, max: egui::Vec2) -> egui::Vec2 {
+        if self.size.x <= 0.0 || self.size.y <= 0.0 {
+            return max;
+        }
+
+        // 比率を計算
+        let ratio = (max.x / self.size.x).min(max.y / self.size.y);
+
+        // 比率が有限な場合は表示サイズを計算
+        if ratio.is_finite() {
+            self.size * ratio
+        } else {
+            max
+        }
     }
 }

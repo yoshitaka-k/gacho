@@ -1,9 +1,10 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::{Cursor, Read, BufReader};
 use getset::{Getters, Setters};
+use image::ImageReader;
 
-use crate::file;
+use crate::{file, error};
 
 #[derive(Getters, Setters)]
 #[getset(get = "pub")]
@@ -16,6 +17,10 @@ pub(crate) struct ArchiveFile {
 
     /// ファイルのパス
     relative_path: String,
+
+    /// ファイルの幅・高さ
+    #[getset(set = "pub")]
+    size: egui::Vec2,
 
     /// ファイルのバイト列
     #[getset(set = "pub")]
@@ -81,6 +86,7 @@ impl Archive {
                 index: i,
                 file_name,
                 relative_path,
+                size: egui::Vec2::new(0.0, 0.0),
                 bytes: Vec::new(),
             });
         }
@@ -118,8 +124,16 @@ impl Archive {
         // アーカイブからファイルのバイト列を取得する
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes)?;
-
         archive_file.set_bytes(bytes.clone());
+
+        // ファイルの幅・高さを取得する
+        let reader = ImageReader::new(Cursor::new(bytes)).with_guessed_format().map_err(|e| {
+            error::GachoError::FileError(e.to_string(), PathBuf::from(&archive_file.relative_path))
+        })?;
+        let (width, height) = reader.into_dimensions().map_err(|e| {
+            error::GachoError::FileError(e.to_string(), PathBuf::from(&archive_file.relative_path))
+        })?;
+        archive_file.set_size(egui::Vec2::new(width as f32, height as f32));
 
         Ok(archive_file)
     }

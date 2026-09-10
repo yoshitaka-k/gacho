@@ -19,7 +19,28 @@ pub(crate) fn view(
     egui::Panel::bottom("bottom_taskbar").frame(bottom_panel_style).show(ui, |ui| {
         ui.horizontal(|ui| {
             if let Some(index) = open_files.selected_index() {
-                ui.label(format!("{} / {}", index + 1, open_files.images().len()));
+                match app.page_layout() {
+                    event::PageLayout::Default | event::PageLayout::Single => {
+                        ui.label(format!("{} / {}", index + 1, open_files.images().len()));
+                    }
+                    event::PageLayout::Spread => {
+                        let first = index + 1;
+                        let last = if open_files.images().len() > index + 1 + app.page_layout().to_offset() {
+                            index + 1 + app.page_layout().to_offset()
+                        } else {
+                            open_files.images().len()
+                        };
+
+                        match app.read_from() {
+                            event::ReadFrom::RightToLeft => {
+                                ui.label(format!("{} - {} / {}", last, first, open_files.images().len()));
+                            }
+                            event::ReadFrom::LeftToRight => {
+                                ui.label(format!("{} - {} / {}", first, last, open_files.images().len()));
+                            }
+                        }
+                    }
+                }
             } else {
                 ui.label(format!("0 / {}", open_files.images().len()));
             }
@@ -65,10 +86,14 @@ pub(crate) fn view(
 
                     ui.spacing_mut().slider_width = SLIDER_WIDTH;
                     let slider = match app.read_from() {
-                        event::ReadFrom::RightToLeft => ui.add(egui::Slider::new(&mut selected, max..=MIN_INDEX)
-                            .show_value(false)),
-                        event::ReadFrom::LeftToRight => ui.add(egui::Slider::new(&mut selected, MIN_INDEX..=max)
-                            .show_value(false)),
+                        event::ReadFrom::RightToLeft => ui.add(
+                            egui::Slider::new(&mut selected, max..=MIN_INDEX)
+                            .show_value(false)
+                        ),
+                        event::ReadFrom::LeftToRight => ui.add(
+                            egui::Slider::new(&mut selected, MIN_INDEX..=max)
+                            .show_value(false)
+                        ),
                     };
 
                     // 選択が変更された場合はインデックスを更新

@@ -8,6 +8,7 @@ pub enum GachoError {
     FileError(String, path::PathBuf),
     ArchiveError(String),
     InvalidVersion,
+    IndexError(usize),
 }
 
 /// GachoError を表示
@@ -18,6 +19,7 @@ impl fmt::Display for GachoError {
             GachoError::FileError(e, path) => write!(f, "File error: {}\n\n{}", e, path.display()),
             GachoError::ArchiveError(e) => write!(f, "Archive error: {}", e),
             GachoError::InvalidVersion => write!(f, "Invalid version"),
+            GachoError::IndexError(index) => write!(f, "Index error: {}", index),
         }
     }
 }
@@ -30,6 +32,7 @@ impl error::Error for GachoError {
             GachoError::FileError(_, _) => None,
             GachoError::ArchiveError(_) => None,
             GachoError::InvalidVersion => None,
+            GachoError::IndexError(_) => None,
         }
     }
 }

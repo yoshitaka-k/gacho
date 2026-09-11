@@ -24,7 +24,7 @@ pub(crate) fn view(
         let available_rect = ui.available_rect_before_wrap();
         let available = available_rect.size();
 
-        match open_files.selected_index_files(app) {
+        match open_files.selected_index_images(app) {
             Ok(images) if !images.is_empty() => {
                 let n = images.len() as f32;
                 let max_each = egui::vec2(available.x / n, available.y);
@@ -38,13 +38,13 @@ pub(crate) fn view(
                 ui.scope_builder(egui::UiBuilder::new().max_rect(rect), |ui| {
                     ui.spacing_mut().item_spacing.x = 0.0;
                     ui.horizontal(|ui| {
-                        let mut pages: Vec<(&file::Image, egui::Vec2)> =
+                        let mut images: Vec<(&file::Image, egui::Vec2)> =
                             images.iter().zip(sizes).collect();
                         if matches!(app.read_from(), event::ReadFrom::RightToLeft) {
-                            pages.reverse();
+                            images.reverse();
                         }
 
-                        for (image_file, size) in pages {
+                        for (image_file, size) in images {
                             let image = ui_image(image_file).fit_to_exact_size(size);
                             image_load(ui, image, image_file, size, true, error_token);
                         }
@@ -59,11 +59,11 @@ pub(crate) fn view(
 
         // 前後の画像を先読み
         for i in 1..=*app.preloading() {
-            if let Ok(Some(image_file)) = open_files.selected_next_file(i) {
+            if let Ok(Some(image_file)) = open_files.selected_next_image(i) {
                 let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
             }
 
-            if let Ok(Some(image_file)) = open_files.selected_prev_file(i) {
+            if let Ok(Some(image_file)) = open_files.selected_prev_image(i) {
                 let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
             }
         }

@@ -18,8 +18,8 @@ pub(crate) fn view(
     let button_color = assets::button_icon_color(ui);
 
     // ファイルのIDリストと選択されたファイルを取得
-    let all_images_ids = open_files.image_ids();
-    let selected_images = open_files.selected_index_files(app).unwrap_or(vec![]);
+    let all_images_ids = open_files.book_image_ids();
+    let selected_images = open_files.selected_index_images(app).unwrap_or(vec![]);
 
     egui::Panel::bottom("bottom_taskbar").frame(bottom_panel_style).show(ui, |ui| {
         // 左右分割のレイアウトで、左にページャー・ファイル名、右にボタンを配置する
@@ -29,11 +29,11 @@ pub(crate) fn view(
                 let mut file_names = vec![];
 
                 for (index, image) in selected_images.iter().enumerate() {
-                    let page = all_images_ids.iter().position(|id| {
+                    let image_index = all_images_ids.iter().position(|id| {
                         id == image.id()
                     }).unwrap_or(0);
 
-                    pagers.push(format!("{}", page + 1));
+                    pagers.push(format!("{}", image_index + 1));
                     file_names.push(image.file_name().as_str());
 
                     if index < selected_images.len() - 1 {
@@ -87,7 +87,7 @@ pub(crate) fn view(
 
                     // ページャースライダー
                     let mut selected = open_files.selected_index_mut().unwrap_or(0);
-                    let max = if open_files.len() > 0 { open_files.len() - 1 } else { DEFAULT_MAX_INDEX };
+                    let max = if open_files.book_len() > 0 { open_files.book_len() - 1 } else { DEFAULT_MAX_INDEX };
                     ui.scope(|ui| {
                         ui.spacing_mut().slider_width = SLIDER_WIDTH;
                         let slider = match app.read_from() {

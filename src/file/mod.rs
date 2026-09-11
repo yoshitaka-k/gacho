@@ -1,10 +1,12 @@
 pub mod extension;
 pub mod open_files;
+pub mod book;
 pub mod image;
 pub mod archive;
 
 pub(crate) use extension::Extension;
 pub(crate) use open_files::OpenFiles;
+pub(crate) use book::Book;
 pub(crate) use image::Image;
 pub(crate) use archive::Archive;
 
@@ -31,17 +33,6 @@ pub(crate) static RE_DOJIN_NAME_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
 pub(crate) static RE_BOOK_NAME_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^(?:\((?P<category>[^)]+)\)\s*)?\[(?P<author>[^\]]+)\]\s*(?P<title>.+)\s*$").unwrap()
 });
-
-/// ファイル名から本のタイトルを取り出す。
-/// 同人形式を先に試し、一致しなければ簡易形式を試す。
-pub(crate) fn extract_book_title(name: &str) -> String {
-    for re in [&*RE_DOJIN_NAME_PATTERN, &*RE_BOOK_NAME_PATTERN] {
-        if let Some(title) = re.captures(name).and_then(|c| c.name("title")) {
-            return title.as_str().trim().to_string();
-        }
-    }
-    name.trim().to_string()
-}
 
 /// ファイルが画像かどうかを判断
 /// * `path` - ファイルのパス

@@ -17,7 +17,7 @@ pub(crate) fn view(
         // 左右分割のレイアウトで、左にタイトル、右にボタンを配置する
         egui::Sides::new().shrink_left().truncate().show(ui,
             |ui| {
-                let title = open_files.title().unwrap_or("");
+                let title = open_files.book_title();
                 ui.add(egui::Label::new(title).truncate());
             },
             |ui| {

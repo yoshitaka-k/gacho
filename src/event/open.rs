@@ -15,7 +15,7 @@ pub(crate) fn file(
 
     // ファイルを追加
     if let Some(path) = path {
-        open_files.add_path(path)?;
+        open_files.add_book(path)?;
     }
 
     Ok(())
@@ -45,7 +45,7 @@ pub(crate) fn folder(
 
     // ファイルを追加
     if let Some(path) = path {
-        open_files.add_path(path)?;
+        open_files.add_book(path)?;
     }
 
     Ok(())

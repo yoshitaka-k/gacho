@@ -22,9 +22,6 @@ pub struct Image {
     /// ファイルの相対パス
     relative_path: String,
 
-    /// 本の名前
-    title: String,
-
     /// 画像ファイルの名前
     file_name: String,
 
@@ -78,32 +75,6 @@ impl Image {
             ));
         };
 
-        // 本の名前を取得
-        let title = if matches!(extension, file::Extension::Zip | file::Extension::Cbz) {
-            let mut path = path.clone();
-            path.set_extension("");
-            if let Some(name) = path.file_name() {
-                name.to_string_lossy().trim().to_string()
-            } else {
-                file_name.clone()
-            }
-        } else if path.is_file() {
-            if let Some(parent) = path.parent() {
-                if let Some(parent_name) = parent.file_name() {
-                    parent_name.to_string_lossy().to_string()
-                } else {
-                    file_name.clone()
-                }
-            } else {
-                file_name.clone()
-            }
-        } else {
-            let replace_path = format!("/{}", file_name);
-            relative_path.clone().replace(&replace_path, "")
-        };
-
-        let title = file::extract_book_title(&title);
-
         // ファイルの幅・高さを取得
         let size = if file::is_image(&path) {
             let reader = ImageReader::open(&path).map_err(|e| {
@@ -132,7 +103,6 @@ impl Image {
             id,
             path,
             relative_path,
-            title,
             file_name,
             extension,
             size,

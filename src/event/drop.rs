@@ -24,6 +24,9 @@ pub(crate) fn path(
     path: PathBuf,
     open_files: &mut file::OpenFiles,
 ) -> error::Result<()> {
+    // ファイルをクリア
     open_files.clear();
-    open_files.add_path(path)
+
+    // ファイルを追加
+    open_files.add_book(path)
 }

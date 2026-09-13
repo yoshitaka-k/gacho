@@ -4,17 +4,17 @@ use getset::{Getters, MutGetters, Setters};
 
 use crate::{app, event, file, error};
 
-const DEFAULT_SELECTED_INDEX: usize = 0;
+const DEFAULT_PAGE: usize = 0;
 
 /// ドロップされたファイルを管理する構造体
 #[derive(Getters, MutGetters, Setters)]
 pub struct OpenFiles {
-    /// ファイル一覧
+    /// 本の構造体
     book: file::Book,
 
     /// 選択されたファイルのインデックス
     #[getset(get = "pub", get_mut = "pub", set = "pub")]
-    selected_index: Option<usize>,
+    page: Option<usize>,
 }
 
 /// public methods
@@ -24,14 +24,14 @@ impl OpenFiles {
     pub fn new() -> Self {
         Self {
             book: file::Book::new(),
-            selected_index: None,
+            page: None,
         }
     }
 
     /// ファイルをクリア
     pub fn clear(&mut self) {
         self.book.clear();
-        self.selected_index = None;
+        self.page = None;
     }
 
     /// 本の名前を取得
@@ -54,8 +54,8 @@ impl OpenFiles {
 
     /// 選択された画像のパスを取得
     /// * `return` - 選択されたファイルのパス
-    pub fn selected_index_images(&mut self, app: &app::App) -> error::Result<Vec<file::Image>> {
-        let Some(index) = self.selected_index else { return Ok(vec![]); };
+    pub fn page_images(&mut self, app: &app::App) -> error::Result<Vec<file::Image>> {
+        let Some(index) = self.page else { return Ok(vec![]); };
 
         let mut images = vec![];
         match app.page_layout() {
@@ -91,7 +91,7 @@ impl OpenFiles {
     /// * `offset` - オフセット
     /// * `return` - 次のファイル
     pub fn selected_next_image(&mut self, offset: usize) -> error::Result<Option<file::Image>> {
-        let Some(index) = self.selected_index else { return Ok(None); };
+        let Some(index) = self.page else { return Ok(None); };
         let Some(add_index) = index.checked_add(offset) else { return Ok(None); };
 
         self.book.ensure_image_by_index(add_index)
@@ -101,7 +101,7 @@ impl OpenFiles {
     /// * `offset` - オフセット
     /// * `return` - 前のファイル
     pub fn selected_prev_image(&mut self, offset: usize) -> error::Result<Option<file::Image>> {
-        let Some(index) = self.selected_index else { return Ok(None); };
+        let Some(index) = self.page else { return Ok(None); };
         let Some(sub_index) = index.checked_sub(offset) else { return Ok(None); };
 
         self.book.ensure_image_by_index(sub_index)
@@ -118,15 +118,15 @@ impl OpenFiles {
 
         // 見開き
         if matches!(app.page_layout(), event::PageLayout::Spread) {
-            if let Some(index) = self.selected_index {
+            if let Some(index) = self.page {
                 // 最後のページの調整
                 if index % 2 != 0 {
-                    self.selected_index = Some(index - 1);
+                    self.page = Some(index - 1);
                 }
             }
         }
 
-        Ok(self.selected_index)
+        Ok(self.page)
     }
 
     /// 前のインデックス
@@ -140,15 +140,15 @@ impl OpenFiles {
 
         // 見開き
         if matches!(app.page_layout(), event::PageLayout::Spread) {
-            if let Some(index) = self.selected_index {
+            if let Some(index) = self.page {
                 // 最後のページの調整
                 if index % 2 != 0 {
-                    self.selected_index = Some(index - 1);
+                    self.page = Some(index - 1);
                 }
             }
         }
 
-        Ok(self.selected_index)
+        Ok(self.page)
     }
 
     /// 本を追加
@@ -162,9 +162,9 @@ impl OpenFiles {
         if self.book.len() > 0 {
             // 画像ファイルから開かれたら
             if let Some(file_name) = file_name {
-                self.selected_index = self.book.get_index_by_filename(&file_name);
+                self.page = self.book.get_index_by_filename(&file_name);
             } else {
-                self.selected_index = Some(DEFAULT_SELECTED_INDEX);
+                self.page = Some(DEFAULT_PAGE);
             }
         }
 
@@ -176,22 +176,22 @@ impl OpenFiles {
 impl OpenFiles {
     /// 次のファイルを取得
     fn from_next(&mut self, offset: usize) {
-        if let Some(index) = self.selected_index {
+        if let Some(index) = self.page {
             if index + offset < self.book.len() - 1 {
-                self.selected_index = Some(index + offset + 1);
+                self.page = Some(index + offset + 1);
             } else {
-                self.selected_index = Some(self.book.len() - 1);
+                self.page = Some(self.book.len() - 1);
             }
         }
     }
 
     /// 前のファイルを取得
     fn from_prev(&mut self, offset: usize) {
-        if let Some(index) = self.selected_index {
+        if let Some(index) = self.page {
             if (index as isize - offset as isize) > 0 {
-                self.selected_index = Some(index - offset - 1);
+                self.page = Some(index - offset - 1);
             } else {
-                self.selected_index = Some(0);
+                self.page = Some(0);
             }
         }
     }

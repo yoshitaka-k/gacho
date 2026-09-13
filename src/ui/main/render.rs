@@ -213,11 +213,11 @@ impl Render {
     fn set_selected_index(&mut self) {
         // 見開きの場合は、奇数の場合は前のインデックスを設定
         if matches!(self.app.page_layout(), event::PageLayout::Spread) {
-            if let Some(index) = self.open_files.selected_index() {
+            if let Some(index) = self.open_files.page() {
                 if index % 2 != 0 {
-                    self.open_files.set_selected_index(Some(index - 1));
+                    self.open_files.set_page(Some(index - 1));
                 } else {
-                    self.open_files.set_selected_index(Some(*index));
+                    self.open_files.set_page(Some(*index));
                 }
             }
         }

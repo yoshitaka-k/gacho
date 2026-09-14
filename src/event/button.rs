@@ -1,4 +1,4 @@
-use crate::{app, ui};
+use crate::{app, file, ui};
 
 /// ファイルダイアログを開く
 /// * `ui` - UI
@@ -43,4 +43,10 @@ pub(crate) fn setting_open(ui: &mut egui::Ui, setting_token: &mut ui::SettingTok
 /// * `updated_token` - 更新モーダルを表示するためのトークン
 pub(crate) fn check_for_update(update_job: &mut app::UpdateJob) {
     update_job.run();
+}
+
+/// 開いている本を閉じる
+/// * `open_files` - 開いている本
+pub(crate) fn close_open_files(open_files: &mut file::OpenFiles) {
+    open_files.clear();
 }

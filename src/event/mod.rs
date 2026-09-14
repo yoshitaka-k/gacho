@@ -11,6 +11,7 @@ pub(crate) enum EventAction {
     Click(egui::Pos2),
     Left,
     Right,
+    Close,
 }
 
 /// ページ送り方向

@@ -1,5 +1,5 @@
 use crate::{app, event, file};
-use crate::event::{open, input};
+use crate::event::{button, open, input};
 use crate::ui::{self, modal};
 use crate::ui::assets::{fonts, svg};
 use crate::ui::main::{top, bottom, middle};
@@ -75,6 +75,9 @@ impl eframe::App for Render {
         // Command + Comma キーが押されたら設定ウィンドウを開く
         input::command_comma(ui, &mut self.setting_token);
 
+        // Command + W キーが押されたら開いている本を閉じる
+        input::command_w(ui, &mut self.open_files);
+
         // キーイベントを処理
         input::arrow_left(ui, &mut self.pending_actions);
         input::arrow_right(ui, &mut self.pending_actions);
@@ -94,6 +97,7 @@ impl eframe::App for Render {
             &mut self.open_files,
             &mut self.setting_token,
             &mut self.open_dialog_token,
+            &mut self.pending_actions,
         );
 
         // 下部パネルを表示
@@ -263,6 +267,9 @@ impl Render {
                     if let Err(e) = self.open_files.prev_index(&self.app) {
                         self.error_token.show(e);
                     }
+                }
+                event::EventAction::Close => {
+                    button::close_open_files(&mut self.open_files);
                 }
             }
         }

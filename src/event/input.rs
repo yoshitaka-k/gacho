@@ -83,3 +83,16 @@ pub fn command_comma(
         button::setting_open(ui, setting_token);
     }
 }
+
+/// Command + W キーが押されたら開いている本を閉じる
+pub fn command_w(
+    ui: &mut egui::Ui,
+    open_files: &mut file::OpenFiles,
+) {
+    if ui.input(|input| {
+        input.modifiers.matches_exact(egui::Modifiers::COMMAND)
+        && input.key_pressed(egui::Key::W)
+    }) {
+        button::close_open_files(open_files);
+    }
+}

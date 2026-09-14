@@ -26,31 +26,33 @@ pub(crate) fn view(
     let all_images_ids = open_files.book_image_ids();
     let selected_images = open_files.page_images(app).unwrap_or(vec![]);
 
+    // ページャーとファイル名を生成
+    let mut pagers = vec![];
+    let mut file_names = vec![];
+
+    for (index, image) in selected_images.iter().enumerate() {
+        let image_index = all_images_ids.iter().position(|id| {
+            id == image.id()
+        }).unwrap_or(0);
+
+        pagers.push(format!("{}", image_index + 1));
+        file_names.push(image.file_name().as_str());
+
+        if index < selected_images.len() - 1 {
+            pagers.push("-".to_string());
+            file_names.push(" - ");
+        }
+    }
+
+    if pagers.is_empty() {
+        pagers.push("0".to_string());
+    }
+
+    // 下部パネルを表示
     egui::Panel::bottom("bottom_taskbar").frame(bottom_panel_style).show(ui, |ui| {
         // 左右分割のレイアウトで、左にページャー・ファイル名、右にボタンを配置する
         egui::Sides::new().shrink_left().truncate().show(ui,
             |ui| {
-                let mut pagers = vec![];
-                let mut file_names = vec![];
-
-                for (index, image) in selected_images.iter().enumerate() {
-                    let image_index = all_images_ids.iter().position(|id| {
-                        id == image.id()
-                    }).unwrap_or(0);
-
-                    pagers.push(format!("{}", image_index + 1));
-                    file_names.push(image.file_name().as_str());
-
-                    if index < selected_images.len() - 1 {
-                        pagers.push("-".to_string());
-                        file_names.push(" - ");
-                    }
-                }
-
-                if pagers.is_empty() {
-                    pagers.push("0".to_string());
-                }
-
                 // ページャー
                 ui.label(format!("#{} / {}", pagers.join(""), all_images_ids.len()));
 
@@ -60,7 +62,7 @@ pub(crate) fn view(
                 ui.add(egui::Label::new(file_names.join("")).truncate());
             },
             |ui| {
-                // 前のファイルボタン
+                // 右矢印のファイルボタン
                 let hover_text = match app.read_from() {
                     event::ReadFrom::RightToLeft => "Previous page",
                     event::ReadFrom::LeftToRight => "Next page",
@@ -73,7 +75,7 @@ pub(crate) fn view(
                     pending_actions.push(event::EventAction::Right);
                 }
 
-                // 次のファイルボタン
+                // 左矢印のファイルボタン
                 let hover_text = match app.read_from() {
                     event::ReadFrom::RightToLeft => "Next page",
                     event::ReadFrom::LeftToRight => "Previous page",

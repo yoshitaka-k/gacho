@@ -3,6 +3,10 @@ use crate::{file, ui};
 use crate::ui::assets::{self, icon, svg};
 
 /// 上部パネル
+/// * `ui` - UI
+/// * `open_files` - 開いているファイル
+/// * `setting_token` - 設定ダイアログのトークン
+/// * `open_dialog_token` - ファイルダイアログのトークン
 pub(crate) fn view(
     ui: &mut egui::Ui,
     open_files: &mut file::OpenFiles,

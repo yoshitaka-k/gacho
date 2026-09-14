@@ -6,6 +6,11 @@ const MIN_INDEX: usize = 0;
 const DEFAULT_MAX_INDEX: usize = 0;
 
 /// 下部パネル
+/// * `ui` - UI
+/// * `app` - アプリケーション
+/// * `open_files` - 開いているファイル
+/// * `pending_actions` - 待機中のアクション
+/// * `error_token` - エラーモーダルのトークン
 pub(crate) fn view(
     ui: &mut egui::Ui,
     app: &app::App,

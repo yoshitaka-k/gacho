@@ -207,6 +207,12 @@ impl Render {
         if let Err(e) = result {
             self.error_token.show(e);
         }
+
+        // ウィンドウを前面に
+        ui.ctx().send_viewport_cmd_to(
+            egui::ViewportId::ROOT,
+            egui::ViewportCommand::Focus,
+        );
     }
 
     /// 選択されたインデックスを設定

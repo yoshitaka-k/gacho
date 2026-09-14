@@ -65,9 +65,6 @@ pub(crate) fn view(
                 // タブの選択時の背景色を保存
                 let selection_bg_fill = ui.style_mut().visuals.selection.bg_fill;
 
-                // タブの選択時の背景色を設定
-                // ui.style_mut().visuals.selection.bg_fill = setting::tab_selected_color(ui);
-
                 // タブを表示
                 ui.selectable_value(&mut setting_token.tab, ui::SettingTab::General, ui::SettingTab::General.to_string());
                 ui.selectable_value(&mut setting_token.tab, ui::SettingTab::About, ui::SettingTab::About.to_string());

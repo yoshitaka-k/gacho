@@ -47,13 +47,14 @@ impl OpenFiles {
     }
 
     /// 本の画像のIDを取得
-    /// * `return` - 本の画像のID
+    /// * `return` - 本の画像の ID ベクター
     pub fn book_image_ids(&self) -> Vec<u64> {
         self.book.image_ids()
     }
 
     /// 選択された画像のパスを取得
-    /// * `return` - 選択されたファイルのパス
+    /// * `app` - アプリケーション
+    /// * `return` - 選択された Image ベクター
     pub fn page_images(&mut self, app: &app::App) -> error::Result<Vec<file::Image>> {
         let Some(index) = self.page else { return Ok(vec![]); };
 
@@ -131,6 +132,7 @@ impl OpenFiles {
 
     /// 前のインデックス
     // 読み込み方向によって前後が変わる
+    /// * `app` - アプリケーション
     /// * `return` - 前のインデックス
     pub fn prev_index(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
@@ -175,6 +177,7 @@ impl OpenFiles {
 /// private methods
 impl OpenFiles {
     /// 次のファイルを取得
+    /// * `offset` - オフセット
     fn from_next(&mut self, offset: usize) {
         if let Some(index) = self.page {
             if index + offset < self.book.len() - 1 {
@@ -186,6 +189,7 @@ impl OpenFiles {
     }
 
     /// 前のファイルを取得
+    /// * `offset` - オフセット
     fn from_prev(&mut self, offset: usize) {
         if let Some(index) = self.page {
             if (index as isize - offset as isize) > 0 {

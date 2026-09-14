@@ -28,7 +28,9 @@ pub(crate) fn view(
             Ok(images) if !images.is_empty() => {
                 let n = images.len() as f32;
                 let max_each = egui::vec2(available.x / n, available.y);
-                let sizes: Vec<egui::Vec2> = images.iter().map(|image| image.fit_to(max_each)).collect();
+                let sizes: Vec<egui::Vec2> = images.iter().map(|image| {
+                    image.fit_to(max_each)
+                }).collect();
 
                 let total_width: f32 = sizes.iter().map(|size| size.x).sum();
                 let total_height = sizes.iter().map(|size| size.y).fold(0.0_f32, f32::max);
@@ -38,12 +40,15 @@ pub(crate) fn view(
                 ui.scope_builder(egui::UiBuilder::new().max_rect(rect), |ui| {
                     ui.spacing_mut().item_spacing.x = 0.0;
                     ui.horizontal(|ui| {
-                        let mut images: Vec<(&file::Image, egui::Vec2)> =
-                            images.iter().zip(sizes).collect();
+                        // 画像とサイズを組み合わせてベクターに格納
+                        let mut images: Vec<(&file::Image, egui::Vec2)> = images.iter().zip(sizes).collect();
+
+                        // 読み込み方向によって画像を反転
                         if matches!(app.read_from(), event::ReadFrom::RightToLeft) {
                             images.reverse();
                         }
 
+                        // 画像を表示
                         for (image_file, size) in images {
                             let image = ui_image(image_file).fit_to_exact_size(size);
                             image_load(ui, image, image_file, size, true, error_token);

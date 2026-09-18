@@ -102,7 +102,7 @@ impl Book {
         let base_dir = path.parent().unwrap_or(&path).to_path_buf();
 
         // ファイル名の控えを用意
-        let mut file_name: Option<String> = None;
+        let mut image_name: Option<String> = None;
 
         if file::is_image(&path) {
             // 画像ファイルの場合は、同ディレクトリの他の画像ファイルも検索する
@@ -110,7 +110,7 @@ impl Book {
                 self.find_file(&parent.to_path_buf(), &base_dir)?;
 
                 // 画像ファイルの場合は、ファイル名を控えておく
-                file_name = if let Some(file_name) = path.file_name() {
+                image_name = if let Some(file_name) = path.file_name() {
                     Some(file_name.to_string_lossy().into_owned())
                 } else {
                     None
@@ -130,7 +130,7 @@ impl Book {
             self.title = self.extract_book_title(&title);
         }
 
-        Ok(file_name)
+        Ok(image_name)
     }
 }
 
@@ -153,8 +153,7 @@ impl Book {
     }
 
     /// 本の名前を取得
-    /// * `path` - パス
-    /// * `file_name` - ファイル名
+    /// * `image` - 画像のインスタンス
     /// * `return` - 本の名前
     fn find_title(&self, image: &file::Image) -> String {
         let mut path = image.path().clone();

@@ -158,13 +158,13 @@ impl OpenFiles {
     /// * `return` - 結果
     pub fn add_book(&mut self, path: PathBuf) -> error::Result<()> {
         // 本に画像を追加
-        let file_name = self.book.open_from_path(path)?;
+        let image_name = self.book.open_from_path(path.clone())?;
 
         // 本に画像が追加されたら
         if self.book.len() > 0 {
             // 画像ファイルから開かれたら
-            if let Some(file_name) = file_name {
-                self.page = self.book.get_index_by_filename(&file_name);
+            if let Some(image_name) = image_name {
+                self.page = self.book.get_index_by_filename(&image_name);
             } else {
                 self.page = Some(DEFAULT_PAGE);
             }

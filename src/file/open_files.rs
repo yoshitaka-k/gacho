@@ -15,6 +15,13 @@ pub struct OpenFiles {
     /// 選択されたファイルのインデックス
     #[getset(get = "pub", get_mut = "pub", set = "pub")]
     page: Option<usize>,
+
+    /// ライブラリの構造体
+    // cbz (zip) ファイルだったら同階層の cbz (zip) ファイルをライブラリに追加
+    library: file::Library,
+
+    /// ライブラリのインデックス
+    library_index: Option<usize>,
 }
 
 /// public methods
@@ -25,6 +32,8 @@ impl OpenFiles {
         Self {
             book: file::Book::new(),
             page: None,
+            library: file::Library::new(),
+            library_index: None,
         }
     }
 
@@ -32,6 +41,8 @@ impl OpenFiles {
     pub fn clear(&mut self) {
         self.book.clear();
         self.page = None;
+        self.library.clear();
+        self.library_index = None;
     }
 
     /// 本の名前を取得
@@ -160,15 +171,23 @@ impl OpenFiles {
         // 本に画像を追加
         let image_name = self.book.open_from_path(path.clone())?;
 
-        // 本に画像が追加されたら
-        if self.book.len() > 0 {
-            // 画像ファイルから開かれたら
-            if let Some(image_name) = image_name {
-                self.page = self.book.get_index_by_filename(&image_name);
-            } else {
-                self.page = Some(DEFAULT_PAGE);
-            }
+        // 本に画像が追加されていない場合はスキップ
+        if self.book.is_empty() {
+            return Ok(());
         }
+
+        // 画像ファイルから開かれたら
+        if let Some(image_name) = image_name {
+            self.page = self.book.get_index_by_filename(&image_name);
+        } else {
+            self.page = Some(DEFAULT_PAGE);
+        }
+
+        // ライブラリにファイルを追加
+        self.library.add_entry(path)?;
+
+        // ライブラリのインデックスを取得
+        self.library_index = self.library.get_index_by_path(&self.book.path());
 
         Ok(())
     }

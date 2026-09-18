@@ -16,6 +16,10 @@ pub struct Book {
     /// 本の名前
     #[getset(get = "pub")]
     title: String,
+
+    /// パス
+    #[getset(get = "pub")]
+    path: PathBuf,
 }
 
 /// public methods
@@ -27,6 +31,7 @@ impl Book {
             images: vec![],
             archive: None,
             title: String::new(),
+            path: PathBuf::new(),
         }
     }
 
@@ -34,6 +39,12 @@ impl Book {
     /// * `return` - ページ数
     pub fn len(&self) -> usize {
         self.images.len()
+    }
+
+    /// 本が空かどうかを取得
+    /// * `return` - 本が空かどうか
+    pub fn is_empty(&self) -> bool {
+        self.images.is_empty()
     }
 
     /// 本をクリア
@@ -266,6 +277,9 @@ impl Book {
             // アーカイブを控えておく
             self.archive = Some(archive);
 
+            // パスを控えておく
+            self.path = path.clone();
+
         } else if file::is_image(&path) {
             // ファイルを作成
             let image_file = file::Image::new(
@@ -278,6 +292,15 @@ impl Book {
 
             // ファイルを追加
             self.images.push(image_file);
+
+            // パスを控えておく
+            let parent = path.parent().ok_or_else(|| {
+                error::GachoError::FileError(
+                    "Parent not found".to_string(),
+                    path.clone()
+                )
+            })?;
+            self.path = parent.to_path_buf();
         }
 
         Ok(())

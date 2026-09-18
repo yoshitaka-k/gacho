@@ -3,12 +3,14 @@ pub mod open_files;
 pub mod book;
 pub mod image;
 pub mod archive;
+pub mod library;
 
 pub(crate) use extension::Extension;
 pub(crate) use open_files::OpenFiles;
 pub(crate) use book::Book;
 pub(crate) use image::Image;
 pub(crate) use archive::Archive;
+pub(crate) use library::Library;
 
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;

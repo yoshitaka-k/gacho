@@ -31,6 +31,7 @@ impl Book {
     }
 
     /// ページ数を取得
+    /// * `return` - ページ数
     pub fn len(&self) -> usize {
         self.images.len()
     }
@@ -107,6 +108,7 @@ impl Book {
         if file::is_image(&path) {
             // 画像ファイルの場合は、同ディレクトリの他の画像ファイルも検索する
             if let Some(parent) = path.parent() {
+                // ファイルを検索
                 self.find_file(&parent.to_path_buf(), &base_dir)?;
 
                 // 画像ファイルの場合は、ファイル名を控えておく
@@ -158,13 +160,17 @@ impl Book {
     fn find_title(&self, image: &file::Image) -> String {
         let mut path = image.path().clone();
 
+        // アーカイブの場合は、ファイル名を取得
         let title = if matches!(image.extension(), file::Extension::Zip | file::Extension::Cbz) {
+            // 拡張子を削除したファイル名を取得
             path.set_extension("");
             if let Some(name) = path.file_name() {
                 name.to_string_lossy().trim().to_string()
             } else {
                 image.file_name().clone()
             }
+
+        // ファイルの場合は、ファイル名を取得
         } else if path.is_file() {
             if let Some(parent) = path.parent() {
                 if let Some(parent_name) = parent.file_name() {
@@ -253,9 +259,11 @@ impl Book {
                     Some(*file.index()),
                 )?;
 
+                // ファイルを追加
                 self.images.push(image_file);
             }
 
+            // アーカイブを控えておく
             self.archive = Some(archive);
 
         } else if file::is_image(&path) {

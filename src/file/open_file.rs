@@ -21,7 +21,7 @@ pub struct OpenFile {
     library: file::Library,
 
     /// ライブラリのインデックス
-    library_index: Option<usize>,
+    volume: Option<usize>,
 }
 
 /// public methods
@@ -33,7 +33,7 @@ impl OpenFile {
             book: file::Book::new(),
             page: None,
             library: file::Library::new(),
-            library_index: None,
+            volume: None,
         }
     }
 
@@ -42,7 +42,7 @@ impl OpenFile {
         self.book.clear();
         self.page = None;
         self.library.clear();
-        self.library_index = None;
+        self.volume = None;
     }
 
     /// 本の名前を取得
@@ -124,8 +124,20 @@ impl OpenFile {
     /// * `return` - 次のインデックス
     pub fn left_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
-            event::ReadFrom::RightToLeft => self.page_add(app.page_layout().to_offset()),
-            event::ReadFrom::LeftToRight => self.page_subtract(app.page_layout().to_offset()),
+            event::ReadFrom::RightToLeft => {
+                if self.is_last_page(app) {
+                    self.read_next_library()?;
+                } else {
+                    self.page_add(app.page_layout().to_offset());
+                }
+            }
+            event::ReadFrom::LeftToRight => {
+                if self.is_first_page() {
+                    self.read_prev_library()?;
+                } else {
+                    self.page_subtract(app.page_layout().to_offset());
+                }
+            }
         }
 
         // 見開き
@@ -147,8 +159,20 @@ impl OpenFile {
     /// * `return` - 前のインデックス
     pub fn right_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
-            event::ReadFrom::RightToLeft => self.page_subtract(app.page_layout().to_offset()),
-            event::ReadFrom::LeftToRight => self.page_add(app.page_layout().to_offset()),
+            event::ReadFrom::RightToLeft => {
+                if self.is_first_page() {
+                    self.read_prev_library()?;
+                } else {
+                    self.page_subtract(app.page_layout().to_offset());
+                }
+            }
+            event::ReadFrom::LeftToRight => {
+                if self.is_last_page(app) {
+                    self.read_next_library()?;
+                } else {
+                    self.page_add(app.page_layout().to_offset());
+                }
+            }
         }
 
         // 見開き
@@ -187,7 +211,7 @@ impl OpenFile {
         self.library.add_entry(path)?;
 
         // ライブラリのインデックスを取得
-        self.library_index = self.library.get_index_by_path(&self.book.path());
+        self.volume = self.library.get_index_by_path(&self.book.path());
 
         Ok(())
     }
@@ -195,6 +219,68 @@ impl OpenFile {
 
 /// private methods
 impl OpenFile {
+    /// 最初のページかどうか
+    /// * `return` - 最初のページかどうか
+    fn is_first_page(&self) -> bool {
+        let Some(index) = self.page else { return false; };
+        index == 0
+    }
+
+    /// 最後のページかどうか
+    /// * `return` - 最後のページかどうか
+    fn is_last_page(&self, app: &app::App) -> bool {
+        let Some(index) = self.page else { return false; };
+        index + app.page_layout().to_offset() >= self.book.len().saturating_sub(1)
+    }
+
+    /// 次のライブラリを読み込む
+    fn read_next_library(&mut self) -> error::Result<()> {
+        if self.library.len() == 0 { return Ok(()); }
+
+        let Some(index) = self.volume  else { return Ok(()); };
+
+        if index == self.library.len() - 1 {
+            return Ok(());
+        }
+
+        self.volume_add();
+        self.read_book_from_library()?;
+
+        Ok(())
+    }
+
+    /// 前のライブラリを読み込む
+    /// * `return` - 結果
+    fn read_prev_library(&mut self) -> error::Result<()> {
+        if self.library.len() == 0 { return Ok(()); }
+
+        let Some(index) = self.volume  else { return Ok(()); };
+
+        if index == 0 {
+            return Ok(());
+        }
+
+        self.volume_subtract();
+        self.read_book_from_library()?;
+
+        Ok(())
+    }
+
+    /// ライブラリから本を読み込む
+    /// * `return` - 結果
+    fn read_book_from_library(&mut self) -> error::Result<()> {
+        let Some(index) = self.volume else { return Ok(()); };
+        let Some(entry) = self.library.get(index) else { return Ok(()); };
+        let path = entry.path().clone();
+
+        self.book.clear();
+        self.page = None;
+
+        self.add_book(path)?;
+
+        Ok(())
+    }
+
     /// 次のファイルを取得
     /// * `offset` - オフセット
     fn page_add(&mut self, offset: usize) {
@@ -215,6 +301,28 @@ impl OpenFile {
                 self.page = Some(index - offset - 1);
             } else {
                 self.page = Some(0);
+            }
+        }
+    }
+
+    /// 次のボリュームを取得
+    fn volume_add(&mut self) {
+        if let Some(index) = self.volume {
+            if index + 1 < self.library.len() {
+                self.volume = Some(index + 1);
+            } else {
+                self.volume = Some(self.library.len() - 1);
+            }
+        }
+    }
+
+    /// 前のボリュームを取得
+    fn volume_subtract(&mut self) {
+        if let Some(index) = self.volume {
+            if index > 0 {
+                self.volume = Some(index - 1);
+            } else {
+                self.volume = Some(0);
             }
         }
     }

@@ -1,15 +1,19 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
+use getset::Getters;
 use crate::{error, file};
 
 /// Image の一意な ID を発行するカウンタ
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
 /// ライブラリのエントリ
-#[derive(Debug)]
-struct LibraryEntry {
+#[derive(Getters)]
+pub(crate) struct LibraryEntry {
     id: u64,
+
+    #[getset(get = "pub")]
     path: PathBuf,
+
     file_name: String,
 }
 
@@ -44,31 +48,11 @@ impl Library {
         self.entries.clear();
     }
 
-    /// ライブラリにエントリを追加
-    /// * `path` - ファイルのパス
-    pub fn add_entry(&mut self, path: PathBuf) -> error::Result<()> {
-        // ベースディレクトリを取得
-        let base_dir = path.parent().unwrap_or(&path).to_path_buf();
-
-        // ファイルが画像ファイルの場合は
-        // ベースディレクトリのファイル名をライブラリに追加
-        if file::is_image(&path) {
-            let file_name = self.get_file_name(&base_dir);
-            self.entries.push(LibraryEntry::new(base_dir.clone(), file_name));
-
-            // ファイルをソート
-            self.sort();
-
-            return Ok(());
-        }
-
-        // ファイルを探索
-        self.find_file(&path, &base_dir)?;
-
-        // ファイルをソート
-        self.sort();
-
-        Ok(())
+    /// インデックスでエントリを取得
+    /// * `index` - インデックス
+    /// * `return` - エントリ
+    pub fn get(&self, index: usize) -> Option<&LibraryEntry> {
+        self.entries.get(index)
     }
 
     /// パスで index を取得
@@ -79,6 +63,41 @@ impl Library {
         self.entries.iter().position(|entry| {
             entry.path == *path
         })
+    }
+
+    /// ライブラリにエントリを追加
+    /// * `path` - ファイルのパス
+    pub fn add_entry(&mut self, path: PathBuf) -> error::Result<()> {
+        // ベースディレクトリを取得
+        let base_dir = path.parent().unwrap_or(&path).to_path_buf();
+
+        // ファイルが画像ファイルの場合は
+        // ベースディレクトリのファイル名をライブラリに追加
+        if file::is_image(&path) {
+            // ベースディレクトリがすでにライブラリに追加されている場合はスキップ
+            let index = self.get_index_by_path(&base_dir);
+            if index.is_some() { return Ok(()); }
+
+            let file_name = self.get_file_name(&base_dir);
+            self.entries.push(LibraryEntry::new(base_dir.clone(), file_name));
+
+            // ファイルをソート
+            self.sort();
+
+            return Ok(());
+        }
+
+        // ファイルがすでにライブラリに追加されている場合はスキップ
+        let index = self.get_index_by_path(&path);
+        if index.is_some() { return Ok(()); }
+
+        // ファイルを探索
+        self.find_file(&path, &base_dir)?;
+
+        // ファイルをソート
+        self.sort();
+
+        Ok(())
     }
 }
 

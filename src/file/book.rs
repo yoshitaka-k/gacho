@@ -55,6 +55,7 @@ impl Book {
         self.title = String::new();
         self.images.clear();
         self.archive = None;
+        self.path = PathBuf::new();
         self.temp_path.clear();
     }
 

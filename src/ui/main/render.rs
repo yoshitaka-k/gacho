@@ -249,22 +249,22 @@ impl Render {
                 event::EventAction::Click(pos) => {
                     // クリックした位置が左半分の場合は次のファイルを表示
                     if pos.x < ui.max_rect().max.x / 2.0 {
-                        if let Err(e) = self.open_file.next_index(&self.app) {
+                        if let Err(e) = self.open_file.left_page(&self.app) {
                             self.error_token.show(e);
                         }
                     } else {
-                        if let Err(e) = self.open_file.prev_index(&self.app) {
+                        if let Err(e) = self.open_file.right_page(&self.app) {
                             self.error_token.show(e);
                         }
                     }
                 }
                 event::EventAction::Left => {
-                    if let Err(e) = self.open_file.next_index(&self.app) {
+                    if let Err(e) = self.open_file.left_page(&self.app) {
                         self.error_token.show(e);
                     }
                 }
                 event::EventAction::Right => {
-                    if let Err(e) = self.open_file.prev_index(&self.app) {
+                    if let Err(e) = self.open_file.right_page(&self.app) {
                         self.error_token.show(e);
                     }
                 }

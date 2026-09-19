@@ -122,7 +122,7 @@ impl OpenFile {
     /// 次のインデックス
     /// * `app` - アプリケーション
     /// * `return` - 次のインデックス
-    pub fn next_index(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+    pub fn left_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
             event::ReadFrom::RightToLeft => self.page_add(app.page_layout().to_offset()),
             event::ReadFrom::LeftToRight => self.page_subtract(app.page_layout().to_offset()),
@@ -145,7 +145,7 @@ impl OpenFile {
     // 読み込み方向によって前後が変わる
     /// * `app` - アプリケーション
     /// * `return` - 前のインデックス
-    pub fn prev_index(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+    pub fn right_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
             event::ReadFrom::RightToLeft => self.page_subtract(app.page_layout().to_offset()),
             event::ReadFrom::LeftToRight => self.page_add(app.page_layout().to_offset()),

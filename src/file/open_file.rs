@@ -124,8 +124,8 @@ impl OpenFile {
     /// * `return` - 次のインデックス
     pub fn next_index(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
-            event::ReadFrom::RightToLeft => self.from_next(app.page_layout().to_offset()),
-            event::ReadFrom::LeftToRight => self.from_prev(app.page_layout().to_offset()),
+            event::ReadFrom::RightToLeft => self.page_add(app.page_layout().to_offset()),
+            event::ReadFrom::LeftToRight => self.page_subtract(app.page_layout().to_offset()),
         }
 
         // 見開き
@@ -147,8 +147,8 @@ impl OpenFile {
     /// * `return` - 前のインデックス
     pub fn prev_index(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
-            event::ReadFrom::RightToLeft => self.from_prev(app.page_layout().to_offset()),
-            event::ReadFrom::LeftToRight => self.from_next(app.page_layout().to_offset()),
+            event::ReadFrom::RightToLeft => self.page_subtract(app.page_layout().to_offset()),
+            event::ReadFrom::LeftToRight => self.page_add(app.page_layout().to_offset()),
         }
 
         // 見開き
@@ -197,7 +197,7 @@ impl OpenFile {
 impl OpenFile {
     /// 次のファイルを取得
     /// * `offset` - オフセット
-    fn from_next(&mut self, offset: usize) {
+    fn page_add(&mut self, offset: usize) {
         if let Some(index) = self.page {
             if index + offset < self.book.len() - 1 {
                 self.page = Some(index + offset + 1);
@@ -209,7 +209,7 @@ impl OpenFile {
 
     /// 前のファイルを取得
     /// * `offset` - オフセット
-    fn from_prev(&mut self, offset: usize) {
+    fn page_subtract(&mut self, offset: usize) {
         if let Some(index) = self.page {
             if (index as isize - offset as isize) > 0 {
                 self.page = Some(index - offset - 1);

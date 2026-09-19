@@ -19,6 +19,9 @@ pub struct Book {
     /// パス
     #[getset(get = "pub")]
     path: PathBuf,
+
+    /// 一時ファイルのパス
+    temp_path: Vec<PathBuf>,
 }
 
 /// public methods
@@ -31,6 +34,7 @@ impl Book {
             archive: None,
             title: String::new(),
             path: PathBuf::new(),
+            temp_path: vec![],
         }
     }
 
@@ -51,6 +55,7 @@ impl Book {
         self.title = String::new();
         self.images.clear();
         self.archive = None;
+        self.temp_path.clear();
     }
 
     /// ファイルのIDを取得
@@ -133,6 +138,29 @@ impl Book {
             self.find_file(&path, &base_dir)?;
         }
 
+        // 一時ファイルをソート
+        self.sort_temp_path();
+
+        // 画像から開いたときは画像だけ、それ以外でアーカイブがあれば先頭の1冊だけ
+        let prefer_archive = !file::is_image(&path)
+            && self.temp_path.iter().any(|temp| file::is_archive(temp));
+
+        // 一時パス一覧を順番に処理
+        for temp in std::mem::take(&mut self.temp_path) {
+            // アーカイブを優先する場合
+            if prefer_archive {
+                if !file::is_archive(&temp) { continue; }
+                self.image_new(&temp, &base_dir)?;
+                break;
+            }
+
+            // 画像の場合
+            if !file::is_image(&temp) { continue; }
+
+            // 画像を新規作成して登録
+            self.image_new(&temp, &base_dir)?;
+        }
+
         // ファイルをパス順にソート
         self.sort();
 
@@ -151,6 +179,11 @@ impl Book {
     /// ファイルをパス順にソート
     fn sort(&mut self) {
         self.images.sort_by(|a, b| a.path().cmp(&b.path()));
+    }
+
+    /// 一時ファイルをソート
+    fn sort_temp_path(&mut self) {
+        self.temp_path.sort();
     }
 
     /// ファイル名から本のタイトルを取り出す。
@@ -213,7 +246,7 @@ impl Book {
 
         // ファイルの場合は、画像を新規作成
         if metadata.is_file() {
-            self.image_new(&path, base_dir)?;
+            self.temp_path.push(path.clone());
 
         // ディレクトリの場合は、ディレクトリの中のファイルを再起で探索
         } else if metadata.is_dir() {
@@ -254,7 +287,7 @@ impl Book {
             .into_owned();
 
         // ファイルがアーカイブかどうかを判断
-        if file::is_archive(&path) && self.images.is_empty() {
+        if file::is_archive(&path) {
             let mut archive = file::Archive::new();
             archive.unarchive(&path).map_err(|e| {
                 error::GachoError::ArchiveError(e.to_string())

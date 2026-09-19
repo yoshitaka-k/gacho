@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::{Path, PathBuf};
 use getset::{Getters, MutGetters, Setters};
 
@@ -167,7 +166,7 @@ impl Book {
 
     /// 本の名前を取得
     /// * `image` - 画像のインスタンス
-    /// * `return` - 本の名前
+    /// * `return` - 本の名前（拡張子なしのファイル名）
     fn find_title(&self, image: &file::Image) -> String {
         let mut path = image.path().clone();
 
@@ -219,7 +218,7 @@ impl Book {
         // ディレクトリの場合は、ディレクトリの中のファイルを再起で探索
         } else if metadata.is_dir() {
             // ディレクトリの中のファイルを探索
-            for entry in fs::read_dir(&path).map_err(|e| {
+            for entry in std::fs::read_dir(&path).map_err(|e| {
                 error::GachoError::FileError(e.to_string(), path.clone())
             })? {
                 let entry = entry.map_err(|e| {

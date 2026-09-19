@@ -27,8 +27,8 @@ jobs:
 
     # avif-native が引き込む dav1d-sys は pkg-config でシステム libdav1d を探す。
     # クロスビルドではそれが失敗するので、下でターゲット向けに静的ビルドした
-    # libdav1d.a を SYSTEM_DEPS_* で直接渡す。job-level にするのは cargo-bundle
-    # 側でも dav1d-sys が再コンパイルされるため。
+    # libdav1d.a を SYSTEM_DEPS_* で直接渡す。
+    # job-level にするのは cargo-bundle 側で dav1d-sys が再コンパイルされるため。
     env:
       SYSTEM_DEPS_DAV1D_NO_PKG_CONFIG: '1'
       SYSTEM_DEPS_DAV1D_LINK: static

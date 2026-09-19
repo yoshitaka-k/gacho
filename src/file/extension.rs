@@ -2,8 +2,13 @@ use std::ffi::OsStr;
 
 #[derive(Clone)]
 pub enum Extension {
+    Jpg,
     Jpeg,
     Png,
+    Bmp,
+    Gif,
+    Webp,
+    Avif,
     Zip,
     Cbz,
     None,
@@ -14,8 +19,13 @@ impl Extension {
     /// * `return` - 画像ファイルのベクタ
     pub fn to_image_vec() -> Vec<&'static str> {
         vec![
+            Self::Jpg.to_str(),
             Self::Jpeg.to_str(),
             Self::Png.to_str(),
+            Self::Bmp.to_str(),
+            Self::Gif.to_str(),
+            Self::Webp.to_str(),
+            Self::Avif.to_str(),
         ]
     }
 
@@ -33,8 +43,13 @@ impl Extension {
     /// * `return` - Extension
     pub fn from_str(extension: &OsStr) -> Self {
         match extension.to_ascii_lowercase().to_string_lossy().as_ref() {
-            "jpg" | "jpeg" => Self::Jpeg,
+            "jpg" => Self::Jpg,
+            "jpeg" => Self::Jpeg,
             "png" => Self::Png,
+            "bmp" => Self::Bmp,
+            "gif" => Self::Gif,
+            "webp" => Self::Webp,
+            "avif" => Self::Avif,
             "zip" => Self::Zip,
             "cbz" => Self::Cbz,
             _ => Self::None,
@@ -45,8 +60,13 @@ impl Extension {
     /// * `return` - 文字列
     pub fn to_str(&self) -> &'static str {
         match self {
-            Self::Jpeg => "jpg",
+            Self::Jpg => "jpg",
+            Self::Jpeg => "jpeg",
             Self::Png => "png",
+            Self::Bmp => "bmp",
+            Self::Gif => "gif",
+            Self::Webp => "webp",
+            Self::Avif => "avif",
             Self::Zip => "zip",
             Self::Cbz => "cbz",
             Self::None => "",

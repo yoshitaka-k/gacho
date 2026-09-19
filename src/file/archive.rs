@@ -140,7 +140,7 @@ impl Archive {
 
     /// ファイルを名前でソートする
     fn sort(&mut self) {
-        self.files.sort_by_key(|file| file.relative_path.clone());
+        self.files.sort_by(|a, b| a.relative_path.cmp(&b.relative_path));
     }
 
     /// テキストをデコードする

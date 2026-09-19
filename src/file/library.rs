@@ -86,7 +86,7 @@ impl Library {
 impl Library {
     /// ファイルをソート
     fn sort(&mut self) {
-        self.entries.sort_by_key(|entry| entry.path.clone());
+        self.entries.sort_by(|a, b| a.path.cmp(&b.path));
     }
 
     /// ファイルを探索

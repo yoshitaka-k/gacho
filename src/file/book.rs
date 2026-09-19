@@ -151,7 +151,7 @@ impl Book {
 impl Book {
     /// ファイルをパス順にソート
     fn sort(&mut self) {
-        self.images.sort_by_key(|image| image.path().clone());
+        self.images.sort_by(|a, b| a.path().cmp(&b.path()));
     }
 
     /// ファイル名から本のタイトルを取り出す。

@@ -29,18 +29,18 @@ pub fn arrow_right(
 
 /// ドロップされたファイルを処理する
 /// * `ui` - ウィジェットのUI
-/// * `open_files` - 開いているファイル
+/// * `open_file` - 開いているファイル
 /// * `return` - ドロップがなければ `None`、あれば処理結果
 pub fn drop(
     ui: &egui::Ui,
-    open_files: &mut file::OpenFiles,
+    open_file: &mut file::OpenFile,
 ) -> Option<error::Result<()>> {
     ui.ctx().input(|input| {
         let files = input.raw.dropped_files.clone();
         if files.is_empty() {
             None
         } else {
-            Some(drop::files(&files, open_files))
+            Some(drop::files(&files, open_file))
         }
     })
 }
@@ -87,12 +87,12 @@ pub fn command_comma(
 /// Command + W キーが押されたら開いている本を閉じる
 pub fn command_w(
     ui: &mut egui::Ui,
-    open_files: &mut file::OpenFiles,
+    open_file: &mut file::OpenFile,
 ) {
     if ui.input(|input| {
         input.modifiers.matches_exact(egui::Modifiers::COMMAND)
         && input.key_pressed(egui::Key::W)
     }) {
-        button::close_open_files(open_files);
+        button::close_open_file(open_file);
     }
 }

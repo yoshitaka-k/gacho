@@ -4,13 +4,13 @@ use crate::ui::assets::{self, icon, svg};
 
 /// 上部パネル
 /// * `ui` - UI
-/// * `open_files` - 開いているファイル
+/// * `open_file` - 開いているファイル
 /// * `setting_token` - 設定ダイアログのトークン
 /// * `open_dialog_token` - ファイルダイアログのトークン
 /// * `pending_actions` - 待機中のアクション
 pub(crate) fn view(
     ui: &mut egui::Ui,
-    open_files: &mut file::OpenFiles,
+    open_file: &mut file::OpenFile,
     setting_token: &mut ui::SettingToken,
     open_dialog_token: &mut ui::OpenDialogToken,
     pending_actions: &mut Vec<event::EventAction>,
@@ -23,7 +23,7 @@ pub(crate) fn view(
         // 左右分割のレイアウトで、左にタイトル、右にボタンを配置する
         egui::Sides::new().shrink_left().truncate().show(ui,
             |ui| {
-                let title = open_files.book_title();
+                let title = open_file.book_title();
                 ui.add(egui::Label::new(title).truncate());
             },
             |ui| {

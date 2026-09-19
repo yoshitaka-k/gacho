@@ -8,7 +8,7 @@ use crate::ui::setting::view as setting_window;
 /// 描画用のウィジェット
 pub struct Render {
     app: app::App,
-    open_files: file::OpenFiles,
+    open_file: file::OpenFile,
     pending_actions: Vec<event::EventAction>,
 
     // ファイルダイアログを開くタイミング
@@ -41,7 +41,7 @@ impl Render {
 
         Self {
             app,
-            open_files: file::OpenFiles::new(),
+            open_file: file::OpenFile::new(),
             pending_actions: Vec::new(),
             open_dialog_token: ui::OpenDialogToken::new(),
             setting_token: ui::SettingToken::new(),
@@ -76,7 +76,7 @@ impl eframe::App for Render {
         input::command_comma(ui, &mut self.setting_token);
 
         // Command + W キーが押されたら開いている本を閉じる
-        input::command_w(ui, &mut self.open_files);
+        input::command_w(ui, &mut self.open_file);
 
         // キーイベントを処理
         input::arrow_left(ui, &mut self.pending_actions);
@@ -94,7 +94,7 @@ impl eframe::App for Render {
         // 上部パネルを表示
         top::view(
             ui,
-            &mut self.open_files,
+            &mut self.open_file,
             &mut self.setting_token,
             &mut self.open_dialog_token,
             &mut self.pending_actions,
@@ -104,7 +104,7 @@ impl eframe::App for Render {
         bottom::view(
             ui,
             &self.app,
-            &mut self.open_files,
+            &mut self.open_file,
             &mut self.pending_actions,
             &mut self.error_token,
         );
@@ -113,7 +113,7 @@ impl eframe::App for Render {
         middle::view(
             ui,
             &self.app,
-            &mut self.open_files,
+            &mut self.open_file,
             &mut self.pending_actions,
             &mut self.error_token,
         );
@@ -150,7 +150,7 @@ impl Render {
             self.error_token.reset();
 
             // ファイルを開く
-            if let Err(e) = open::file(&mut self.open_files) {
+            if let Err(e) = open::file(&mut self.open_file) {
                 self.error_token.show(e);
             }
 
@@ -166,7 +166,7 @@ impl Render {
             self.error_token.reset();
 
             // フォルダを開く
-            if let Err(e) = open::folder(&mut self.open_files) {
+            if let Err(e) = open::folder(&mut self.open_file) {
                 self.error_token.show(e);
             }
 
@@ -185,7 +185,7 @@ impl Render {
         self.error_token.reset();
 
         // ファイルを開く
-        if let Err(e) = event::drop::path(path, &mut self.open_files) {
+        if let Err(e) = event::drop::path(path, &mut self.open_file) {
             self.error_token.show(e);
         }
 
@@ -197,7 +197,7 @@ impl Render {
     /// * `ui` - UI
     fn drop_files(&mut self, ui: &egui::Ui) {
         // ドラッグ&ドロップされたファイルを処理
-        let Some(result) = input::drop(ui, &mut self.open_files) else {
+        let Some(result) = input::drop(ui, &mut self.open_file) else {
             return;
         };
 
@@ -223,11 +223,11 @@ impl Render {
     fn set_selected_index(&mut self) {
         // 見開きの場合は、奇数の場合は前のインデックスを設定
         if matches!(self.app.page_layout(), event::PageLayout::Spread) {
-            if let Some(index) = self.open_files.page() {
+            if let Some(index) = self.open_file.page() {
                 if index % 2 != 0 {
-                    self.open_files.set_page(Some(index - 1));
+                    self.open_file.set_page(Some(index - 1));
                 } else {
-                    self.open_files.set_page(Some(*index));
+                    self.open_file.set_page(Some(*index));
                 }
             }
         }
@@ -249,27 +249,27 @@ impl Render {
                 event::EventAction::Click(pos) => {
                     // クリックした位置が左半分の場合は次のファイルを表示
                     if pos.x < ui.max_rect().max.x / 2.0 {
-                        if let Err(e) = self.open_files.next_index(&self.app) {
+                        if let Err(e) = self.open_file.next_index(&self.app) {
                             self.error_token.show(e);
                         }
                     } else {
-                        if let Err(e) = self.open_files.prev_index(&self.app) {
+                        if let Err(e) = self.open_file.prev_index(&self.app) {
                             self.error_token.show(e);
                         }
                     }
                 }
                 event::EventAction::Left => {
-                    if let Err(e) = self.open_files.next_index(&self.app) {
+                    if let Err(e) = self.open_file.next_index(&self.app) {
                         self.error_token.show(e);
                     }
                 }
                 event::EventAction::Right => {
-                    if let Err(e) = self.open_files.prev_index(&self.app) {
+                    if let Err(e) = self.open_file.prev_index(&self.app) {
                         self.error_token.show(e);
                     }
                 }
                 event::EventAction::Close => {
-                    button::close_open_files(&mut self.open_files);
+                    button::close_open_file(&mut self.open_file);
                 }
             }
         }

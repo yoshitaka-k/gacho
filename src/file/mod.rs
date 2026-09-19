@@ -1,12 +1,12 @@
 pub mod extension;
-pub mod open_files;
+pub mod open_file;
 pub mod book;
 pub mod image;
 pub mod archive;
 pub mod library;
 
 pub(crate) use extension::Extension;
-pub(crate) use open_files::OpenFiles;
+pub(crate) use open_file::OpenFile;
 pub(crate) use book::Book;
 pub(crate) use image::Image;
 pub(crate) use archive::Archive;

@@ -8,13 +8,13 @@ const DEFAULT_MAX_INDEX: usize = 0;
 /// 下部パネル
 /// * `ui` - UI
 /// * `app` - アプリケーション
-/// * `open_files` - 開いているファイル
+/// * `open_file` - 開いているファイル
 /// * `pending_actions` - 待機中のアクション
 /// * `error_token` - エラーモーダルのトークン
 pub(crate) fn view(
     ui: &mut egui::Ui,
     app: &app::App,
-    open_files: &mut file::OpenFiles,
+    open_file: &mut file::OpenFile,
     pending_actions: &mut Vec<event::EventAction>,
     error_token: &mut ui::ErrorToken,
 ) {
@@ -23,8 +23,8 @@ pub(crate) fn view(
     let button_color = assets::button_icon_color(ui);
 
     // ファイルのIDリストと選択されたファイルを取得
-    let all_images_ids = open_files.book_image_ids();
-    let selected_images = open_files.page_images(app).unwrap_or(vec![]);
+    let all_images_ids = open_file.book_image_ids();
+    let selected_images = open_file.page_images(app).unwrap_or(vec![]);
 
     // ページャーとファイル名を生成
     let mut pagers = vec![];
@@ -91,8 +91,8 @@ pub(crate) fn view(
                 ui.separator();
 
                 // ページャースライダー
-                let mut selected = open_files.page_mut().unwrap_or(0);
-                let max = if open_files.book_len() > 0 { open_files.book_len() - 1 } else { DEFAULT_MAX_INDEX };
+                let mut selected = open_file.page_mut().unwrap_or(0);
+                let max = if open_file.book_len() > 0 { open_file.book_len() - 1 } else { DEFAULT_MAX_INDEX };
                 ui.scope(|ui| {
                     ui.spacing_mut().slider_width = SLIDER_WIDTH;
                     let slider = match app.read_from() {
@@ -112,7 +112,7 @@ pub(crate) fn view(
                         error_token.reset();
 
                         // インデックスを更新
-                        open_files.set_page(Some(selected));
+                        open_file.set_page(Some(selected));
                     }
                 });
 

@@ -46,7 +46,7 @@ pub(crate) fn check_for_update(update_job: &mut app::UpdateJob) {
 }
 
 /// 開いている本を閉じる
-/// * `open_files` - 開いている本
-pub(crate) fn close_open_files(open_files: &mut file::OpenFiles) {
-    open_files.clear();
+/// * `open_file` - 開いている本
+pub(crate) fn close_open_file(open_file: &mut file::OpenFile) {
+    open_file.clear();
 }

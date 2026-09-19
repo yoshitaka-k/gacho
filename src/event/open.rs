@@ -2,7 +2,7 @@ use crate::{error, file};
 
 /// ファイルオープンダイアログを開いて選択結果を追加する
 pub(crate) fn file(
-    open_files: &mut file::OpenFiles,
+    open_file: &mut file::OpenFile,
 ) -> error::Result<()> {
     let extensions = file::Extension::to_archive_vec();
 
@@ -11,11 +11,11 @@ pub(crate) fn file(
         .pick_file();
 
     // ファイルをクリア
-    open_files.clear();
+    open_file.clear();
 
     // ファイルを追加
     if let Some(path) = path {
-        open_files.add_book(path)?;
+        open_file.add_book(path)?;
     }
 
     Ok(())
@@ -24,7 +24,7 @@ pub(crate) fn file(
 /// ファイルオープンダイアログを開いて選択結果を追加する
 /// * `files` - 開いているファイル
 pub(crate) fn folder(
-    open_files: &mut file::OpenFiles,
+    open_file: &mut file::OpenFile,
 ) -> error::Result<()> {
     let extensions = file::Extension::to_archive_vec();
 
@@ -41,11 +41,11 @@ pub(crate) fn folder(
         .pick_folder();
 
     // ファイルをクリア
-    open_files.clear();
+    open_file.clear();
 
     // ファイルを追加
     if let Some(path) = path {
-        open_files.add_book(path)?;
+        open_file.add_book(path)?;
     }
 
     Ok(())

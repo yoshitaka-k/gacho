@@ -8,7 +8,7 @@ const DEFAULT_PAGE: usize = 0;
 
 /// ドロップされたファイルを管理する構造体
 #[derive(Getters, MutGetters, Setters)]
-pub struct OpenFiles {
+pub struct OpenFile {
     /// 本の構造体
     book: file::Book,
 
@@ -25,9 +25,9 @@ pub struct OpenFiles {
 }
 
 /// public methods
-impl OpenFiles {
-    /// 新しい OpenFiles を作成
-    /// * `return` - OpenFiles のインスタンス
+impl OpenFile {
+    /// 新しい OpenFile を作成
+    /// * `return` - OpenFile のインスタンス
     pub fn new() -> Self {
         Self {
             book: file::Book::new(),
@@ -194,7 +194,7 @@ impl OpenFiles {
 }
 
 /// private methods
-impl OpenFiles {
+impl OpenFile {
     /// 次のファイルを取得
     /// * `offset` - オフセット
     fn from_next(&mut self, offset: usize) {

@@ -8,25 +8,25 @@ use crate::{file, error};
 /// * `files` - ドロップされたファイル
 pub(crate) fn files(
     files: &[DroppedFileHandle],
-    open_files: &mut file::OpenFiles,
+    open_file: &mut file::OpenFile,
 ) -> error::Result<()> {
     let Some(file) = files.first() else {
         return Ok(());
     };
 
-    path(file.path().to_path_buf(), open_files)
+    path(file.path().to_path_buf(), open_file)
 }
 
 /// パスからファイルを開く
 /// * `path` - ファイルのパス
-/// * `open_files` - 開いているファイル
+/// * `open_file` - 開いているファイル
 pub(crate) fn path(
     path: PathBuf,
-    open_files: &mut file::OpenFiles,
+    open_file: &mut file::OpenFile,
 ) -> error::Result<()> {
     // ファイルをクリア
-    open_files.clear();
+    open_file.clear();
 
     // ファイルを追加
-    open_files.add_book(path)
+    open_file.add_book(path)
 }

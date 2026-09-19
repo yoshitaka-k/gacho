@@ -4,14 +4,14 @@ use crate::{app, error, event, file, ui};
 /// メインパネルを表示する
 /// * `ui` - UI
 /// * `app` - アプリケーション
-/// * `open_files` - 開いているファイル
+/// * `open_file` - 開いているファイル
 /// * `pending_actions` - 処理予約
 /// * `error_token` - エラートークン
 /// メインパネル
 pub(crate) fn view(
     ui: &mut egui::Ui,
     app: &app::App,
-    open_files: &mut file::OpenFiles,
+    open_file: &mut file::OpenFile,
     pending_actions: &mut Vec<event::EventAction>,
     error_token: &mut ui::ErrorToken,
 ) {
@@ -24,7 +24,7 @@ pub(crate) fn view(
         let available_rect = ui.available_rect_before_wrap();
         let available = available_rect.size();
 
-        match open_files.page_images(app) {
+        match open_file.page_images(app) {
             Ok(images) if !images.is_empty() => {
                 let n = images.len() as f32;
                 let max_each = egui::vec2(available.x / n, available.y);
@@ -64,11 +64,11 @@ pub(crate) fn view(
 
         // 前後の画像を先読み
         for i in 1..=*app.preloading() {
-            if let Ok(Some(image_file)) = open_files.selected_next_image(i) {
+            if let Ok(Some(image_file)) = open_file.selected_next_image(i) {
                 let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
             }
 
-            if let Ok(Some(image_file)) = open_files.selected_prev_image(i) {
+            if let Ok(Some(image_file)) = open_file.selected_prev_image(i) {
                 let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
             }
         }

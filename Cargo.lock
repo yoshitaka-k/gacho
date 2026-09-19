@@ -1766,7 +1766,7 @@ dependencies = [
 
 [[package]]
 name = "gacho"
-version = "0.9.1"
+version = "0.9.2"
 dependencies = [
  "eframe",
  "egui",

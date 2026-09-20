@@ -191,7 +191,7 @@ impl OpenFile {
     /// 本を追加
     /// * `path` - ドロップされたファイルのパス
     /// * `return` - 結果
-    pub fn add_book(&mut self, path: PathBuf) -> error::Result<()> {
+    pub fn open_book(&mut self, path: PathBuf) -> error::Result<()> {
         // 本に画像を追加
         let image_name = self.book.open_from_path(path.clone())?;
 
@@ -278,7 +278,7 @@ impl OpenFile {
         self.book.clear();
         self.page = None;
 
-        self.add_book(path)?;
+        self.open_book(path)?;
 
         Ok(())
     }

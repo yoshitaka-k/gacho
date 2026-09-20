@@ -28,5 +28,5 @@ pub(crate) fn path(
     open_file.clear();
 
     // ファイルを追加
-    open_file.add_book(path)
+    open_file.open_book(path)
 }

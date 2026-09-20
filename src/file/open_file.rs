@@ -119,9 +119,9 @@ impl OpenFile {
         self.book.ensure_image_by_index(sub_index)
     }
 
-    /// 次のインデックス
+    /// 左へのインデックス
     /// * `app` - アプリケーション
-    /// * `return` - 次のインデックス
+    /// * `return` - 左へのインデックス
     pub fn left_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
             event::ReadFrom::RightToLeft => {
@@ -153,10 +153,10 @@ impl OpenFile {
         Ok(self.page)
     }
 
-    /// 前のインデックス
+    /// 右へのインデックス
     // 読み込み方向によって前後が変わる
     /// * `app` - アプリケーション
-    /// * `return` - 前のインデックス
+    /// * `return` - 右へのインデックス
     pub fn right_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
             event::ReadFrom::RightToLeft => {
@@ -227,6 +227,7 @@ impl OpenFile {
     }
 
     /// 最後のページかどうか
+    /// * `app` - アプリケーション
     /// * `return` - 最後のページかどうか
     fn is_last_page(&self, app: &app::App) -> bool {
         let Some(index) = self.page else { return false; };
@@ -234,6 +235,7 @@ impl OpenFile {
     }
 
     /// 次のライブラリを読み込む
+    /// * `return` - 結果
     fn read_next_library(&mut self) -> error::Result<()> {
         if self.library.len() == 0 { return Ok(()); }
 

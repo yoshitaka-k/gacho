@@ -1,10 +1,14 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::fs::File;
 use std::io::{Cursor, Read, BufReader};
 use getset::{Getters, Setters};
 use image::ImageReader;
 
-use crate::{file, error};
+use crate::file;
+
+// アーカイブヘッダーのバイト数
+// JPEG の巨大 EXIF 用に大きめに設定
+const HEADER_BYTES: u64 = 256 * 1024;
 
 #[derive(Getters, Setters)]
 #[getset(get = "pub")]
@@ -47,6 +51,7 @@ impl Archive {
     }
 
     /// アーカイブを展開する
+    /// アーカイブ内のファイルのbyte情報は展開した後に取得するため、ここでは取得しない
     /// * `path` - アーカイブのパス
     /// * `return` - アーカイブを展開した結果
     pub fn unarchive(&mut self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
@@ -63,30 +68,41 @@ impl Archive {
         // アーカイブのファイルを取得する
         // bytes 以外のデータを取得する（bytes はファイルを指定した時に取得する）
         for i in 0..self.len {
-            let file = archive.by_index(i)?;
-            if file.is_dir() {
-                continue;
-            }
+            let mut file = archive.by_index(i)?;
+            if file.is_dir() { continue; }
 
             // zipファイル内の相対パス付きファイル名を取得する
             let relative_path = self.decode_raw(file.name_raw());
+            let path = Path::new(&relative_path);
 
             // ファイルが隠しファイルかどうかをチェックする
-            let path = Path::new(&relative_path);
-            if file::is_hidden_entry(&path) {
-                continue;
-            }
+            if file::is_hidden_entry(&path) { continue; }
+            // ファイルが画像でない場合はスキップする
+            if !file::is_image(&path.to_path_buf()) { continue; }
 
             // zipファイル内のファイル名を取得する
             let file_name = path.file_name()
                 .map(|name| name.to_string_lossy().into_owned())
                 .unwrap_or_else(|| relative_path.clone());
 
+            // アーカイブ内のファイルのヘッダーの HEADER_BYTES 数を取得する
+            let mut header = Vec::new();
+            (&mut file).take(HEADER_BYTES).read_to_end(&mut header)?;
+
+            // ファイルのヘッダーのバイト列から画像の幅・高さを取得する
+            let size = match ImageReader::new(Cursor::new(header)).with_guessed_format() {
+                Ok(reader) => match reader.into_dimensions() {
+                    Ok((width, height)) => egui::Vec2::new(width as f32, height as f32),
+                    Err(_) => egui::Vec2::ZERO,
+                },
+                Err(_) => egui::Vec2::ZERO,
+            };
+
             self.files.push(ArchiveFile {
                 index: i,
                 file_name,
                 relative_path,
-                size: egui::Vec2::new(0.0, 0.0),
+                size,
                 bytes: Vec::new(),
             });
         }
@@ -125,15 +141,6 @@ impl Archive {
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes)?;
         archive_file.set_bytes(bytes.clone());
-
-        // ファイルの幅・高さを取得する
-        let reader = ImageReader::new(Cursor::new(bytes)).with_guessed_format().map_err(|e| {
-            error::GachoError::FileError(e.to_string(), PathBuf::from(&archive_file.relative_path))
-        })?;
-        let (width, height) = reader.into_dimensions().map_err(|e| {
-            error::GachoError::FileError(e.to_string(), PathBuf::from(&archive_file.relative_path))
-        })?;
-        archive_file.set_size(egui::Vec2::new(width as f32, height as f32));
 
         Ok(archive_file)
     }

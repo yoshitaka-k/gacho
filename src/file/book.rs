@@ -299,6 +299,7 @@ impl Book {
                     path.clone(),
                     file.relative_path().clone(),
                     Some(file.file_name().clone()),
+                    Some(*file.size()),
                     Some(file.bytes().to_vec()),
                     Some(*file.index()),
                 )?;
@@ -318,6 +319,7 @@ impl Book {
             let image_file = file::Image::new(
                 path.clone(),
                 relative_path,
+                None,
                 None,
                 None,
                 None,

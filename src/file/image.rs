@@ -50,6 +50,7 @@ impl Image {
         path: PathBuf,
         relative_path: String,
         file_name: Option<String>,
+        size: Option<egui::Vec2>,
         bytes: Option<Vec<u8>>,
         archive_index: Option<usize>,
     ) -> Result<Self, error::GachoError> {
@@ -76,7 +77,9 @@ impl Image {
         };
 
         // ファイルの幅・高さを取得
-        let size = if file::is_image(&path) {
+        let size = if let Some(size) = size {
+            size
+        } else if file::is_image(&path) {
             let reader = ImageReader::open(&path).map_err(|e| {
                 error::GachoError::FileError(e.to_string(), path.clone())
             })?;
@@ -86,7 +89,7 @@ impl Image {
 
             egui::Vec2::new(width as f32, height as f32)
         } else {
-            egui::Vec2::new(0.0, 0.0)
+            egui::Vec2::ZERO
         };
 
         // ファイルの内容を取得

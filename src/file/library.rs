@@ -9,11 +9,13 @@ static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 /// ライブラリのエントリ
 #[derive(Getters)]
 pub(crate) struct LibraryEntry {
+    #[allow(unused)]
     id: u64,
 
     #[getset(get = "pub")]
     path: PathBuf,
 
+    #[allow(unused)]
     file_name: String,
 }
 

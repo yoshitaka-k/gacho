@@ -337,7 +337,6 @@ impl OpenFile {
                 Spread::Pair { right, .. } => *right,
             });
         }
-        println!("update_page: {:?}", self.page);
     }
 
     /// 次のライブラリを読み込む

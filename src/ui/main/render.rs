@@ -221,7 +221,7 @@ impl Render {
 
     /// 画面に表示させるページリストを作成
     fn rebuild_spreads(&mut self) {
-        self.open_file.build_spreads(*self.app.page_layout());
+        self.open_file.build_spreads(*self.app.cover_layout(), *self.app.page_layout());
     }
 
     /// イベントアクションを処理

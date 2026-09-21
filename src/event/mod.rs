@@ -14,6 +14,24 @@ pub(crate) enum EventAction {
     Close,
 }
 
+/// 表紙表示方式
+#[derive(Clone, Copy, Deserialize, Serialize, PartialEq)]
+pub(crate) enum CoverLayout {
+    Single,
+    Spread,
+}
+
+impl CoverLayout {
+    /// 文字列を取得
+    /// * `return` - 文字列
+    pub(crate) fn to_string(&self) -> &str {
+        match self {
+            CoverLayout::Single => "Single Cover",
+            CoverLayout::Spread => "No Single Cover",
+        }
+    }
+}
+
 /// ページ送り方向
 #[derive(Deserialize, Serialize, PartialEq)]
 pub(crate) enum ReadFrom {

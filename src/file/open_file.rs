@@ -105,9 +105,15 @@ impl OpenFile {
 
     /// 画面に表示させるページリストを作成
     /// * `page_layout` - ページ送り表示方式
-    pub fn build_spreads(&mut self, page_layout: event::PageLayout) {
+    pub fn build_spreads(&mut self, cover_layout: event::CoverLayout, page_layout: event::PageLayout) {
         self.spreads.clear();
         let mut page_index = 0;
+
+        // 表紙（0ページ目）を単独表示
+        if !self.book.is_empty() && matches!(cover_layout, event::CoverLayout::Single) {
+            self.spreads.push(Spread::Single { index: 0 });
+            page_index += 1;
+        }
 
         while page_index < self.book.len() {
             let image = self.book.get_image_by_index(page_index);
@@ -216,7 +222,7 @@ impl OpenFile {
                     // 次のライブラリを読み込む
                     if self.read_next_library()? {
                         // ページリストを再構築
-                        self.build_spreads(*app.page_layout());
+                        self.build_spreads(*app.cover_layout(), *app.page_layout());
                     }
                 } else {
                     if self.page_add() {
@@ -229,7 +235,7 @@ impl OpenFile {
                     // 前のライブラリを読み込む
                     if self.read_prev_library()? {
                         // ページリストを再構築
-                        self.build_spreads(*app.page_layout());
+                        self.build_spreads(*app.cover_layout(), *app.page_layout());
                     }
                 } else {
                     if self.page_subtract() {
@@ -253,7 +259,7 @@ impl OpenFile {
                     // 前のライブラリを読み込む
                     if self.read_prev_library()? {
                         // ページリストを再構築
-                        self.build_spreads(*app.page_layout());
+                        self.build_spreads(*app.cover_layout(), *app.page_layout());
                     }
                 } else {
                     if self.page_subtract() {
@@ -266,7 +272,7 @@ impl OpenFile {
                     // 次のライブラリを読み込む
                     if self.read_next_library()? {
                         // ページリストを再構築
-                        self.build_spreads(*app.page_layout());
+                        self.build_spreads(*app.cover_layout(), *app.page_layout());
                     }
                 } else {
                     if self.page_add() {

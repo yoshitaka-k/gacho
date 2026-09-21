@@ -24,6 +24,9 @@ pub struct App {
     /// 前処理数
     preloading: usize,
 
+    /// 表紙表示方式
+    cover_layout: event::CoverLayout,
+
     /// ページ送り方向
     read_from: event::ReadFrom,
 
@@ -35,6 +38,7 @@ impl Default for App {
     fn default() -> Self {
         Self {
             preloading: DEFAULT_PRELOADING,
+            cover_layout: event::CoverLayout::Single,
             read_from: event::ReadFrom::RightToLeft,
             page_layout: event::PageLayout::Single,
         }

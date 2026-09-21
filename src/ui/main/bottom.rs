@@ -114,7 +114,7 @@ pub(crate) fn view(
                         error_token.reset();
 
                         // インデックスを更新
-                        open_file.set_current_spread(app.read_from(), selected);
+                        open_file.set_current_spread(selected);
                     }
                 });
 

@@ -83,13 +83,12 @@ impl OpenFile {
     }
 
     /// 現在のページリストのインデックスを設定
-    /// * `from` - 読み込み方向
     /// * `index` - 現在のページリストのインデックス
-    pub fn set_current_spread(&mut self, from: &event::ReadFrom, index: usize) {
+    pub fn set_current_spread(&mut self, index: usize) {
         self.current_spread = Some(index);
 
         // ページを更新
-        self.update_page(from);
+        self.update_page();
     }
 
     /// ページから現在のページリストのインデックスを取得
@@ -158,6 +157,9 @@ impl OpenFile {
                     .unwrap_or(DEFAULT_PAGE)
             )
         };
+
+        // ページを更新
+        self.update_page();
     }
 
     /// 選択された画像のパスを取得
@@ -218,7 +220,7 @@ impl OpenFile {
                     }
                 } else {
                     if self.page_add() {
-                        self.update_page(app.read_from());
+                        self.update_page();
                     }
                 }
             }
@@ -231,7 +233,7 @@ impl OpenFile {
                     }
                 } else {
                     if self.page_subtract() {
-                        self.update_page(app.read_from());
+                        self.update_page();
                     }
                 }
             }
@@ -255,7 +257,7 @@ impl OpenFile {
                     }
                 } else {
                     if self.page_subtract() {
-                        self.update_page(app.read_from());
+                        self.update_page();
                     }
                 }
             }
@@ -268,7 +270,7 @@ impl OpenFile {
                     }
                 } else {
                     if self.page_add() {
-                        self.update_page(app.read_from());
+                        self.update_page();
                     }
                 }
             }
@@ -325,22 +327,17 @@ impl OpenFile {
 
     /// ページを更新
     /// * `from` - 読み込み方向
-    fn update_page(&mut self, from: &event::ReadFrom) {
+    fn update_page(&mut self) {
         if !self.spreads.is_empty() {
             let Some(index) = self.current_spread else { return; };
             let Some(spread) = self.spreads.get(index) else { return; };
 
-            match spread {
-                Spread::Single { index } => self.page = Some(*index),
-                Spread::Pair { left, right } => {
-                    match from {
-                        event::ReadFrom::RightToLeft => self.page = Some(*right),
-                        event::ReadFrom::LeftToRight => self.page = Some(*left),
-                    }
-                }
-            }
+            self.page = Some(match spread {
+                Spread::Single { index } => *index,
+                Spread::Pair { right, .. } => *right,
+            });
         }
-
+        println!("update_page: {:?}", self.page);
     }
 
     /// 次のライブラリを読み込む

@@ -26,3 +26,14 @@ pub(crate) fn button_icon_color(ui: &egui::Ui) -> egui::Color32 {
         color::LIGHT_MODE_BUTTON_ICON_COLOR
     }
 }
+
+/// 警告アイコンの色
+/// * `ui` - UI
+/// * `return` - 警告アイコンの色
+pub(crate) fn warning_color(ui: &egui::Ui) -> egui::Color32 {
+    if ui.ctx().global_style().visuals.dark_mode {
+        color::DARK_MODE_WARNING_COLOR
+    } else {
+        color::LIGHT_MODE_WARNING_COLOR
+    }
+}

@@ -154,8 +154,8 @@ impl Render {
                 self.error_token.show(e);
             }
 
-            // 選択されたインデックスを設定
-            self.set_selected_index();
+            // 画面に表示させるページリストを作成
+            self.rebuild_spreads();
         }
 
         // フォルダダイアログを開くボタンが押されてたらフォルダダイアログを開く
@@ -170,8 +170,8 @@ impl Render {
                 self.error_token.show(e);
             }
 
-            // 選択されたインデックスを設定
-            self.set_selected_index();
+            // 画面に表示させるページリストを作成
+            self.rebuild_spreads();
         }
     }
 
@@ -189,8 +189,8 @@ impl Render {
             self.error_token.show(e);
         }
 
-        // 選択されたインデックスを設定
-        self.set_selected_index();
+        // 画面に表示させるページリストを作成
+        self.rebuild_spreads();
     }
 
     /// ドラッグ&ドロップされたファイルを処理
@@ -204,8 +204,8 @@ impl Render {
         // 新しいファイルを開いたので、前回閉じたエラーを忘れさせる
         self.error_token.reset();
 
-        // 選択されたインデックスを設定
-        self.set_selected_index();
+        // 画面に表示させるページリストを作成
+        self.rebuild_spreads();
 
         // エラーが発生した場合はエラーモーダルを表示
         if let Err(e) = result {
@@ -219,18 +219,9 @@ impl Render {
         );
     }
 
-    /// 選択されたインデックスを設定
-    fn set_selected_index(&mut self) {
-        // 見開きの場合は、奇数の場合は前のインデックスを設定
-        if matches!(self.app.page_layout(), event::PageLayout::Spread) {
-            if let Some(index) = self.open_file.page() {
-                if index % 2 != 0 {
-                    self.open_file.set_page(Some(index - 1));
-                } else {
-                    self.open_file.set_page(Some(*index));
-                }
-            }
-        }
+    /// 画面に表示させるページリストを作成
+    fn rebuild_spreads(&mut self) {
+        self.open_file.build_spreads(*self.app.page_layout());
     }
 
     /// イベントアクションを処理

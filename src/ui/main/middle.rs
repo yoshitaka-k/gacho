@@ -24,7 +24,7 @@ pub(crate) fn view(
         let available_rect = ui.available_rect_before_wrap();
         let available = available_rect.size();
 
-        match open_file.page_images(app) {
+        match open_file.page_images(None) {
             Ok(images) if !images.is_empty() => {
                 let n = images.len() as f32;
                 let max_each = egui::vec2(available.x / n, available.y);
@@ -44,7 +44,7 @@ pub(crate) fn view(
                         let mut images: Vec<(&file::Image, egui::Vec2)> = images.iter().zip(sizes).collect();
 
                         // 読み込み方向によって画像を反転
-                        if matches!(app.read_from(), event::ReadFrom::RightToLeft) {
+                        if matches!(app.read_from(), event::ReadFrom::LeftToRight) {
                             images.reverse();
                         }
 
@@ -64,12 +64,16 @@ pub(crate) fn view(
 
         // 前後の画像を先読み
         for i in 1..=*app.preloading() {
-            if let Ok(Some(image_file)) = open_file.selected_next_image(i) {
-                let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
+            if let Ok(images) = open_file.page_images(Some(i as isize)) {
+                for image_file in images {
+                    let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
+                }
             }
 
-            if let Ok(Some(image_file)) = open_file.selected_prev_image(i) {
-                let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
+            if let Ok(images) = open_file.page_images(Some(-(i as isize))) {
+                for image_file in images {
+                    let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
+                }
             }
         }
 

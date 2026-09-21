@@ -24,7 +24,7 @@ pub(crate) fn view(
 
     // ファイルのIDリストと選択されたファイルを取得
     let all_images_ids = open_file.book_image_ids();
-    let selected_images = open_file.page_images(app).unwrap_or(vec![]);
+    let selected_images = open_file.page_images(None).unwrap_or(vec![]);
 
     // ページャーとファイル名を生成
     let mut pagers = vec![];
@@ -46,6 +46,8 @@ pub(crate) fn view(
 
     if pagers.is_empty() {
         pagers.push("0".to_string());
+    } else {
+        pagers.reverse();
     }
 
     // 下部パネルを表示
@@ -91,8 +93,8 @@ pub(crate) fn view(
                 ui.separator();
 
                 // ページャースライダー
-                let mut selected = open_file.page_mut().unwrap_or(0);
-                let max = if open_file.book_len() > 0 { open_file.book_len() - 1 } else { DEFAULT_MAX_INDEX };
+                let mut selected = open_file.current_spread_mut().unwrap_or(0);
+                let max = if open_file.spreads_len() > 0 { open_file.spreads_len() - 1 } else { DEFAULT_MAX_INDEX };
                 ui.scope(|ui| {
                     ui.spacing_mut().slider_width = SLIDER_WIDTH;
                     let slider = match app.read_from() {
@@ -112,7 +114,7 @@ pub(crate) fn view(
                         error_token.reset();
 
                         // インデックスを更新
-                        open_file.set_page(Some(selected));
+                        open_file.set_current_spread(app.read_from(), selected);
                     }
                 });
 

@@ -68,6 +68,13 @@ impl Book {
     /// インデックスからファイルを取得
     /// * `index` - インデックス
     /// * `return` - Image のインスタンス
+    pub fn get_image_by_index(&self, index: usize) -> Option<&file::Image> {
+        self.images.get(index)
+    }
+
+    /// インデックスからファイルを取得
+    /// * `index` - インデックス
+    /// * `return` - Image のインスタンス
     pub fn ensure_image_by_index(&mut self, index: usize) -> error::Result<Option<file::Image>> {
         // インデックスが範囲外の場合は None を返す
         if index >= self.len() { return Ok(None); }

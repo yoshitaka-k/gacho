@@ -1,10 +1,18 @@
 use std::path::PathBuf;
-use std::collections::HashSet;
 use getset::{Getters, MutGetters, Setters};
 
 use crate::{app, event, file, error};
 
 const DEFAULT_PAGE: usize = 0;
+
+/// 画面に表示するページの種類
+#[derive(Clone, Copy)]
+pub enum Spread {
+    /// 単一ページ
+    Single { index: usize },
+    /// 見開きページ
+    Pair { left: usize, right: usize },
+}
 
 /// ドロップされたファイルを管理する構造体
 #[derive(Getters, MutGetters, Setters)]
@@ -13,8 +21,15 @@ pub struct OpenFile {
     book: file::Book,
 
     /// 選択されたファイルのインデックス
-    #[getset(get = "pub", get_mut = "pub", set = "pub")]
+    #[getset(get = "pub", set = "pub")]
     page: Option<usize>,
+
+    /// 画面に表示させるページリスト
+    spreads: Vec<Spread>,
+
+    /// 画面に表示させるページリストのインデックス
+    #[getset(get_mut = "pub")]
+    current_spread: Option<usize>,
 
     /// ライブラリの構造体
     // cbz (zip) ファイルだったら同階層の cbz (zip) ファイルをライブラリに追加
@@ -32,6 +47,8 @@ impl OpenFile {
         Self {
             book: file::Book::new(),
             page: None,
+            spreads: vec![],
+            current_spread: None,
             library: file::Library::new(),
             volume: None,
         }
@@ -41,6 +58,8 @@ impl OpenFile {
     pub fn clear(&mut self) {
         self.book.clear();
         self.page = None;
+        self.spreads.clear();
+        self.current_spread = None;
         self.library.clear();
         self.volume = None;
     }
@@ -51,72 +70,138 @@ impl OpenFile {
         &self.book.title()
     }
 
-    /// 本のページ数を取得
-    /// * `return` - 本のページ数
-    pub fn book_len(&self) -> usize {
-        self.book.len()
-    }
-
     /// 本の画像のIDを取得
     /// * `return` - 本の画像の ID ベクター
     pub fn book_image_ids(&self) -> Vec<u64> {
         self.book.image_ids()
     }
 
+    /// ページリストの長さを取得
+    /// * `return` - ページリストの長さ
+    pub fn spreads_len(&self) -> usize {
+        self.spreads.len()
+    }
+
+    /// 現在のページリストのインデックスを設定
+    /// * `from` - 読み込み方向
+    /// * `index` - 現在のページリストのインデックス
+    pub fn set_current_spread(&mut self, from: &event::ReadFrom, index: usize) {
+        self.current_spread = Some(index);
+
+        // ページを更新
+        self.update_page(from);
+    }
+
+    /// ページから現在のページリストのインデックスを取得
+    /// * `page` - ページ
+    /// * `return` - 現在のページリストのインデックス
+    pub fn get_current_by_page(&self, page: usize) -> Option<usize> {
+        self.spreads.iter().position(|spread| {
+            match spread {
+                Spread::Single { index } => *index == page,
+                Spread::Pair { left, right } => *left == page || *right == page,
+            }
+        })
+    }
+
+    /// 画面に表示させるページリストを作成
+    /// * `page_layout` - ページ送り表示方式
+    pub fn build_spreads(&mut self, page_layout: event::PageLayout) {
+        self.spreads.clear();
+        let mut page_index = 0;
+
+        while page_index < self.book.len() {
+            let image = self.book.get_image_by_index(page_index);
+            let Some(image) = image else {
+                page_index += 1;
+                continue;
+            };
+
+            // 単一ページで表示
+            if matches!(page_layout, event::PageLayout::Single) {
+                self.spreads.push(Spread::Single { index: page_index });
+                page_index += 1;
+                continue;
+            }
+
+            // 横長の場合は単一ページで表示
+            if image.is_landscape() {
+                self.spreads.push(Spread::Single { index: page_index });
+                page_index += 1;
+                continue;
+            }
+
+            // 次のページが存在して、次の画像も縦長であれば見開きページで表示
+            if let Some(next_image) = self.book.get_image_by_index(page_index + 1) {
+                if !next_image.is_landscape() {
+                    // デフォルト Right to Left で表示
+                    // Left to Right で表示する場合は Render 側で反転させる
+                    let (left, right) = (page_index + 1, page_index);
+
+                    self.spreads.push(Spread::Pair { left, right });
+                    page_index += 2;
+                    continue;
+                }
+            }
+
+            // 次の画像がない、または次の画像が横長の場合は単一ページで表示
+            self.spreads.push(Spread::Single { index: page_index });
+            page_index += 1;
+        }
+
+        // ページインデックスから現在のページリストのインデックスを取得
+        self.current_spread = if self.spreads.is_empty() {
+            None
+        } else {
+            Some(
+                self.page.and_then(|page| self.get_current_by_page(page))
+                    .unwrap_or(DEFAULT_PAGE)
+            )
+        };
+    }
+
     /// 選択された画像のパスを取得
     /// * `app` - アプリケーション
     /// * `return` - 選択された Image ベクター
-    pub fn page_images(&mut self, app: &app::App) -> error::Result<Vec<file::Image>> {
-        let Some(index) = self.page else { return Ok(vec![]); };
+    pub fn page_images(&mut self, offset: Option<isize>) -> error::Result<Vec<file::Image>> {
+        let Some(mut current_index) = self.current_spread else { return Ok(vec![]); };
 
+        if let Some(offset) = offset {
+            if offset > 0 {
+                let Some(add_index) = current_index.checked_add(offset.unsigned_abs()) else { return Ok(vec![]); };
+                current_index = add_index;
+            } else {
+                let Some(sub_index) = current_index.checked_sub(offset.unsigned_abs()) else { return Ok(vec![]); };
+                current_index = sub_index;
+            }
+        }
+
+        // ページリストを取得
         let mut images = vec![];
-        match app.page_layout() {
-            event::PageLayout::Single => {
+        match self.spreads.get(current_index).copied().ok_or_else(|| {
+            error::GachoError::IndexError(current_index)
+        })? {
+            Spread::Single { index } => {
                 let image = self.book.ensure_image_by_index(index)?;
                 if let Some(image) = image {
                     images.push(image);
                 }
             }
-            event::PageLayout::Spread => {
-                for offset in 0..=app.page_layout().to_offset() {
-                    let Some(add_index) = index.checked_add(offset) else { continue; };
-                    let image = self.book.ensure_image_by_index(add_index)?;
-                    if let Some(image) = image {
-                        images.push(image);
-                    }
+            Spread::Pair { left, right } => {
+                // デフォルト Right to Left で表示
+                // Left to Right で表示する場合は Render 側で反転させる
+                let image = self.book.ensure_image_by_index(left)?;
+                if let Some(image) = image {
+                    images.push(image);
                 }
-
-                // 重複を削除
-                let mut seen = HashSet::new();
-                let unique_images = images.into_iter()
-                    .filter(|image| seen.insert(*image.id()))
-                    .collect();
-
-                images = unique_images;
+                let image = self.book.ensure_image_by_index(right)?;
+                if let Some(image) = image {
+                    images.push(image);
+                }
             }
         }
 
         Ok(images)
-    }
-
-    /// 指定した次のインデックスを移動させて画像を取得
-    /// * `offset` - オフセット
-    /// * `return` - 次のファイル
-    pub fn selected_next_image(&mut self, offset: usize) -> error::Result<Option<file::Image>> {
-        let Some(index) = self.page else { return Ok(None); };
-        let Some(add_index) = index.checked_add(offset) else { return Ok(None); };
-
-        self.book.ensure_image_by_index(add_index)
-    }
-
-    /// 指定した前のインデックスを移動させて画像を取得
-    /// * `offset` - オフセット
-    /// * `return` - 前のファイル
-    pub fn selected_prev_image(&mut self, offset: usize) -> error::Result<Option<file::Image>> {
-        let Some(index) = self.page else { return Ok(None); };
-        let Some(sub_index) = index.checked_sub(offset) else { return Ok(None); };
-
-        self.book.ensure_image_by_index(sub_index)
     }
 
     /// 左へのインデックス
@@ -125,27 +210,29 @@ impl OpenFile {
     pub fn left_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
             event::ReadFrom::RightToLeft => {
-                if self.is_last_page(app) {
-                    self.read_next_library()?;
+                if self.is_last_page() {
+                    // 次のライブラリを読み込む
+                    if self.read_next_library()? {
+                        // ページリストを再構築
+                        self.build_spreads(*app.page_layout());
+                    }
                 } else {
-                    self.page_add(app.page_layout().to_offset());
+                    if self.page_add() {
+                        self.update_page(app.read_from());
+                    }
                 }
             }
             event::ReadFrom::LeftToRight => {
                 if self.is_first_page() {
-                    self.read_prev_library()?;
+                    // 前のライブラリを読み込む
+                    if self.read_prev_library()? {
+                        // ページリストを再構築
+                        self.build_spreads(*app.page_layout());
+                    }
                 } else {
-                    self.page_subtract(app.page_layout().to_offset());
-                }
-            }
-        }
-
-        // 見開き
-        if matches!(app.page_layout(), event::PageLayout::Spread) {
-            if let Some(index) = self.page {
-                // 最後のページの調整
-                if index % 2 != 0 {
-                    self.page = Some(index - 1);
+                    if self.page_subtract() {
+                        self.update_page(app.read_from());
+                    }
                 }
             }
         }
@@ -161,26 +248,28 @@ impl OpenFile {
         match app.read_from() {
             event::ReadFrom::RightToLeft => {
                 if self.is_first_page() {
-                    self.read_prev_library()?;
+                    // 前のライブラリを読み込む
+                    if self.read_prev_library()? {
+                        // ページリストを再構築
+                        self.build_spreads(*app.page_layout());
+                    }
                 } else {
-                    self.page_subtract(app.page_layout().to_offset());
+                    if self.page_subtract() {
+                        self.update_page(app.read_from());
+                    }
                 }
             }
             event::ReadFrom::LeftToRight => {
-                if self.is_last_page(app) {
-                    self.read_next_library()?;
+                if self.is_last_page() {
+                    // 次のライブラリを読み込む
+                    if self.read_next_library()? {
+                        // ページリストを再構築
+                        self.build_spreads(*app.page_layout());
+                    }
                 } else {
-                    self.page_add(app.page_layout().to_offset());
-                }
-            }
-        }
-
-        // 見開き
-        if matches!(app.page_layout(), event::PageLayout::Spread) {
-            if let Some(index) = self.page {
-                // 最後のページの調整
-                if index % 2 != 0 {
-                    self.page = Some(index - 1);
+                    if self.page_add() {
+                        self.update_page(app.read_from());
+                    }
                 }
             }
         }
@@ -200,7 +289,7 @@ impl OpenFile {
             return Ok(());
         }
 
-        // 画像ファイルから開かれたら
+        // 画像ファイルから開かれたら、ページインデックスを取得
         if let Some(image_name) = image_name {
             self.page = self.book.get_index_by_filename(&image_name);
         } else {
@@ -222,89 +311,112 @@ impl OpenFile {
     /// 最初のページかどうか
     /// * `return` - 最初のページかどうか
     fn is_first_page(&self) -> bool {
-        let Some(index) = self.page else { return false; };
+        let Some(index) = self.current_spread else { return false; };
         index == 0
     }
 
     /// 最後のページかどうか
     /// * `app` - アプリケーション
     /// * `return` - 最後のページかどうか
-    fn is_last_page(&self, app: &app::App) -> bool {
-        let Some(index) = self.page else { return false; };
-        index + app.page_layout().to_offset() >= self.book.len().saturating_sub(1)
+    fn is_last_page(&self) -> bool {
+        let Some(index) = self.current_spread else { return false; };
+        index >= self.spreads.len().saturating_sub(1)
+    }
+
+    /// ページを更新
+    /// * `from` - 読み込み方向
+    fn update_page(&mut self, from: &event::ReadFrom) {
+        if !self.spreads.is_empty() {
+            let Some(index) = self.current_spread else { return; };
+            let Some(spread) = self.spreads.get(index) else { return; };
+
+            match spread {
+                Spread::Single { index } => self.page = Some(*index),
+                Spread::Pair { left, right } => {
+                    match from {
+                        event::ReadFrom::RightToLeft => self.page = Some(*right),
+                        event::ReadFrom::LeftToRight => self.page = Some(*left),
+                    }
+                }
+            }
+        }
+
     }
 
     /// 次のライブラリを読み込む
-    /// * `return` - 結果
-    fn read_next_library(&mut self) -> error::Result<()> {
-        if self.library.len() == 0 { return Ok(()); }
+    /// * `return` - 次のライブラリを読み込めたかどうか
+    fn read_next_library(&mut self) -> error::Result<bool> {
+        if self.library.len() == 0 { return Ok(false); }
+        let Some(index) = self.volume  else { return Ok(false); };
 
-        let Some(index) = self.volume  else { return Ok(()); };
-
-        if index == self.library.len() - 1 {
-            return Ok(());
-        }
+        if index == self.library.len() - 1 { return Ok(false); }
 
         self.volume_add();
-        self.read_book_from_library()?;
+        if !self.read_book_from_library()? { return Ok(false); }
 
-        Ok(())
+        Ok(true)
     }
 
     /// 前のライブラリを読み込む
     /// * `return` - 結果
-    fn read_prev_library(&mut self) -> error::Result<()> {
-        if self.library.len() == 0 { return Ok(()); }
+    fn read_prev_library(&mut self) -> error::Result<bool> {
+        if self.library.len() == 0 { return Ok(false); }
+        let Some(index) = self.volume  else { return Ok(false); };
 
-        let Some(index) = self.volume  else { return Ok(()); };
-
-        if index == 0 {
-            return Ok(());
-        }
+        if index == 0 { return Ok(false); }
 
         self.volume_subtract();
-        self.read_book_from_library()?;
+        if !self.read_book_from_library()? { return Ok(false); }
 
-        Ok(())
+        Ok(true)
     }
 
     /// ライブラリから本を読み込む
     /// * `return` - 結果
-    fn read_book_from_library(&mut self) -> error::Result<()> {
-        let Some(index) = self.volume else { return Ok(()); };
-        let Some(entry) = self.library.get(index) else { return Ok(()); };
+    fn read_book_from_library(&mut self) -> error::Result<bool> {
+        let Some(index) = self.volume else { return Ok(false); };
+        let Some(entry) = self.library.get(index) else { return Ok(false); };
         let path = entry.path().clone();
 
         self.book.clear();
         self.page = None;
+        self.current_spread = None;
 
         self.open_book(path)?;
 
-        Ok(())
+        Ok(true)
     }
 
     /// 次のファイルを取得
     /// * `offset` - オフセット
-    fn page_add(&mut self, offset: usize) {
-        if let Some(index) = self.page {
-            if index + offset < self.book.len() - 1 {
-                self.page = Some(index + offset + 1);
+    fn page_add(&mut self) -> bool {
+        if let Some(index) = self.current_spread {
+            if index < self.spreads.len() - 1 {
+                self.current_spread = Some(index + 1);
             } else {
-                self.page = Some(self.book.len() - 1);
+                self.current_spread = Some(self.spreads.len() - 1);
             }
+
+            return true;
         }
+
+        return false;
     }
 
     /// 前のファイルを取得
     /// * `offset` - オフセット
-    fn page_subtract(&mut self, offset: usize) {
-        if let Some(index) = self.page {
-            if (index as isize - offset as isize) > 0 {
-                self.page = Some(index - offset - 1);
+    fn page_subtract(&mut self) -> bool {
+        if let Some(index) = self.current_spread {
+            if index as isize > 0 {
+                self.current_spread = Some(index - 1);
             } else {
-                self.page = Some(0);
+                self.current_spread = Some(0);
             }
+
+            return true;
         }
+
+        return false;
     }
 
     /// 次のボリュームを取得

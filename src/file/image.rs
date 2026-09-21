@@ -126,6 +126,13 @@ impl Image {
         self.bytes.is_empty()
     }
 
+    /// ファイルが横長かどうかを判断
+    /// * `return` - ファイルが横長かどうか
+    pub fn is_landscape(&self) -> bool {
+        // 横長の比率を計算して アスペクト比が 1.2 より大きい場合は横長と判断
+        (self.size.x as f32 / self.size.y as f32) > 1.2
+    }
+
     /// 指定した領域に収まる表示サイズを返す
     /// * `max` - 最大サイズ
     /// * `return` - 表示サイズ

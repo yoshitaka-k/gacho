@@ -1,4 +1,6 @@
-![Gacho](assets/icon.png)
+<p align="center">
+  <img src="assets/icon.png" alt="Keiga" width="96">
+</p>
 
 # Gacho
 
@@ -14,14 +16,12 @@ Rust の勉強がてら、自分用に CBZビューア ってことで、Gacho�
 
 開けるのは次の拡張子です。アーカイブの中も、ばらの画像も同じ形式です。
 
-
-| Extension                | How it opens         |
-| ------------------------ | -------------------- |
-| `.zip` / `.cbz`          | 1冊として開く。中の画像がページになる  |
+| Extension                | How it opens |
+| ------------------------ | ------------ |
+| `.zip` / `.cbz`          | 1冊として開く。中の画像がページになる |
 | `.jpg` / `.jpeg`         | 同じフォルダの画像を、パス順に1冊にする |
-| `.png` / `.bmp` / `.gif` | 同上                   |
-| `.webp` / `.avif`        | 同上                   |
-
+| `.png` / `.bmp` / `.gif` | 同上 |
+| `.webp` / `.avif`        | 同上 |
 
 ファイルを選ぶダイアログはアーカイブだけです。画像のフォルダはドロップするか、フォルダを開いてください。
 
@@ -44,14 +44,12 @@ Rust の勉強がてら、自分用に CBZビューア ってことで、Gacho�
 
 見開きと表紙の扱いは設定の Page Layout / Cover Layout です。変更は本を開き直すまで反映されません。
 
-
-| Layout          | Behavior                    |
-| --------------- | --------------------------- |
-| Single Page     | 1ページずつ（既定）                  |
-| Two-Page Spread | 縦長を見開きにする。横長は1ページのまま        |
+| Layout          | Behavior |
+| --------------- | -------- |
+| Single Page     | 1ページずつ（既定） |
+| Two-Page Spread | 縦長を見開きにする。横長は1ページのまま |
 | Single Cover    | 先頭を表紙として単独表示し、続きを見開きにする（既定） |
-| No Single Cover | 先頭から見開きにする                  |
-
+| No Single Cover | 先頭から見開きにする |
 
 並びは Read From に従います。Right to Left（既定）では、見開きの右が若いページです。
 
@@ -61,27 +59,21 @@ Rust の勉強がてら、自分用に CBZビューア ってことで、Gacho�
 
 ページ送りです。Right to Left では左が次、右が前です。Left to Right では逆になります。本の端では、同じフォルダの前後のアーカイブへ移ります。
 
-
-| Input                   | Behavior             |
-| ----------------------- | -------------------- |
+| Input                   | Behavior |
+| ----------------------- | -------- |
 | Click on left half / ←  | 次のページ（Right to Left） |
 | Click on right half / → | 前のページ（Right to Left） |
-| 下部の左向き矢印                | ← と同じ                |
-| 下部の右向き矢印                | → と同じ                |
-
+| 下部の左向き矢印           | ← と同じ |
+| 下部の右向き矢印           | → と同じ |
 
 アプリ全体のショートカットです。macOS は ⌘、その他は Ctrl です。
 
-
-| Input              | Behavior                   |
-| ------------------ | -------------------------- |
-| ⌘O / Ctrl+O        | アーカイブを開く                   |
-| ⌘⇧O / Ctrl+Shift+O | フォルダを開く                    |
-| ⌘, / Ctrl+,        | 設定を開く                      |
+| Input              | Behavior |
+| ------------------ | -------- |
+| ⌘O / Ctrl+O        | アーカイブを開く |
+| ⌘⇧O / Ctrl+Shift+O | フォルダを開く |
+| ⌘, / Ctrl+,        | 設定を開く |
 | ⌘W / Ctrl+W        | 開いている本を閉じる。設定ウィンドウでは設定を閉じる |
-
-
-
 
 ## Settings
 
@@ -89,16 +81,12 @@ Rust の勉強がてら、自分用に CBZビューア ってことで、Gacho�
 
 ### General
 
-
-| Setting      | Behavior                                                                         |
-| ------------ | -------------------------------------------------------------------------------- |
-| Page Layout  | Single Page / Two-Page Spread（既定 Single Page）                                    |
+| Setting      | Behavior |
+| ------------ | -------- |
+| Page Layout  | Single Page / Two-Page Spread（既定 Single Page） |
 | Cover Layout | Single Cover / No Single Cover（既定 Single Cover）。Page Layout とあわせて、本を開き直すまで反映されない |
-| Read From    | Right to Left / Left to Right（既定 Right to Left）                                  |
-| Preloading   | 0–10。前後の見開きを先に読む数（既定 5）                                                          |
-
-
-
+| Read From    | Right to Left / Left to Right（既定 Right to Left） |
+| Preloading   | 0–10。前後の見開きを先に読む数（既定 5） |
 
 ### About
 

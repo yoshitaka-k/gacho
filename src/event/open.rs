@@ -32,7 +32,7 @@ pub(crate) fn folder(
     #[cfg(target_os = "macos")]
     let path = rfd::FileDialog::new()
         .add_filter("Archive", &extensions)
-        .pick_file_or_folder();
+        .pick_folder();
 
     // Mac以外はフォルダ選択のみ
     #[cfg(not(target_os = "macos"))]

@@ -289,26 +289,35 @@ impl OpenFile {
     /// * `path` - ドロップされたファイルのパス
     /// * `return` - 結果
     pub fn open_book(&mut self, path: PathBuf) -> error::Result<bool> {
+        // ライブラリにファイルを追加
+        let mut library = file::Library::new();
+        library.build_entries(path.clone())?;
+
+        // ライブラリのインデックスを取得
+        let volume = if path.is_dir() {
+            Some(0)
+        } else {
+            library.get_index_by_path(&path)
+        };
+
+        // ライブラリからエントリを取得
+        let Some(entry) = library.get(volume.unwrap_or(0)) else { return Ok(false); };
+        let library_path = entry.path();
+
         // 新しい本を作成
         let mut book = file::Book::new();
 
         // ファイルを一時ファイルにコピー
-        let image_name = book.open_from_path_to_temp(path.clone())?;
+        let image_name = book.open_from_path_to_temp(library_path.clone())?;
 
         // 一時ファイルに画像が追加されていない場合はスキップ
-        if book.is_temp_empty() {
-            return Ok(false);
-        }
+        if book.is_temp_empty() { return Ok(false); }
 
         // 一時ファイルから本を開く
-        if !book.open_from_temp_to_book(&path)? {
-            return Ok(false);
-        }
+        if !book.open_from_temp_to_book(&library_path)? { return Ok(false); }
 
         // 本に画像が追加されていない場合はスキップ
-        if book.is_empty() {
-            return Ok(false);
-        }
+        if book.is_empty() { return Ok(false); }
 
         // 画像ファイルから開かれたら、ページインデックスを取得
         let page = if let Some(image_name) = image_name {
@@ -316,13 +325,6 @@ impl OpenFile {
         } else {
             Some(DEFAULT_PAGE)
         };
-
-        // ライブラリにファイルを追加
-        let mut library = file::Library::new();
-        library.build_entries(path)?;
-
-        // ライブラリのインデックスを取得
-        let volume = library.get_index_by_path(&book.path());
 
         // 本を更新
         self.book = book;

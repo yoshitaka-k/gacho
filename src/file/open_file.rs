@@ -307,14 +307,21 @@ impl OpenFile {
         // 新しい本を作成
         let mut book = file::Book::new();
 
+        // 画像ファイルかディレクトリかを判断
+        let open_path = if file::is_image(&path) {
+            path.clone()
+        } else {
+            library_path.clone()
+        };
+
         // ファイルを一時ファイルにコピー
-        let image_name = book.open_from_path_to_temp(library_path.clone())?;
+        let image_name = book.open_from_path_to_temp(open_path.clone())?;
 
         // 一時ファイルに画像が追加されていない場合はスキップ
         if book.is_temp_empty() { return Ok(false); }
 
         // 一時ファイルから本を開く
-        if !book.open_from_temp_to_book(&library_path)? { return Ok(false); }
+        if !book.open_from_temp_to_book(&open_path)? { return Ok(false); }
 
         // 本に画像が追加されていない場合はスキップ
         if book.is_empty() { return Ok(false); }

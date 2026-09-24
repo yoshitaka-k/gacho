@@ -18,7 +18,6 @@ name = "Gacho"
 icon = ["target/bundle-icons/*.png"]
 category = "Utility"
 short_description = "Comic Book ZIP viewer"
-linux_use_terminal = false
 linux_exec_args = "%f"
 linux_mime_types = [
     "application/zip",

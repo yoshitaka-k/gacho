@@ -13,9 +13,6 @@ pub(crate) fn file(
 
     // ファイルを追加
     if let Some(path) = path {
-        // ファイルをクリア
-        open_file.clear();
-
         // ファイルを追加
         return open_file.open_book(path);
     }
@@ -44,9 +41,6 @@ pub(crate) fn folder(
 
     // ファイルを追加
     if let Some(path) = path {
-        // ファイルをクリア
-        open_file.clear();
-
         // ファイルを追加
         return open_file.open_book(path);
     }

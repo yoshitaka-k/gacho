@@ -50,6 +50,12 @@ impl Book {
         self.images.is_empty()
     }
 
+    /// 一時ファイルが空かどうかを取得
+    /// * `return` - 一時ファイルが空かどうか
+    pub fn is_temp_empty(&self) -> bool {
+        self.temp_path.is_empty()
+    }
+
     /// 本をクリア
     pub fn clear(&mut self) {
         self.title = String::new();
@@ -121,12 +127,15 @@ impl Book {
     /// 画像を追加
     /// * `path` - ドロップされたファイルのパス
     /// * `return` - 結果
-    pub fn open_from_path(&mut self, path: PathBuf) -> error::Result<Option<String>> {
+    pub fn open_from_path_to_temp(&mut self, path: PathBuf) -> error::Result<Option<String>> {
         // parent() は path を借りるので、先に PathBuf にして借用を終わらせる
         let base_dir = path.parent().unwrap_or(&path).to_path_buf();
 
         // ファイル名の控えを用意
         let mut image_name: Option<String> = None;
+
+        // 一時ファイルをクリア
+        self.temp_path.clear();
 
         if file::is_image(&path) {
             // 画像ファイルの場合は、同ディレクトリの他の画像ファイルも検索する
@@ -148,6 +157,23 @@ impl Book {
 
         // 一時ファイルをソート
         self.sort_temp_path();
+
+        Ok(image_name)
+    }
+
+    /// 一時ファイルから本を開く
+    /// * `base_dir` - ドロップされたパスの親（相対パスの基準）
+    /// * `return` - 結果
+    pub fn open_from_temp_to_book(&mut self, path: &PathBuf) -> error::Result<bool> {
+        if self.temp_path.is_empty() {
+            return Err(error::GachoError::FileError(
+                "No files to open".to_string(),
+                path.clone()
+            ));
+        }
+
+        // parent() は path を借りるので、先に PathBuf にして借用を終わらせる
+        let base_dir = path.parent().unwrap_or(&path).to_path_buf();
 
         // 画像から開いたときは画像だけ、それ以外でアーカイブがあれば先頭の1冊だけ
         let prefer_archive = !file::is_image(&path)
@@ -178,7 +204,7 @@ impl Book {
             self.title = self.extract_book_title(&title);
         }
 
-        Ok(image_name)
+        Ok(true)
     }
 }
 

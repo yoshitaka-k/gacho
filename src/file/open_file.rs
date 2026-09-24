@@ -289,26 +289,46 @@ impl OpenFile {
     /// * `path` - ドロップされたファイルのパス
     /// * `return` - 結果
     pub fn open_book(&mut self, path: PathBuf) -> error::Result<bool> {
-        // 本に画像を追加
-        let image_name = self.book.open_from_path(path.clone())?;
+        // 新しい本を作成
+        let mut book = file::Book::new();
+
+        // ファイルを一時ファイルにコピー
+        let image_name = book.open_from_path_to_temp(path.clone())?;
+
+        // 一時ファイルに画像が追加されていない場合はスキップ
+        if book.is_temp_empty() {
+            return Ok(false);
+        }
+
+        // 一時ファイルから本を開く
+        if !book.open_from_temp_to_book(&path)? {
+            return Ok(false);
+        }
 
         // 本に画像が追加されていない場合はスキップ
-        if self.book.is_empty() {
+        if book.is_empty() {
             return Ok(false);
         }
 
         // 画像ファイルから開かれたら、ページインデックスを取得
-        if let Some(image_name) = image_name {
-            self.page = self.book.get_index_by_filename(&image_name);
+        let page = if let Some(image_name) = image_name {
+            book.get_index_by_filename(&image_name)
         } else {
-            self.page = Some(DEFAULT_PAGE);
-        }
+            Some(DEFAULT_PAGE)
+        };
 
         // ライブラリにファイルを追加
-        self.library.add_entry(path)?;
+        let mut library = file::Library::new();
+        library.add_entry(path)?;
 
         // ライブラリのインデックスを取得
-        self.volume = self.library.get_index_by_path(&self.book.path());
+        let volume = library.get_index_by_path(&book.path());
+
+        // 本を更新
+        self.book = book;
+        self.page = page;
+        self.library = library;
+        self.volume = volume;
 
         Ok(true)
     }
@@ -353,10 +373,23 @@ impl OpenFile {
 
         if index == self.library.len() - 1 { return Ok(false); }
 
+        // ボリュームを増やす
         self.volume_add();
-        if !self.read_book_from_library()? { return Ok(false); }
 
-        Ok(true)
+        // 本を読み込む
+        match self.read_book_from_library() {
+            Ok(true) => Ok(true),
+            Ok(false) => {
+                // 本を読み込めなかった場合はボリュームを減らす
+                self.volume_subtract();
+                Ok(false)
+            }
+            Err(e) => {
+                // 本を読み込めなかった場合はボリュームを減らす
+                self.volume_subtract();
+                Err(e)
+            }
+        }
     }
 
     /// 前のライブラリを読み込む
@@ -367,10 +400,23 @@ impl OpenFile {
 
         if index == 0 { return Ok(false); }
 
+        // ボリュームを減らす
         self.volume_subtract();
-        if !self.read_book_from_library()? { return Ok(false); }
 
-        Ok(true)
+        // 本を読み込む
+        match self.read_book_from_library() {
+            Ok(true) => Ok(true),
+            Ok(false) => {
+                // 本を読み込めなかった場合はボリュームを増やす
+                self.volume_add();
+                Ok(false)
+            }
+            Err(e) => {
+                // 本を読み込めなかった場合はボリュームを増やす
+                self.volume_add();
+                Err(e)
+            }
+        }
     }
 
     /// ライブラリから本を読み込む
@@ -380,13 +426,8 @@ impl OpenFile {
         let Some(entry) = self.library.get(index) else { return Ok(false); };
         let path = entry.path().clone();
 
-        self.book.clear();
-        self.page = None;
-        self.current_spread = None;
-
-        self.open_book(path)?;
-
-        Ok(true)
+        // 新しい本を開く
+        self.open_book(path)
     }
 
     /// 次のファイルを取得

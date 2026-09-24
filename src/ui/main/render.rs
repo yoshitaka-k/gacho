@@ -199,11 +199,18 @@ impl Render {
         self.error_token.reset();
 
         // ファイルを開く
-        if let Err(e) = event::drop::path(path, &mut self.open_file) {
-            self.error_token.show(e);
-        } else {
-            // 画面に表示させるページリストを作成
-            self.rebuild_spreads();
+        match event::drop::path(path, &mut self.open_file) {
+            Ok(true) => {
+                // 画面に表示させるページリストを作成
+                self.rebuild_spreads();
+            }
+            Ok(false) => {
+                // 何もしない
+            }
+            Err(e) => {
+                // エラーモーダルを表示
+                self.error_token.show(e);
+            }
         }
     }
 

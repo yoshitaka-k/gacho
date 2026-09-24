@@ -15,6 +15,8 @@ pub(crate) use library::Library;
 use std::path::PathBuf;
 use std::sync::LazyLock;
 use regex::Regex;
+use std::iter::Peekable;
+use std::str::Chars;
 
 /// 同人形式: (カテゴリ)[著者]タイトル(ジャンル)[備考]
 /// 例:
@@ -81,6 +83,68 @@ pub(crate) fn is_hidden_entry(path: &PathBuf) -> bool {
 /// * `return` - ソートされたパスのベクター
 pub(crate) fn sort_path(paths: &Vec<PathBuf>) -> Vec<PathBuf> {
     let mut temp_paths = paths.clone();
-    temp_paths.sort_by(|a, b| a.cmp(b));
+    // パスで並び替え
+    temp_paths.sort_by(|a, b| {
+        cmp_natural(&a.to_string_lossy(), &b.to_string_lossy()).then(a.cmp(b))
+    });
     temp_paths
+}
+
+/// 自然順で比較
+/// * `a` - 比較する文字列
+/// * `b` - 比較する文字列
+/// * `return` - 比較結果
+pub(crate) fn cmp_natural(a: &str, b: &str) -> std::cmp::Ordering {
+    let mut a = a.chars().peekable();
+    let mut b = b.chars().peekable();
+
+    loop {
+        match (a.peek().copied(), b.peek().copied()) {
+            (None, None) => return std::cmp::Ordering::Equal,
+            (None, Some(_)) => return std::cmp::Ordering::Less,
+            (Some(_), None) => return std::cmp::Ordering::Greater,
+            (Some(ac), Some(bc)) if ac.is_ascii_digit() && bc.is_ascii_digit() => {
+                let cmp = read_number(&mut a).cmp(&read_number(&mut b));
+                if cmp != std::cmp::Ordering::Equal {
+                    return cmp;
+                }
+            }
+            _ => {
+                let cmp = read_text(&mut a).cmp(&read_text(&mut b));
+                if cmp != std::cmp::Ordering::Equal {
+                    return cmp;
+                }
+            }
+        }
+    }
+}
+
+/// 数字を読み込む
+/// * `chars` - 文字列
+/// * `return` - 読み込んだ数字
+fn read_number(chars: &mut Peekable<Chars<'_>>) -> u64 {
+    let mut num = 0;
+    while let Some(c) = chars.peek() {
+        if !c.is_ascii_digit() {
+            break;
+        }
+        num = num * 10 + (c.to_digit(10).unwrap() as u64);
+        chars.next();
+    }
+    num
+}
+
+/// テキストを読み込む
+/// * `chars` - 文字列
+/// * `return` - 読み込んだテキスト
+fn read_text(chars: &mut Peekable<Chars<'_>>) -> String {
+    let mut text = String::new();
+    while let Some(c) = chars.peek() {
+        if c.is_ascii_digit() {
+            break;
+        }
+        text.push(*c);
+        chars.next();
+    }
+    text
 }

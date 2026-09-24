@@ -9,9 +9,9 @@ use crate::{file, error};
 pub(crate) fn files(
     files: &[DroppedFileHandle],
     open_file: &mut file::OpenFile,
-) -> error::Result<()> {
+) -> error::Result<bool> {
     let Some(file) = files.first() else {
-        return Ok(());
+        return Ok(false);
     };
 
     path(file.path().to_path_buf(), open_file)
@@ -23,7 +23,7 @@ pub(crate) fn files(
 pub(crate) fn path(
     path: PathBuf,
     open_file: &mut file::OpenFile,
-) -> error::Result<()> {
+) -> error::Result<bool> {
     // ファイルをクリア
     open_file.clear();
 

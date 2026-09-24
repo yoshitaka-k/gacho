@@ -3,29 +3,31 @@ use crate::{error, file};
 /// ファイルオープンダイアログを開いて選択結果を追加する
 pub(crate) fn file(
     open_file: &mut file::OpenFile,
-) -> error::Result<()> {
+) -> error::Result<bool> {
     let extensions = file::Extension::to_archive_vec();
 
+    // ファイルを選択
     let path = rfd::FileDialog::new()
         .add_filter("Archive", &extensions)
         .pick_file();
 
-    // ファイルをクリア
-    open_file.clear();
-
     // ファイルを追加
     if let Some(path) = path {
-        open_file.open_book(path)?;
+        // ファイルをクリア
+        open_file.clear();
+
+        // ファイルを追加
+        return open_file.open_book(path);
     }
 
-    Ok(())
+    Ok(false)
 }
 
 /// ファイルオープンダイアログを開いて選択結果を追加する
 /// * `files` - 開いているファイル
 pub(crate) fn folder(
     open_file: &mut file::OpenFile,
-) -> error::Result<()> {
+) -> error::Result<bool> {
     let extensions = file::Extension::to_archive_vec();
 
     // Macのみファイルとフォルダを同時選択できる
@@ -40,13 +42,14 @@ pub(crate) fn folder(
         .add_filter("Archive", &extensions)
         .pick_folder();
 
-    // ファイルをクリア
-    open_file.clear();
-
     // ファイルを追加
     if let Some(path) = path {
-        open_file.open_book(path)?;
+        // ファイルをクリア
+        open_file.clear();
+
+        // ファイルを追加
+        return open_file.open_book(path);
     }
 
-    Ok(())
+    Ok(false)
 }

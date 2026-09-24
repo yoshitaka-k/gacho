@@ -288,13 +288,13 @@ impl OpenFile {
     /// 本を追加
     /// * `path` - ドロップされたファイルのパス
     /// * `return` - 結果
-    pub fn open_book(&mut self, path: PathBuf) -> error::Result<()> {
+    pub fn open_book(&mut self, path: PathBuf) -> error::Result<bool> {
         // 本に画像を追加
         let image_name = self.book.open_from_path(path.clone())?;
 
         // 本に画像が追加されていない場合はスキップ
         if self.book.is_empty() {
-            return Ok(());
+            return Ok(false);
         }
 
         // 画像ファイルから開かれたら、ページインデックスを取得
@@ -310,7 +310,7 @@ impl OpenFile {
         // ライブラリのインデックスを取得
         self.volume = self.library.get_index_by_path(&self.book.path());
 
-        Ok(())
+        Ok(true)
     }
 }
 

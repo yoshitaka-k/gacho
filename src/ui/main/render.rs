@@ -150,12 +150,19 @@ impl Render {
             self.error_token.reset();
 
             // ファイルを開く
-            if let Err(e) = open::file(&mut self.open_file) {
-                self.error_token.show(e);
+            match open::file(&mut self.open_file) {
+                Ok(true) => {
+                    // 画面に表示させるページリストを作成
+                    self.rebuild_spreads();
+                }
+                Ok(false) => {
+                    // 何もしない
+                }
+                Err(e) => {
+                    // エラーモーダルを表示
+                    self.error_token.show(e);
+                }
             }
-
-            // 画面に表示させるページリストを作成
-            self.rebuild_spreads();
         }
 
         // フォルダダイアログを開くボタンが押されてたらフォルダダイアログを開く
@@ -166,12 +173,19 @@ impl Render {
             self.error_token.reset();
 
             // フォルダを開く
-            if let Err(e) = open::folder(&mut self.open_file) {
-                self.error_token.show(e);
+            match open::folder(&mut self.open_file) {
+                Ok(true) => {
+                    // 画面に表示させるページリストを作成
+                    self.rebuild_spreads();
+                }
+                Ok(false) => {
+                    // 何もしない
+                }
+                Err(e) => {
+                    // エラーモーダルを表示
+                    self.error_token.show(e);
+                }
             }
-
-            // 画面に表示させるページリストを作成
-            self.rebuild_spreads();
         }
     }
 
@@ -187,10 +201,10 @@ impl Render {
         // ファイルを開く
         if let Err(e) = event::drop::path(path, &mut self.open_file) {
             self.error_token.show(e);
+        } else {
+            // 画面に表示させるページリストを作成
+            self.rebuild_spreads();
         }
-
-        // 画面に表示させるページリストを作成
-        self.rebuild_spreads();
     }
 
     /// ドラッグ&ドロップされたファイルを処理
@@ -204,12 +218,19 @@ impl Render {
         // 新しいファイルを開いたので、前回閉じたエラーを忘れさせる
         self.error_token.reset();
 
-        // 画面に表示させるページリストを作成
-        self.rebuild_spreads();
-
         // エラーが発生した場合はエラーモーダルを表示
-        if let Err(e) = result {
-            self.error_token.show(e);
+        match result {
+            Ok(true) => {
+                // 画面に表示させるページリストを作成
+                self.rebuild_spreads();
+            }
+            Ok(false) => {
+                // 何もしない
+            }
+            Err(e) => {
+                // エラーモーダルを表示
+                self.error_token.show(e);
+            }
         }
 
         // ウィンドウを前面に

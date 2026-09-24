@@ -34,7 +34,7 @@ pub fn arrow_right(
 pub fn drop(
     ui: &egui::Ui,
     open_file: &mut file::OpenFile,
-) -> Option<error::Result<()>> {
+) -> Option<error::Result<bool>> {
     ui.ctx().input(|input| {
         let files = input.raw.dropped_files.clone();
         if files.is_empty() {

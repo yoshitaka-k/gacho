@@ -45,8 +45,10 @@ jobs:
       with:
         targets: ${{ matrix.job.target }}
 
+    # 0.12 で Linux / macOS 設定が [package.metadata.bundle.linux] 等へ移った。
+    # 未指定だと次のリリースで Cargo.toml とまたずれるので固定する。
     - name: Install cargo-bundle
-      run: cargo install cargo-bundle --locked
+      run: cargo install cargo-bundle --version 0.12.0 --locked
 
     - name: Install dav1d build tools
       run: |

@@ -18,15 +18,6 @@ name = "Gacho"
 icon = ["target/bundle-icons/*.png"]
 category = "Utility"
 short_description = "Comic Book ZIP viewer"
-linux_exec_args = "%f"
-linux_mime_types = [
-    "application/zip",
-    "application/vnd.comicbook+zip",
-    "application/x-cbz",
-    "image/jpeg",
-    "image/png",
-]
-osx_info_plist_exts = ["assets/macos/info_plist_ext.xml"]
 deb_depends = [
     "libgtk-3-0",
     "libxcb-render0",
@@ -36,6 +27,19 @@ deb_depends = [
     "libvulkan1",
     "libssl3",
 ]
+
+[package.metadata.bundle.linux]
+exec_args = "%f"
+mime_types = [
+    "application/zip",
+    "application/vnd.comicbook+zip",
+    "application/x-cbz",
+    "image/jpeg",
+    "image/png",
+]
+
+[package.metadata.bundle.osx]
+info_plist_exts = ["assets/macos/info_plist_ext.xml"]
 
 [package.metadata.winresource]
 ProductName = "Gacho"

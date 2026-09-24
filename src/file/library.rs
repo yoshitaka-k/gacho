@@ -69,7 +69,7 @@ impl Library {
 
     /// ライブラリにエントリを追加
     /// * `path` - ファイルのパス
-    pub fn add_entry(&mut self, path: PathBuf) -> error::Result<()> {
+    pub fn build_entries(&mut self, path: PathBuf) -> error::Result<()> {
         // ベースディレクトリを取得
         let base_dir = path.parent().unwrap_or(&path).to_path_buf();
 

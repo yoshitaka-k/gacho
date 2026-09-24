@@ -319,7 +319,7 @@ impl OpenFile {
 
         // ライブラリにファイルを追加
         let mut library = file::Library::new();
-        library.add_entry(path)?;
+        library.build_entries(path)?;
 
         // ライブラリのインデックスを取得
         let volume = library.get_index_by_path(&book.path());

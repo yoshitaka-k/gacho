@@ -10,7 +10,7 @@ use crate::file;
 // JPEG の巨大 EXIF 用に大きめに設定
 const HEADER_BYTES: u64 = 256 * 1024;
 
-#[derive(Getters, Setters)]
+#[derive(Clone, Getters, Setters)]
 #[getset(get = "pub")]
 pub(crate) struct ArchiveFile {
     /// アーカイブ内のファイルのインデックス
@@ -152,7 +152,20 @@ impl Archive {
 
     /// ファイルを名前でソートする
     fn sort(&mut self) {
-        self.files.sort_by(|a, b| a.relative_path.cmp(&b.relative_path));
+        let mut temp_paths = Vec::new();
+        for file in &self.files {
+            temp_paths.push(file.relative_path.clone());
+        }
+
+        let sorted_paths = file::sort_path(&temp_paths);
+
+        let mut sorted_files: Vec<ArchiveFile> = Vec::new();
+        for path in &sorted_paths {
+            let file = self.files.iter().find(|f| f.relative_path == *path).unwrap();
+            sorted_files.push(file.clone());
+        }
+
+        self.files = sorted_files;
     }
 
     /// テキストをデコードする

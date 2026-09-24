@@ -155,9 +155,6 @@ impl Book {
             self.find_file(&path, &base_dir)?;
         }
 
-        // 一時ファイルをソート
-        self.sort_temp_path();
-
         Ok(image_name)
     }
 
@@ -212,12 +209,20 @@ impl Book {
 impl Book {
     /// ファイルをパス順にソート
     fn sort(&mut self) {
-        self.images.sort_by(|a, b| a.path().cmp(&b.path()));
-    }
+        let mut temp_paths = Vec::new();
+        for image in &self.images {
+            temp_paths.push(image.relative_path().clone());
+        }
 
-    /// 一時ファイルをソート
-    fn sort_temp_path(&mut self) {
-        self.temp_path.sort();
+        let sorted_paths = file::sort_path(&temp_paths);
+
+        let mut sorted_images: Vec<file::Image> = Vec::new();
+        for path in &sorted_paths {
+            let image = self.images.iter().find(|i| *i.relative_path() == *path).unwrap();
+            sorted_images.push(image.clone());
+        }
+
+        self.images = sorted_images;
     }
 
     /// ファイル名から本のタイトルを取り出す。

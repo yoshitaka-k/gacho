@@ -7,7 +7,7 @@ use crate::{error, file};
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
 /// ライブラリのエントリ
-#[derive(Getters)]
+#[derive(Clone, Getters)]
 pub(crate) struct LibraryEntry {
     #[allow(unused)]
     id: u64,
@@ -107,7 +107,20 @@ impl Library {
 impl Library {
     /// ファイルをソート
     fn sort(&mut self) {
-        self.entries.sort_by(|a, b| a.path.cmp(&b.path));
+        let mut temp_paths = Vec::new();
+        for entry in &self.entries {
+            temp_paths.push(entry.path.clone());
+        }
+
+        let sorted_paths = file::sort_path(&temp_paths);
+
+        let mut sorted_entries: Vec<LibraryEntry> = Vec::new();
+        for path in &sorted_paths {
+            let entry = self.entries.iter().find(|e| *e.path() == *path).unwrap();
+            sorted_entries.push(entry.clone());
+        }
+
+        self.entries = sorted_entries;
     }
 
     /// ファイルを探索

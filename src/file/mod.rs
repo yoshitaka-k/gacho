@@ -12,7 +12,7 @@ pub(crate) use image::Image;
 pub(crate) use archive::Archive;
 pub(crate) use library::Library;
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::LazyLock;
 use regex::Regex;
 
@@ -69,9 +69,18 @@ pub(crate) fn is_archive(path: &PathBuf) -> bool {
 /// ファイルが隠しファイルかどうかをチェックする
 /// * `path` - ファイルのパス
 /// * `return` - ファイルが隠しファイルかどうか
-pub(crate) fn is_hidden_entry(path: &Path) -> bool {
+pub(crate) fn is_hidden_entry(path: &PathBuf) -> bool {
     path.components().any(|c| {
         let s = c.as_os_str().to_string_lossy();
         s.starts_with('.') || s == "__MACOSX"
     })
+}
+
+/// パスをソートする
+/// * `path` - パスのベクター
+/// * `return` - ソートされたパスのベクター
+pub(crate) fn sort_path(paths: &Vec<PathBuf>) -> Vec<PathBuf> {
+    let mut temp_paths = paths.clone();
+    temp_paths.sort_by(|a, b| a.cmp(b));
+    temp_paths
 }

@@ -92,13 +92,13 @@ impl Book {
         if image.is_archive() && image.is_empty_bytes() {
             let archive = self.archive.as_mut().ok_or_else(|| {
                 error::GachoError::ArchiveError(
-                    format!("Archive not found: {}", image.relative_path())
+                    format!("Archive not found: {}", image.relative_path().display())
                 )
             })?;
 
             let archive_file = archive.get_zipfile(*image.archive_index()).map_err(|e| {
                 error::GachoError::ArchiveError(
-                    format!("{} : {}", e.to_string(), image.relative_path())
+                    format!("{} : {}", e.to_string(), image.relative_path().display())
                 )
             })?;
 
@@ -260,7 +260,7 @@ impl Book {
             }
         } else {
             let replace_path = format!("/{}", image.file_name());
-            image.relative_path().clone().replace(&replace_path, "")
+            image.relative_path().clone().to_string_lossy().replace(&replace_path, "")
         };
 
         title
@@ -313,12 +313,10 @@ impl Book {
     /// * `base_dir` - ドロップされたパスの親（相対パスの基準）
     /// * `return` - 結果
     fn image_new(&mut self, path: &PathBuf, base_dir: &Path) -> error::Result<()> {
-        // strip_prefix は path を借りるので、
-        // 先に String にして into_owned()で所有権を移す
+        // 相対パスを取得
         let relative_path = path.strip_prefix(base_dir)
             .unwrap_or(&path)
-            .to_string_lossy()
-            .into_owned();
+            .to_path_buf();
 
         // ファイルがアーカイブかどうかを判断
         if file::is_archive(&path) {

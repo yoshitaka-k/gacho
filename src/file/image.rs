@@ -20,7 +20,7 @@ pub struct Image {
     path: PathBuf,
 
     /// ファイルの相対パス
-    relative_path: String,
+    relative_path: PathBuf,
 
     /// 画像ファイルの名前
     file_name: String,
@@ -48,7 +48,7 @@ impl Image {
     /// * `return` - Image のインスタンス
     pub fn new(
         path: PathBuf,
-        relative_path: String,
+        relative_path: PathBuf,
         file_name: Option<String>,
         size: Option<egui::Vec2>,
         bytes: Option<Vec<u8>>,

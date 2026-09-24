@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::{Cursor, Read, BufReader};
 use getset::{Getters, Setters};
@@ -20,7 +20,7 @@ pub(crate) struct ArchiveFile {
     file_name: String,
 
     /// ファイルのパス
-    relative_path: String,
+    relative_path: PathBuf,
 
     /// ファイルの幅・高さ
     #[getset(set = "pub")]
@@ -34,10 +34,13 @@ pub(crate) struct ArchiveFile {
 #[derive(Getters, Setters)]
 #[getset(get = "pub")]
 pub(crate) struct Archive {
+    /// アーカイブ
     archive: Option<zip::ZipArchive<Cursor<Vec<u8>>>>,
 
+    /// アーカイブ内のファイル
     files: Vec<ArchiveFile>,
 
+    /// アーカイブ内のファイル数
     len: usize,
 }
 
@@ -72,8 +75,8 @@ impl Archive {
             if file.is_dir() { continue; }
 
             // zipファイル内の相対パス付きファイル名を取得する
-            let relative_path = self.decode_raw(file.name_raw());
-            let path = Path::new(&relative_path);
+            let relative_path = PathBuf::from(self.decode_raw(file.name_raw()));
+            let path = relative_path.clone();
 
             // ファイルが隠しファイルかどうかをチェックする
             if file::is_hidden_entry(&path) { continue; }
@@ -83,7 +86,9 @@ impl Archive {
             // zipファイル内のファイル名を取得する
             let file_name = path.file_name()
                 .map(|name| name.to_string_lossy().into_owned())
-                .unwrap_or_else(|| relative_path.clone());
+                .unwrap_or_else(|| {
+                    relative_path.to_string_lossy().into_owned()
+                });
 
             // アーカイブ内のファイルのヘッダーの HEADER_BYTES 数を取得する
             let mut header = Vec::new();

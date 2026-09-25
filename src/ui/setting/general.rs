@@ -1,4 +1,4 @@
-use crate::{app, event, ui};
+use crate::{app, ui};
 use crate::ui::assets::svg;
 use crate::ui::setting;
 
@@ -21,8 +21,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
         ui.horizontal(|ui| {
             ui::add_label(ui, "Page Layout:", setting::GENERAL_LABEL_WIDTH);
             ui.scope(|ui| {
-                ui.radio_value(app.page_layout_mut(), event::PageLayout::Single, event::PageLayout::Single.to_string());
-                ui.radio_value(app.page_layout_mut(), event::PageLayout::Spread, event::PageLayout::Spread.to_string());
+                ui.radio_value(app.page_layout_mut(), app::PageLayout::Single, app::PageLayout::Single.to_string());
+                ui.radio_value(app.page_layout_mut(), app::PageLayout::Spread, app::PageLayout::Spread.to_string());
             });
         });
 
@@ -30,8 +30,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
         ui.horizontal(|ui| {
             ui::add_label(ui, "Cover Layout:", setting::GENERAL_LABEL_WIDTH);
             ui.scope(|ui| {
-                ui.radio_value(app.cover_layout_mut(), event::CoverLayout::Single, event::CoverLayout::Single.to_string());
-                ui.radio_value(app.cover_layout_mut(), event::CoverLayout::Spread, event::CoverLayout::Spread.to_string());
+                ui.radio_value(app.cover_layout_mut(), app::CoverLayout::Single, app::CoverLayout::Single.to_string());
+                ui.radio_value(app.cover_layout_mut(), app::CoverLayout::Spread, app::CoverLayout::Spread.to_string());
             });
         });
 
@@ -48,8 +48,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
         ui.horizontal(|ui| {
             ui::add_label(ui, "Read From:", setting::GENERAL_LABEL_WIDTH);
             ui.scope(|ui| {
-                ui.radio_value(app.read_from_mut(), event::ReadFrom::RightToLeft, event::ReadFrom::RightToLeft.to_string());
-                ui.radio_value(app.read_from_mut(), event::ReadFrom::LeftToRight, event::ReadFrom::LeftToRight.to_string());
+                ui.radio_value(app.read_from_mut(), app::ReadFrom::RightToLeft, app::ReadFrom::RightToLeft.to_string());
+                ui.radio_value(app.read_from_mut(), app::ReadFrom::LeftToRight, app::ReadFrom::LeftToRight.to_string());
             });
         });
     });

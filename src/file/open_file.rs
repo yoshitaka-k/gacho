@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use getset::{Getters, MutGetters, Setters};
 
-use crate::{app, event, file, error};
+use crate::{app, file, error};
 
 const DEFAULT_PAGE: usize = 0;
 
@@ -105,12 +105,12 @@ impl OpenFile {
 
     /// 画面に表示させるページリストを作成
     /// * `page_layout` - ページ送り表示方式
-    pub fn build_spreads(&mut self, cover_layout: event::CoverLayout, page_layout: event::PageLayout) {
+    pub fn build_spreads(&mut self, cover_layout: app::CoverLayout, page_layout: app::PageLayout) {
         self.spreads.clear();
         let mut page_index = 0;
 
         // 表紙（0ページ目）を単独表示
-        if !self.book.is_empty() && matches!(cover_layout, event::CoverLayout::Single) {
+        if !self.book.is_empty() && matches!(cover_layout, app::CoverLayout::Single) {
             self.spreads.push(Spread::Single { index: 0 });
             page_index += 1;
         }
@@ -123,7 +123,7 @@ impl OpenFile {
             };
 
             // 単一ページで表示
-            if matches!(page_layout, event::PageLayout::Single) {
+            if matches!(page_layout, app::PageLayout::Single) {
                 self.spreads.push(Spread::Single { index: page_index });
                 page_index += 1;
                 continue;
@@ -217,7 +217,7 @@ impl OpenFile {
     /// * `return` - 左へのインデックス
     pub fn left_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
-            event::ReadFrom::RightToLeft => {
+            app::ReadFrom::RightToLeft => {
                 if self.is_last_page() {
                     // 次のライブラリを読み込む
                     if self.read_next_library()? {
@@ -230,7 +230,7 @@ impl OpenFile {
                     }
                 }
             }
-            event::ReadFrom::LeftToRight => {
+            app::ReadFrom::LeftToRight => {
                 if self.is_first_page() {
                     // 前のライブラリを読み込む
                     if self.read_prev_library()? {
@@ -254,7 +254,7 @@ impl OpenFile {
     /// * `return` - 右へのインデックス
     pub fn right_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
-            event::ReadFrom::RightToLeft => {
+            app::ReadFrom::RightToLeft => {
                 if self.is_first_page() {
                     // 前のライブラリを読み込む
                     if self.read_prev_library()? {
@@ -267,7 +267,7 @@ impl OpenFile {
                     }
                 }
             }
-            event::ReadFrom::LeftToRight => {
+            app::ReadFrom::LeftToRight => {
                 if self.is_last_page() {
                     // 次のライブラリを読み込む
                     if self.read_next_library()? {

@@ -44,7 +44,7 @@ pub(crate) fn view(
                         let mut images: Vec<(&file::Image, egui::Vec2)> = images.iter().zip(sizes).collect();
 
                         // 読み込み方向によって画像を反転
-                        if matches!(app.read_from(), event::ReadFrom::LeftToRight) {
+                        if matches!(app.read_from(), app::ReadFrom::LeftToRight) {
                             images.reverse();
                         }
 

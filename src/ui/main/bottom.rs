@@ -66,8 +66,8 @@ pub(crate) fn view(
             |ui| {
                 // 右矢印のファイルボタン
                 let hover_text = match app.read_from() {
-                    event::ReadFrom::RightToLeft => "Previous page",
-                    event::ReadFrom::LeftToRight => "Next page",
+                    app::ReadFrom::RightToLeft => "Previous page",
+                    app::ReadFrom::LeftToRight => "Next page",
                 };
                 let prev_button = egui::Image::new(svg::KEYBOARD_ARROW_RIGHT)
                     .tint(button_color);
@@ -79,8 +79,8 @@ pub(crate) fn view(
 
                 // 左矢印のファイルボタン
                 let hover_text = match app.read_from() {
-                    event::ReadFrom::RightToLeft => "Next page",
-                    event::ReadFrom::LeftToRight => "Previous page",
+                    app::ReadFrom::RightToLeft => "Next page",
+                    app::ReadFrom::LeftToRight => "Previous page",
                 };
                 let next_button = egui::Image::new(svg::KEYBOARD_ARROW_LEFT)
                     .tint(button_color);
@@ -98,11 +98,11 @@ pub(crate) fn view(
                 ui.scope(|ui| {
                     ui.spacing_mut().slider_width = SLIDER_WIDTH;
                     let slider = match app.read_from() {
-                        event::ReadFrom::RightToLeft => ui.add(
+                        app::ReadFrom::RightToLeft => ui.add(
                             egui::Slider::new(&mut selected, max..=MIN_INDEX)
                             .show_value(false)
                         ),
-                        event::ReadFrom::LeftToRight => ui.add(
+                        app::ReadFrom::LeftToRight => ui.add(
                             egui::Slider::new(&mut selected, MIN_INDEX..=max)
                             .show_value(false)
                         ),

@@ -216,13 +216,8 @@ impl Render {
                 // 画面に表示させるページリストを作成
                 self.rebuild_spreads();
             }
-            Ok(false) => {
-                // 何もしない
-            }
-            Err(e) => {
-                // エラーモーダルを表示
-                self.error_token.show(e);
-            }
+            Ok(false) => {},
+            Err(e) => self.error_token.show(e),
         }
     }
 

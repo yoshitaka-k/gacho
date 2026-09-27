@@ -41,14 +41,11 @@
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
         <key>LSHandlerRank</key>
-        <string>Alternate</string>
-        <key>LSItemContentTypes</key>
-        <array>
-            <string>public.zip-archive</string>
-        </array>
+        <string>Default</string>
         <key>CFBundleTypeExtensions</key>
         <array>
             <string>zip</string>
+            <string>ZIP</string>
         </array>
     </dict>
     <dict>
@@ -57,10 +54,13 @@
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
         <key>LSHandlerRank</key>
-        <string>Alternate</string>
-        <key>LSItemContentTypes</key>
+        <string>Default</string>
+        <key>CFBundleTypeExtensions</key>
         <array>
-            <string>public.jpeg</string>
+            <string>jpg</string>
+            <string>jpeg</string>
+            <string>JPG</string>
+            <string>JPEG</string>
         </array>
     </dict>
     <dict>
@@ -69,10 +69,11 @@
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
         <key>LSHandlerRank</key>
-        <string>Alternate</string>
-        <key>LSItemContentTypes</key>
+        <string>Default</string>
+        <key>CFBundleTypeExtensions</key>
         <array>
-            <string>public.png</string>
+            <string>png</string>
+            <string>PNG</string>
         </array>
     </dict>
 </array>

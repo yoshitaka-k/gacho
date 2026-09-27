@@ -1,6 +1,6 @@
 [package]
 name = "gacho"
-version = "1.2.1"
+version = "1.2.2"
 edition = "2024"
 description = "Comic Book ZIP viewer"
 authors = ["yoshitaka-k"]
@@ -18,6 +18,7 @@ name = "Gacho"
 icon = ["target/bundle-icons/*.png"]
 category = "Utility"
 short_description = "Comic Book ZIP viewer"
+osx_info_plist_exts = ["assets/macos/info_plist_ext.xml"]
 deb_depends = [
     "libgtk-3-0",
     "libxcb-render0",
@@ -37,9 +38,6 @@ mime_types = [
     "image/jpeg",
     "image/png",
 ]
-
-[package.metadata.bundle.osx]
-info_plist_exts = ["assets/macos/info_plist_ext.xml"]
 
 [package.metadata.winresource]
 ProductName = "Gacho"

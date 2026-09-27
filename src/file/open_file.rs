@@ -369,7 +369,7 @@ impl OpenFile {
     fn next_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         if self.is_last_page() {
             // 次のライブラリを読み込む
-            if self.read_next_library()? {
+            if self.read_next_library(*app.open_last_page())? {
                 // ページリストを再構築
                 self.build_spreads(*app.cover_layout(), *app.page_layout());
             }
@@ -388,7 +388,7 @@ impl OpenFile {
     fn prev_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         if self.is_first_page() {
             // 前のライブラリを読み込む
-            if self.read_prev_library()? {
+            if self.read_prev_library(*app.open_last_page())? {
                 // ページリストを再構築
                 self.build_spreads(*app.cover_layout(), *app.page_layout());
             }
@@ -407,7 +407,7 @@ impl OpenFile {
     fn last_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         if self.is_last_page() {
             // 次のライブラリを読み込む
-            if self.read_next_library()? {
+            if self.read_next_library(*app.open_last_page())? {
                 // ページリストを再構築
                 self.build_spreads(*app.cover_layout(), *app.page_layout());
             }
@@ -425,7 +425,7 @@ impl OpenFile {
     fn first_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         if self.is_first_page() {
             // 前のライブラリを読み込む
-            if self.read_prev_library()? {
+            if self.read_prev_library(*app.open_last_page())? {
                 // ページリストを再構築
                 self.build_spreads(*app.cover_layout(), *app.page_layout());
             }
@@ -498,8 +498,9 @@ impl OpenFile {
     }
 
     /// 次のライブラリを読み込む
+    /// * `open_last_page` - 最後に読んだページを開くかどうか
     /// * `return` - 次のライブラリを読み込めたかどうか
-    fn read_next_library(&mut self) -> error::Result<bool> {
+    fn read_next_library(&mut self, open_last_page: bool) -> error::Result<bool> {
         if self.library.len() == 0 { return Ok(false); }
         let Some(index) = self.volume  else { return Ok(false); };
 
@@ -509,7 +510,7 @@ impl OpenFile {
         self.volume_add();
 
         // 本を読み込む
-        match self.read_book_from_library() {
+        match self.read_book_from_library(open_last_page) {
             Ok(true) => Ok(true),
             Ok(false) => {
                 // 本を読み込めなかった場合はボリュームを減らす
@@ -525,8 +526,9 @@ impl OpenFile {
     }
 
     /// 前のライブラリを読み込む
+    /// * `open_last_page` - 最後に読んだページを開くかどうか
     /// * `return` - 結果
-    fn read_prev_library(&mut self) -> error::Result<bool> {
+    fn read_prev_library(&mut self, open_last_page: bool) -> error::Result<bool> {
         if self.library.len() == 0 { return Ok(false); }
         let Some(index) = self.volume  else { return Ok(false); };
 
@@ -536,7 +538,7 @@ impl OpenFile {
         self.volume_subtract();
 
         // 本を読み込む
-        match self.read_book_from_library() {
+        match self.read_book_from_library(open_last_page) {
             Ok(true) => Ok(true),
             Ok(false) => {
                 // 本を読み込めなかった場合はボリュームを増やす
@@ -552,15 +554,16 @@ impl OpenFile {
     }
 
     /// ライブラリから本を読み込む
+    /// * `open_last_page` - 最後に読んだページを開くかどうか
     /// * `return` - 結果
-    fn read_book_from_library(&mut self) -> error::Result<bool> {
+    fn read_book_from_library(&mut self, open_last_page: bool) -> error::Result<bool> {
         let Some(index) = self.volume else { return Ok(false); };
         let Some(entry) = self.library.get(index) else { return Ok(false); };
         let path = entry.path().clone();
         let last_page = entry.last_page();
 
         // 新しい本を開く
-        self.open_book(path, *last_page)
+        self.open_book(path, if open_last_page { *last_page } else { None })
     }
 
     /// 次のファイルを取得

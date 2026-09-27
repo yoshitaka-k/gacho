@@ -236,30 +236,10 @@ impl OpenFile {
     pub fn left_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
             app::ReadFrom::RightToLeft => {
-                if self.is_last_page() {
-                    // 次のライブラリを読み込む
-                    if self.read_next_library()? {
-                        // ページリストを再構築
-                        self.build_spreads(*app.cover_layout(), *app.page_layout());
-                    }
-                } else {
-                    if self.page_add() {
-                        self.update_page();
-                    }
-                }
+                self.next_page(app)?;
             }
             app::ReadFrom::LeftToRight => {
-                if self.is_first_page() {
-                    // 前のライブラリを読み込む
-                    if self.read_prev_library()? {
-                        // ページリストを再構築
-                        self.build_spreads(*app.cover_layout(), *app.page_layout());
-                    }
-                } else {
-                    if self.page_subtract() {
-                        self.update_page();
-                    }
-                }
+                self.prev_page(app)?;
             }
         }
 
@@ -273,30 +253,10 @@ impl OpenFile {
     pub fn right_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
         match app.read_from() {
             app::ReadFrom::RightToLeft => {
-                if self.is_first_page() {
-                    // 前のライブラリを読み込む
-                    if self.read_prev_library()? {
-                        // ページリストを再構築
-                        self.build_spreads(*app.cover_layout(), *app.page_layout());
-                    }
-                } else {
-                    if self.page_subtract() {
-                        self.update_page();
-                    }
-                }
+                self.prev_page(app)?;
             }
             app::ReadFrom::LeftToRight => {
-                if self.is_last_page() {
-                    // 次のライブラリを読み込む
-                    if self.read_next_library()? {
-                        // ページリストを再構築
-                        self.build_spreads(*app.cover_layout(), *app.page_layout());
-                    }
-                } else {
-                    if self.page_add() {
-                        self.update_page();
-                    }
-                }
+                self.next_page(app)?;
             }
         }
 
@@ -369,6 +329,44 @@ impl OpenFile {
     fn is_last_page(&self) -> bool {
         let Some(index) = self.current_spread else { return false; };
         index >= self.spreads.len().saturating_sub(1)
+    }
+
+    /// 次のページを取得
+    /// * `app` - アプリケーション
+    /// * `return` - 次のページ
+    fn next_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+        if self.is_last_page() {
+            // 次のライブラリを読み込む
+            if self.read_next_library()? {
+                // ページリストを再構築
+                self.build_spreads(*app.cover_layout(), *app.page_layout());
+            }
+        } else {
+            if self.page_add() {
+                self.update_page();
+            }
+        }
+
+        Ok(self.page)
+    }
+
+    /// 前のページを取得
+    /// * `app` - アプリケーション
+    /// * `return` - 前のページ
+    fn prev_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+        if self.is_first_page() {
+            // 前のライブラリを読み込む
+            if self.read_prev_library()? {
+                // ページリストを再構築
+                self.build_spreads(*app.cover_layout(), *app.page_layout());
+            }
+        } else {
+            if self.page_subtract() {
+                self.update_page();
+            }
+        }
+
+        Ok(self.page)
     }
 
     /// ページを更新

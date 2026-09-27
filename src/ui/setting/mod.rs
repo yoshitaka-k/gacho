@@ -14,7 +14,7 @@ const WINDOW_TITLE: &str = "Settings";
 
 // ウィンドウのサイズ
 const WINDOW_WIDTH: f32 = 460.0;
-const WINDOW_HEIGHT: f32 = 240.0;
+const WINDOW_HEIGHT: f32 = 260.0;
 
 // ヘッダーのスペースの幅
 const HEADER_ICON_SPACING: f32 = 4.0;
@@ -23,6 +23,7 @@ const WARNING_ICON_SPACING: f32 = 3.0;
 
 // ラベルの幅
 pub(crate) const GENERAL_LABEL_WIDTH: f32 = 80.0;
+pub(crate) const GENERAL_LONG_LABEL_WIDTH: f32 = 140.0;
 
 // 追加のスペースの幅
 pub(crate) const SETTING_ADD_SPACING: f32 = 4.0;

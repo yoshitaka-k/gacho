@@ -27,8 +27,7 @@ pub struct Render {
     error_token: ui::ErrorToken,
 
     // 本のモデル
-    // TODO: 最後に読んだページ用のモデルを追加
-    #[allow(unused)]
+    // 最後に読んだページ用のモデルを追加
     book_model: model::Book,
 }
 
@@ -161,6 +160,9 @@ impl Render {
             // ファイルを開く
             match open::file(&mut self.open_file) {
                 Ok(true) => {
+                    // 最後に読んだページを保存
+                    self.save_last_page();
+
                     // 画面に表示させるページリストを作成
                     self.rebuild_spreads();
                 }
@@ -184,6 +186,9 @@ impl Render {
             // フォルダを開く
             match open::folder(&mut self.open_file) {
                 Ok(true) => {
+                    // 最後に読んだページを保存するかどうかが保存されている場合は保存
+                    self.save_last_page();
+
                     // 画面に表示させるページリストを作成
                     self.rebuild_spreads();
                 }
@@ -210,6 +215,9 @@ impl Render {
         // ファイルを開く
         match event::drop::path(path, &mut self.open_file) {
             Ok(true) => {
+                // 最後に読んだページを保存するかどうかが保存されている場合は保存
+                self.save_last_page();
+
                 // 画面に表示させるページリストを作成
                 self.rebuild_spreads();
             }
@@ -237,6 +245,9 @@ impl Render {
         // エラーが発生した場合はエラーモーダルを表示
         match result {
             Ok(true) => {
+                // 最後に読んだページを保存
+                self.save_last_page();
+
                 // 画面に表示させるページリストを作成
                 self.rebuild_spreads();
             }
@@ -261,6 +272,19 @@ impl Render {
         self.open_file.build_spreads(*self.app.cover_layout(), *self.app.page_layout());
     }
 
+    /// 最後に読んだページを保存
+    fn save_last_page(&mut self) {
+        if !*self.app.remembered_last_page() {
+            return;
+        }
+
+        let path = self.open_file.book_path();
+        let page = self.open_file.current_page();
+        if let Err(e) = self.book_model.save_last_page(&path, page) {
+            self.error_token.show(e);
+        }
+    }
+
     /// イベントアクションを処理
     /// * `ui` - UI
     fn process_actions(&mut self, ui: &egui::Ui) {
@@ -271,6 +295,8 @@ impl Render {
 
         // エラーモーダルをリセット
         self.error_token.reset();
+
+        let mut is_saved = false;
 
         for action in self.pending_actions.drain(..) {
             match action {
@@ -286,24 +312,32 @@ impl Render {
                             self.error_token.show(e);
                         }
                     }
+                    is_saved = true;
                 }
                 // 左矢印ボタンイベント
                 event::EventAction::Left => {
                     if let Err(e) = self.open_file.left_page(&self.app) {
                         self.error_token.show(e);
                     }
+                    is_saved = true;
                 }
                 // 右矢印ボタンイベント
                 event::EventAction::Right => {
                     if let Err(e) = self.open_file.right_page(&self.app) {
                         self.error_token.show(e);
                     }
+                    is_saved = true;
                 }
                 // 閉じるボタンイベント
                 event::EventAction::Close => {
                     button::close_open_file(&mut self.open_file);
                 }
             }
+        }
+
+        // 最後に読んだページを保存
+        if is_saved {
+            self.save_last_page();
         }
     }
 }

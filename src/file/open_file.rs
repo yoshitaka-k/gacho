@@ -70,6 +70,18 @@ impl OpenFile {
         &self.book.title()
     }
 
+    /// 本のパスを取得
+    /// * `return` - 本のパス
+    pub fn book_path(&self) -> &PathBuf {
+        &self.book.path()
+    }
+
+    /// 本のページを取得
+    /// * `return` - 本のページ
+    pub fn current_page(&self) -> usize {
+        self.page.unwrap_or(DEFAULT_PAGE)
+    }
+
     /// 本の画像のIDを取得
     /// * `return` - 本の画像の ID ベクター
     pub fn book_image_ids(&self) -> Vec<u64> {

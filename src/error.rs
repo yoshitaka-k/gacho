@@ -9,6 +9,7 @@ pub enum GachoError {
     ArchiveError(String),
     InvalidVersion,
     IndexError(usize),
+    DatabaseError(String),
 }
 
 /// GachoError を表示
@@ -20,6 +21,7 @@ impl fmt::Display for GachoError {
             GachoError::ArchiveError(e) => write!(f, "Archive error: {}", e),
             GachoError::InvalidVersion => write!(f, "Invalid version"),
             GachoError::IndexError(index) => write!(f, "Index error: {}", index),
+            GachoError::DatabaseError(e) => write!(f, "Database error: {}", e),
         }
     }
 }
@@ -33,6 +35,7 @@ impl error::Error for GachoError {
             GachoError::ArchiveError(_) => None,
             GachoError::InvalidVersion => None,
             GachoError::IndexError(_) => None,
+            GachoError::DatabaseError(_) => None,
         }
     }
 }

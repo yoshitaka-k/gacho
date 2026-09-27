@@ -84,6 +84,9 @@ pub struct App {
 
     /// ページ送り表示方式
     page_layout: PageLayout,
+
+    /// 最後に読んだページを保存するかどうか
+    remembered_last_page: bool,
 }
 
 impl Default for App {
@@ -93,6 +96,7 @@ impl Default for App {
             cover_layout: CoverLayout::Single,
             read_from: ReadFrom::RightToLeft,
             page_layout: PageLayout::Single,
+            remembered_last_page: false,
         }
     }
 }

@@ -80,10 +80,17 @@ impl Image {
         let size = if let Some(size) = size {
             size
         } else if file::is_image(&path) {
+            // 画像ファイルを読み込む
             let reader = ImageReader::open(&path).map_err(|e| {
                 error::GachoError::FileError(e.to_string(), path.clone())
             })?;
-            let (width, height) = reader.into_dimensions().map_err(|e| {
+            // ファイルのフォーマットを取得
+            let reader_with_format = reader.with_guessed_format().map_err(|e| {
+                error::GachoError::FileError(e.to_string(), path.clone())
+            })?;
+
+            // 画像ファイルの幅・高さを取得
+            let (width, height) = reader_with_format.into_dimensions().map_err(|e| {
                 error::GachoError::FileError(e.to_string(), path.clone())
             })?;
 

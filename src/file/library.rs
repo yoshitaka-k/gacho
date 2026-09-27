@@ -1,13 +1,13 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
-use getset::Getters;
+use getset::{Getters, Setters};
 use crate::{error, file};
 
 /// Image の一意な ID を発行するカウンタ
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
 /// ライブラリのエントリ
-#[derive(Clone, Getters)]
+#[derive(Clone, Getters, Setters)]
 pub(crate) struct LibraryEntry {
     /// ファイルの一意な ID
     #[allow(unused)]
@@ -20,6 +20,10 @@ pub(crate) struct LibraryEntry {
     /// ファイルの名前
     #[allow(unused)]
     file_name: String,
+
+    /// 最後に読んだページ
+    #[getset(set = "pub", get = "pub")]
+    last_page: Option<usize>,
 }
 
 /// public methods
@@ -28,11 +32,11 @@ impl LibraryEntry {
     /// * `path` - ファイルのパス
     /// * `file_name` - ファイルの名前
     /// * `return` - ライブラリのエントリ
-    pub fn new(path: PathBuf, file_name: String) -> Self {
+    pub fn new(path: PathBuf, file_name: String, last_page: Option<usize>) -> Self {
         // ファイルの一意な ID を発行
         let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
 
-        Self { id, path, file_name }
+        Self { id, path, file_name, last_page }
     }
 }
 
@@ -66,6 +70,13 @@ impl Library {
         self.entries.get(index)
     }
 
+    /// インデックスでエントリを取得
+    /// * `index` - インデックス
+    /// * `return` - エントリ
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut LibraryEntry> {
+        self.entries.get_mut(index)
+    }
+
     /// パスで index を取得
     /// * `path` - パス
     /// * `return` - index
@@ -78,7 +89,8 @@ impl Library {
 
     /// ライブラリにエントリを追加
     /// * `path` - ファイルのパス
-    pub fn build_entries(&mut self, path: PathBuf) -> error::Result<()> {
+    /// * `books_last_page` - 本のリスト
+    pub fn build_entries(&mut self, path: PathBuf, books_last_page: &Vec<(PathBuf, usize)>) -> error::Result<()> {
         // ベースディレクトリを取得
         let base_dir = path.parent().unwrap_or(&path).to_path_buf();
 
@@ -90,7 +102,7 @@ impl Library {
             if index.is_some() { return Ok(()); }
 
             let file_name = self.get_file_name(&base_dir);
-            self.entries.push(LibraryEntry::new(base_dir.clone(), file_name));
+            self.entries.push(LibraryEntry::new(base_dir.clone(), file_name, None));
 
             // ファイルをソート
             self.sort();
@@ -103,7 +115,7 @@ impl Library {
         if index.is_some() { return Ok(()); }
 
         // ファイルを探索
-        self.find_file(&path, &base_dir)?;
+        self.find_file(&path, &base_dir, books_last_page)?;
 
         // ファイルをソート
         self.sort();
@@ -135,8 +147,9 @@ impl Library {
     /// ファイルを探索
     /// * `path` - ファイルのパス
     /// * `base_dir` - ベースディレクトリのパス
+    /// * `books_last_page` - 本のリスト
     /// * `return` - 結果
-    fn find_file(&mut self, path: &PathBuf, base_dir: &PathBuf) -> error::Result<()> {
+    fn find_file(&mut self, path: &PathBuf, base_dir: &PathBuf, books_last_page: &Vec<(PathBuf, usize)>) -> error::Result<()> {
         // メタデータを取得
         let metadata = path.metadata().map_err(|e| {
             error::GachoError::FileError(e.to_string(), path.clone())
@@ -158,9 +171,12 @@ impl Library {
                 // ファイルの名前を取得
                 let file_name = self.get_file_name(&entry.path());
 
+                // 最後に読んだページを取得
+                let last_page = books_last_page.iter().find(|(p, _)| p == &entry.path()).map(|(_, p)| p).copied();
+
                 // ライブラリに追加
                 self.entries.push(
-                    LibraryEntry::new(entry.path().clone(), file_name)
+                    LibraryEntry::new(entry.path().clone(), file_name, last_page)
                 );
             }
 
@@ -180,16 +196,19 @@ impl Library {
                 // ファイルの名前を取得
                 let file_name = self.get_file_name(&entry.path());
 
+                // 最後に読んだページを取得
+                let last_page = books_last_page.iter().find(|(p, _)| p == &entry.path()).map(|(_, p)| p).copied();
+
                 // ライブラリに追加
                 self.entries.push(
-                    LibraryEntry::new(entry.path().clone(), file_name)
+                    LibraryEntry::new(entry.path().clone(), file_name, last_page)
                 );
             }
 
             // ディレクトリで何も追加されていない場合は、ディレクトリのパスをライブラリに追加
             if self.entries.is_empty() {
                 self.entries.push(
-                    LibraryEntry::new(path.clone(), self.get_file_name(&path))
+                    LibraryEntry::new(path.clone(), self.get_file_name(&path), None)
                 );
             }
         }

@@ -1,4 +1,4 @@
-use crate::{file, event, error, ui};
+use crate::{error, event, file, model, ui};
 use crate::event::{drop, button};
 
 /// 左矢印キーが押されたら次に移動する
@@ -34,13 +34,15 @@ pub fn arrow_right(
 pub fn drop(
     ui: &egui::Ui,
     open_file: &mut file::OpenFile,
+    book_model: &mut model::Book,
+    is_open_last_page: bool,
 ) -> Option<error::Result<bool>> {
     ui.ctx().input(|input| {
         let files = input.raw.dropped_files.clone();
         if files.is_empty() {
             None
         } else {
-            Some(drop::files(&files, open_file))
+            Some(drop::files(&files, open_file, book_model, is_open_last_page))
         }
     })
 }

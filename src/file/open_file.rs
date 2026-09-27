@@ -297,13 +297,14 @@ impl OpenFile {
         Ok(self.page)
     }
 
-    /// 本を追加
+    /// ライブラリと本を構築
     /// * `path` - ドロップされたファイルのパス
+    /// * `books_last_page` - 本のリスト
     /// * `return` - 結果
-    pub fn open_book(&mut self, path: PathBuf) -> error::Result<bool> {
+    pub fn build_book(&mut self, path: PathBuf, books_last_page: Vec<(PathBuf, usize)>) -> error::Result<bool> {
         // ライブラリにファイルを追加
         let mut library = file::Library::new();
-        library.build_entries(path.clone())?;
+        library.build_entries(path.clone(), &books_last_page)?;
 
         // ライブラリのインデックスを取得
         let volume = if path.is_dir() {
@@ -316,9 +317,6 @@ impl OpenFile {
         let Some(entry) = library.get(volume.unwrap_or(0)) else { return Ok(false); };
         let library_path = entry.path();
 
-        // 新しい本を作成
-        let mut book = file::Book::new();
-
         // 画像ファイルかディレクトリかを判断
         let open_path = if file::is_image(&path) {
             path.clone()
@@ -326,28 +324,23 @@ impl OpenFile {
             library_path.clone()
         };
 
-        // ファイルを一時ファイルにコピー
-        let image_name = book.open_from_path_to_temp(open_path.clone())?;
-
-        // 一時ファイルに画像が追加されていない場合はスキップ
-        if book.is_temp_empty() { return Ok(false); }
-
-        // 一時ファイルから本を開く
-        if !book.open_from_temp_to_book(&open_path)? { return Ok(false); }
-
-        // 本に画像が追加されていない場合はスキップ
-        if book.is_empty() { return Ok(false); }
-
-        // 画像ファイルから開かれたら、ページインデックスを取得
-        let page = if let Some(image_name) = image_name {
-            book.get_index_by_filename(&image_name)
+        // 最後に読んだページを取得
+        let last_page = if !books_last_page.is_empty() {
+            if !file::is_image(&open_path) {
+                books_last_page.iter().find(|(p, _)| *p == open_path).map(|(_, p)| p).copied()
+            } else {
+                // 画像ファイルの場合は、画像ファイルを基準に開くので、
+                // 最後に読んだページを取得しない
+                None
+            }
         } else {
-            Some(DEFAULT_PAGE)
+            None
         };
 
-        // 本を更新
-        self.book = book;
-        self.page = page;
+        // 本を開く
+        if !self.open_book(open_path, last_page)? { return Ok(false); }
+
+        // ライブラリと本を更新
         self.library = library;
         self.volume = volume;
 
@@ -383,7 +376,53 @@ impl OpenFile {
                 Spread::Single { index } => *index,
                 Spread::Pair { right, .. } => *right,
             });
+
+            // 最後に読んだページをライブラリに保存
+            if let Some(index) = self.volume {
+                let Some(entry) = self.library.get_mut(index) else { return; };
+                let page = self.page.unwrap_or(DEFAULT_PAGE);
+                entry.set_last_page(Some(page));
+            }
         }
+    }
+
+    /// 本を開く
+    /// * `path` - ファイルのパス
+    /// * `last_page` - 最後に読んだページ
+    /// * `return` - 結果
+    fn open_book(&mut self, path: PathBuf, last_page: Option<usize>) -> error::Result<bool> {
+        // 新しい本を作成
+        let mut book = file::Book::new();
+
+        // ファイルを一時ファイルにコピー
+        let image_name = book.open_from_path_to_temp(path.clone())?;
+
+        // 一時ファイルに画像が追加されていない場合はスキップ
+        if book.is_temp_empty() { return Ok(false); }
+
+        // 一時ファイルから本を開く
+        if !book.open_from_temp_to_book(&path)? { return Ok(false); }
+
+        // 本に画像が追加されていない場合はスキップ
+        if book.is_empty() { return Ok(false); }
+
+        // 画像ファイルから開かれたら、ページインデックスを取得
+        let mut page = if let Some(image_name) = image_name {
+            book.get_index_by_filename(&image_name)
+        } else {
+            Some(DEFAULT_PAGE)
+        };
+
+        // 最後に読んだページを設定
+        if let Some(last_page) = last_page {
+            page = Some(last_page);
+        }
+
+        // 本を更新
+        self.book = book;
+        self.page = page;
+
+        Ok(true)
     }
 
     /// 次のライブラリを読み込む
@@ -446,9 +485,10 @@ impl OpenFile {
         let Some(index) = self.volume else { return Ok(false); };
         let Some(entry) = self.library.get(index) else { return Ok(false); };
         let path = entry.path().clone();
+        let last_page = entry.last_page();
 
         // 新しい本を開く
-        self.open_book(path)
+        self.open_book(path, *last_page)
     }
 
     /// 次のファイルを取得

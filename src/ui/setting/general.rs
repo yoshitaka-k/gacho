@@ -73,13 +73,24 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
     ui.separator();
     ui.add_space(setting::SETTING_ADD_SPACING);
 
-    // 最後に読んだページを表示
     egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
+        // 最後に読んだページを保存するかどうかを表示
         ui.horizontal(|ui| {
             ui::add_label(ui, "Remembered Last Page:", setting::GENERAL_LONG_LABEL_WIDTH);
             ui.scope(|ui| {
                 ui.radio_value(app.remembered_last_page_mut(), true, "Yes");
                 ui.radio_value(app.remembered_last_page_mut(), false, "No");
+            });
+        });
+
+        // 最後に読んだページを開くかどうかを表示
+        ui.add_enabled_ui(*app.remembered_last_page(), |ui| {
+            ui.horizontal(|ui| {
+                ui::add_label(ui, "Open Last Page:", setting::GENERAL_LONG_LABEL_WIDTH);
+                ui.scope(|ui| {
+                    ui.radio_value(app.open_last_page_mut(), true, "Yes");
+                    ui.radio_value(app.open_last_page_mut(), false, "No");
+                });
             });
         });
     });

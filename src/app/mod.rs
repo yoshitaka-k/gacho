@@ -86,7 +86,14 @@ pub struct App {
     page_layout: PageLayout,
 
     /// 最後に読んだページを保存するかどうか
+    #[getset(skip)]
+    #[getset(get_mut = "pub")]
     remembered_last_page: bool,
+
+    /// 最後に読んだページを開くかどうか
+    #[getset(skip)]
+    #[getset(get_mut = "pub")]
+    open_last_page: bool,
 }
 
 impl Default for App {
@@ -97,6 +104,7 @@ impl Default for App {
             read_from: ReadFrom::RightToLeft,
             page_layout: PageLayout::Single,
             remembered_last_page: false,
+            open_last_page: false,
         }
     }
 }
@@ -106,5 +114,22 @@ impl App {
     /// * `return` - 新しいアプリケーション
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// 最後に読んだページを保存するかどうかを取得
+    /// * `return` - 最後に読んだページを保存するかどうか
+    pub fn remembered_last_page(&self) -> &bool {
+        &self.remembered_last_page
+    }
+
+    /// 最後に読んだページを開くかどうかを取得
+    /// 最後に読んだページを保存していない場合は false を返す
+    /// * `return` - 最後に読んだページを開くかどうか
+    pub fn open_last_page(&self) -> &bool {
+        if self.remembered_last_page {
+            &self.open_last_page
+        } else {
+            &false
+        }
     }
 }

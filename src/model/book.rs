@@ -28,26 +28,66 @@ impl Book {
             self.update_page(id.unwrap(), page)
         }
     }
+
+    /// 全ての本を取得
+    /// * `return`: 全ての本
+    pub fn get_all(&self) -> error::Result<Vec<(PathBuf, usize)>> {
+        self.get_books()
+    }
 }
 
 /// private methods
 impl Book {
+    /// 本を取得
+    /// * `return`: 本
+    fn get_books(&self) -> error::Result<Vec<(PathBuf, usize)>> {
+        let mut stmt = self.conn
+            .prepare("SELECT `path`, `page` FROM `books`")
+            .map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+
+        let rows = stmt.query_map([], |row| {
+            let path: String = row.get(0)?;
+            let page: u32 = row.get(1)?;
+            Ok((PathBuf::from(path), page as usize))
+        }).map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+
+        let mut results = Vec::new();
+        for row in rows {
+            let (path, page) = row.map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+            results.push((path, page));
+        }
+
+        Ok(results)
+    }
+
     /// 最後に読んだページを取得
     /// * `path`: 本のパス
     /// * `return`: 本ID
     fn get_id(&self, path: &PathBuf) -> error::Result<Option<usize>> {
-        let path = path.to_string_lossy().to_string();
         let mut stmt = self.conn
             .prepare("SELECT `id` FROM `books` WHERE `path` = ?")
             .map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
 
+        self.query_row(&mut stmt, path)
+    }
+
+    /// クエリを実行して結果を取得
+    /// * `stmt`: ステートメント
+    /// * `path`: 本のパス
+    /// * `return`: 結果
+    fn query_row(&self, stmt: &mut rusqlite::Statement<'_>, path: &PathBuf) -> error::Result<Option<usize>> {
+        let path = path.to_string_lossy().to_string();
+        if path.is_empty() { return Ok(None); }
+
         // 該当行がなければ None にする
-        let id: Option<i64> = stmt
+        let result: Option<i64> = stmt
             .query_row([&path], |row| row.get(0))
             .optional()
             .map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
 
-        Ok(id.map(|id| id as usize))
+        // println!("{}", stmt.expanded_sql().unwrap_or_default());
+
+        Ok(result.map(|result| result as usize))
     }
 
     /// 最後に読んだページを保存

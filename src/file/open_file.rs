@@ -263,6 +263,38 @@ impl OpenFile {
         Ok(self.page)
     }
 
+    /// 左端のページへのインデックス
+    /// * `app` - アプリケーション
+    /// * `return` - 左端のページへのインデックス
+    pub fn leftmost_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+        match app.read_from() {
+            app::ReadFrom::RightToLeft => {
+                self.last_page(app)?;
+            }
+            app::ReadFrom::LeftToRight => {
+                self.first_page(app)?;
+            }
+        }
+
+        Ok(self.page)
+    }
+
+    /// 右端のページへのインデックス
+    /// * `app` - アプリケーション
+    /// * `return` - 右端のページへのインデックス
+    pub fn rightmost_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+        match app.read_from() {
+            app::ReadFrom::RightToLeft => {
+                self.first_page(app)?;
+            }
+            app::ReadFrom::LeftToRight => {
+                self.last_page(app)?;
+            }
+        }
+
+        Ok(self.page)
+    }
+
     /// ライブラリと本を構築
     /// * `path` - ドロップされたファイルのパス
     /// * `books_last_page` - 本のリスト
@@ -364,6 +396,42 @@ impl OpenFile {
             if self.page_subtract() {
                 self.update_page();
             }
+        }
+
+        Ok(self.page)
+    }
+
+    /// 最後のページを取得
+    /// * `app` - アプリケーション
+    /// * `return` - 最後のページ
+    fn last_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+        if self.is_last_page() {
+            // 次のライブラリを読み込む
+            if self.read_next_library()? {
+                // ページリストを再構築
+                self.build_spreads(*app.cover_layout(), *app.page_layout());
+            }
+        } else {
+            self.current_spread = Some(self.spreads.len() - 1);
+            self.update_page();
+        }
+
+        Ok(self.page)
+    }
+
+    /// 最初のページを取得
+    /// * `app` - アプリケーション
+    /// * `return` - 最初のページ
+    fn first_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+        if self.is_first_page() {
+            // 前のライブラリを読み込む
+            if self.read_prev_library()? {
+                // ページリストを再構築
+                self.build_spreads(*app.cover_layout(), *app.page_layout());
+            }
+        } else {
+            self.current_spread = Some(0);
+            self.update_page();
         }
 
         Ok(self.page)

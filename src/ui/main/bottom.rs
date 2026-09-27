@@ -62,6 +62,20 @@ pub(crate) fn view(
                 ui.add(egui::Label::new(file_names.join("")).truncate());
             },
             |ui| {
+                // 右端のページボタン
+                let hover_text = match app.read_from() {
+                    app::ReadFrom::RightToLeft => "First page",
+                    app::ReadFrom::LeftToRight => "Last page",
+                };
+                let rightmost_button_image = egui::Image::new(svg::LAST_PAGE)
+                    .tint(button_color);
+                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                    ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(rightmost_button_image))
+                }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
+                {
+                    pending_actions.push(event::EventAction::Rightmost);
+                }
+
                 // 右矢印のファイルボタン
                 let hover_text = match app.read_from() {
                     app::ReadFrom::RightToLeft => "Previous page",
@@ -88,6 +102,20 @@ pub(crate) fn view(
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
                 {
                     pending_actions.push(event::EventAction::Left);
+                }
+
+                // 左端のページボタン
+                let hover_text = match app.read_from() {
+                    app::ReadFrom::RightToLeft => "Last page",
+                    app::ReadFrom::LeftToRight => "First page",
+                };
+                let leftmost_button_image = egui::Image::new(svg::FIRST_PAGE)
+                    .tint(button_color);
+                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                    ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(leftmost_button_image))
+                }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
+                {
+                    pending_actions.push(event::EventAction::Leftmost);
                 }
 
                 ui.separator();

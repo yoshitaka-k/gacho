@@ -286,6 +286,20 @@ impl Render {
                     }
                     is_saved = true;
                 }
+                // 左端ボタンイベント
+                event::EventAction::Leftmost => {
+                    if let Err(e) = self.open_file.leftmost_page(&self.app) {
+                        self.error_token.show(e);
+                    }
+                    is_saved = true;
+                }
+                // 右端ボタンイベント
+                event::EventAction::Rightmost => {
+                    if let Err(e) = self.open_file.rightmost_page(&self.app) {
+                        self.error_token.show(e);
+                    }
+                    is_saved = true;
+                }
                 // スライダーイベント
                 event::EventAction::Slider(index) => {
                     // インデックスを更新

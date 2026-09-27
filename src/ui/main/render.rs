@@ -274,6 +274,7 @@ impl Render {
 
         for action in self.pending_actions.drain(..) {
             match action {
+                // クリックイベント
                 event::EventAction::Click(pos) => {
                     // クリックした位置が左半分の場合は次のファイルを表示
                     if pos.x < ui.max_rect().max.x / 2.0 {
@@ -286,16 +287,19 @@ impl Render {
                         }
                     }
                 }
+                // 左矢印ボタンイベント
                 event::EventAction::Left => {
                     if let Err(e) = self.open_file.left_page(&self.app) {
                         self.error_token.show(e);
                     }
                 }
+                // 右矢印ボタンイベント
                 event::EventAction::Right => {
                     if let Err(e) = self.open_file.right_page(&self.app) {
                         self.error_token.show(e);
                     }
                 }
+                // 閉じるボタンイベント
                 event::EventAction::Close => {
                     button::close_open_file(&mut self.open_file);
                 }

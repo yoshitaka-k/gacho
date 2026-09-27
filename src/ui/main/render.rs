@@ -31,6 +31,7 @@ pub struct Render {
     book_model: model::Book,
 }
 
+/// public methods
 impl Render {
     pub fn new(cc: &eframe::CreationContext<'_>, app: app::App) -> Self {
         // フォントと SVG ローダーを追加
@@ -60,6 +61,7 @@ impl Render {
     }
 }
 
+/// eframe::App の実装
 impl eframe::App for Render {
     /// 終了前に App の状態を保存
     /// * `storage` - ストレージ
@@ -147,6 +149,7 @@ impl eframe::App for Render {
     }
 }
 
+/// private methods
 impl Render {
     /// ダイアログを開く
     fn open_dialog(&mut self) {

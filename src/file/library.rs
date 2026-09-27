@@ -9,18 +9,25 @@ static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 /// ライブラリのエントリ
 #[derive(Clone, Getters)]
 pub(crate) struct LibraryEntry {
+    /// ファイルの一意な ID
     #[allow(unused)]
     id: u64,
 
+    /// ファイルのパス
     #[getset(get = "pub")]
     path: PathBuf,
 
+    /// ファイルの名前
     #[allow(unused)]
     file_name: String,
 }
 
 /// public methods
 impl LibraryEntry {
+    /// 新しいライブラリのエントリを作成
+    /// * `path` - ファイルのパス
+    /// * `file_name` - ファイルの名前
+    /// * `return` - ライブラリのエントリ
     pub fn new(path: PathBuf, file_name: String) -> Self {
         // ファイルの一意な ID を発行
         let id = NEXT_ID.fetch_add(1, Ordering::Relaxed);
@@ -35,6 +42,8 @@ pub struct Library {
 }
 
 impl Library {
+    /// 新しいライブラリを作成
+    /// * `return` - ライブラリ
     pub fn new() -> Self {
         Self { entries: vec![] }
     }

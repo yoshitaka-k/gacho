@@ -44,7 +44,10 @@ pub(crate) struct Archive {
     len: usize,
 }
 
+/// public methods
 impl Archive {
+    /// 新しいアーカイブを作成
+    /// * `return` - アーカイブのインスタンス
     pub(crate) fn new() -> Self {
         Self {
             archive: None,
@@ -149,7 +152,10 @@ impl Archive {
 
         Ok(archive_file)
     }
+}
 
+/// private methods
+impl Archive {
     /// ファイルを名前でソートする
     fn sort(&mut self) {
         let mut temp_paths = Vec::new();

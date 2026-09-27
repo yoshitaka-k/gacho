@@ -9,5 +9,6 @@ pub(crate) enum EventAction {
     Click(egui::Pos2),
     Left,
     Right,
+    Slider(usize),
     Close,
 }

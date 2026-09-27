@@ -10,13 +10,11 @@ const DEFAULT_MAX_INDEX: usize = 0;
 /// * `app` - アプリケーション
 /// * `open_file` - 開いているファイル
 /// * `pending_actions` - 待機中のアクション
-/// * `error_token` - エラーモーダルのトークン
 pub(crate) fn view(
     ui: &mut egui::Ui,
     app: &app::App,
     open_file: &mut file::OpenFile,
     pending_actions: &mut Vec<event::EventAction>,
-    error_token: &mut ui::ErrorToken,
 ) {
     // スタイルとボタンの色を設定
     let bottom_panel_style = ui::panel_style(ui, ui::BOTTOM_PANEL_INNER_MARGIN);
@@ -110,11 +108,7 @@ pub(crate) fn view(
 
                     // 選択が変更された場合はインデックスを更新
                     if slider.changed() {
-                        // エラーモーダルをリセット
-                        error_token.reset();
-
-                        // インデックスを更新
-                        open_file.set_current_spread(selected);
+                        pending_actions.push(event::EventAction::Slider(selected));
                     }
                 });
 

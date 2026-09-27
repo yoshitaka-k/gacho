@@ -116,7 +116,6 @@ impl eframe::App for Render {
             &self.app,
             &mut self.open_file,
             &mut self.pending_actions,
-            &mut self.error_token,
         );
 
         // 中央パネルを表示
@@ -280,6 +279,13 @@ impl Render {
                     if let Err(e) = self.open_file.right_page(&self.app) {
                         self.error_token.show(e);
                     }
+                    is_saved = true;
+                }
+                // スライダーイベント
+                event::EventAction::Slider(index) => {
+                    // インデックスを更新
+                    self.open_file.set_current_spread(index);
+
                     is_saved = true;
                 }
                 // 閉じるボタンイベント

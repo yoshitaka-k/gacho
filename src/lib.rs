@@ -5,9 +5,13 @@ mod event;
 mod file;
 mod ui;
 mod error;
+mod model;
 
 pub use app::App;
 pub use ui::Render;
+
+/// アプリケーション名
+pub const APP_NAME: &str = "Gacho";
 
 /// OS の「このアプリで開く」を受け取る準備をする。
 /// `eframe::run_native` より前に呼ぶ。

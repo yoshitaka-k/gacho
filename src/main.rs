@@ -2,10 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![warn(clippy::all, rust_2018_idioms)]
 
-use gacho::{App, Render};
+use gacho::{APP_NAME, App, Render};
 
-/// アプリケーション名
-const APP_NAME: &str = "Gacho";
+/// アプリケーションバージョン
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// ウィンドウのサイズ

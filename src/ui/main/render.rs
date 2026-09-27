@@ -1,4 +1,4 @@
-use crate::{app, event, file};
+use crate::{app, event, file, model};
 use crate::event::{button, open, input};
 use crate::ui::{self, modal};
 use crate::ui::assets::{fonts, svg};
@@ -25,6 +25,11 @@ pub struct Render {
 
     // エラーモーダルのトークン
     error_token: ui::ErrorToken,
+
+    // 本のモデル
+    // TODO: 最後に読んだページ用のモデルを追加
+    #[allow(unused)]
+    book_model: model::Book,
 }
 
 impl Render {
@@ -39,6 +44,9 @@ impl Render {
             .and_then(|storage| eframe::get_value(storage, eframe::APP_KEY))
             .unwrap_or(app);
 
+        // 本のモデルを作成
+        let book_model = model::Book::new();
+
         Self {
             app,
             open_file: file::OpenFile::new(),
@@ -48,6 +56,7 @@ impl Render {
             updated_token: app::UpdatedToken::new(),
             error_token: ui::ErrorToken::new(),
             update_job: app::UpdateJob::new(cc.egui_ctx.clone()),
+            book_model,
         }
     }
 }

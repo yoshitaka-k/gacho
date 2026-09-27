@@ -57,12 +57,10 @@ impl Book {
     fn insert_page(&mut self, path: &PathBuf, page: usize) -> error::Result<bool> {
         // パラメータを準備
         let path = path.to_string_lossy().to_string();
+        if path.is_empty() { return Ok(false); }
+
         let created_at = chrono::Local::now().to_string();
         let updated_at = chrono::Local::now().to_string();
-
-        if path.is_empty() {
-            return Err(error::GachoError::DatabaseError("path is empty".to_string()));
-        }
 
         // SQL を準備
         let mut stmt = self.conn.prepare(

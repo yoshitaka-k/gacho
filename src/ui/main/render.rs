@@ -157,7 +157,11 @@ impl Render {
             self.open_dialog_token.file_dialog = false;
 
             // ファイルを開く
-            let result = open::file(&mut self.open_file);
+            let result = open::file(
+                &mut self.open_file,
+                &mut self.book_model,
+                *self.app.open_last_page(),
+            );
             self.open_result(result);
         }
 
@@ -166,7 +170,11 @@ impl Render {
             self.open_dialog_token.folder_dialog = false;
 
             // フォルダを開く
-            let result = open::folder(&mut self.open_file);
+            let result = open::folder(
+                &mut self.open_file,
+                &mut self.book_model,
+                *self.app.open_last_page(),
+            );
             self.open_result(result);
         }
     }
@@ -178,7 +186,12 @@ impl Render {
         };
 
         // ファイルを開く
-        let result = event::drop::path(path, &mut self.open_file);
+        let result = event::drop::path(
+            path,
+            &mut self.open_file,
+            &mut self.book_model,
+            *self.app.open_last_page(),
+        );
         self.open_result(result);
     }
 
@@ -186,7 +199,12 @@ impl Render {
     /// * `ui` - UI
     fn drop_files(&mut self, ui: &egui::Ui) {
         // ドラッグ&ドロップされたファイルを処理
-        let Some(result) = input::drop(ui, &mut self.open_file) else {
+        let Some(result) = input::drop(
+            ui,
+            &mut self.open_file,
+            &mut self.book_model,
+            *self.app.open_last_page(),
+        ) else {
             return;
         };
 
@@ -223,19 +241,6 @@ impl Render {
     /// 画面に表示させるページリストを作成
     fn rebuild_spreads(&mut self) {
         self.open_file.build_spreads(*self.app.cover_layout(), *self.app.page_layout());
-    }
-
-    /// 最後に読んだページを保存
-    fn save_last_page(&mut self) {
-        if !*self.app.remembered_last_page() {
-            return;
-        }
-
-        let path = self.open_file.book_path();
-        let page = self.open_file.current_page();
-        if let Err(e) = self.book_model.save_last_page(&path, page) {
-            self.error_token.show(e);
-        }
     }
 
     /// イベントアクションを処理
@@ -298,6 +303,19 @@ impl Render {
         // 最後に読んだページを保存
         if is_saved {
             self.save_last_page();
+        }
+    }
+
+    /// sqlite に最後に読んだページを保存
+    fn save_last_page(&mut self) {
+        if !*self.app.remembered_last_page() {
+            return;
+        }
+
+        let path = self.open_file.book_path();
+        let page = self.open_file.current_page();
+        if let Err(e) = self.book_model.save_last_page(&path, page) {
+            self.error_token.show(e);
         }
     }
 }

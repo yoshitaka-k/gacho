@@ -1,4 +1,4 @@
-use crate::{app, event, file, model};
+use crate::{app, error, event, file, model};
 use crate::event::{button, open, input};
 use crate::ui::{self, modal};
 use crate::ui::assets::{fonts, svg};
@@ -157,52 +157,18 @@ impl Render {
         if self.open_dialog_token.file_dialog {
             self.open_dialog_token.file_dialog = false;
 
-            // エラーモーダルをリセット
-            self.error_token.reset();
-
             // ファイルを開く
-            match open::file(&mut self.open_file) {
-                Ok(true) => {
-                    // 最後に読んだページを保存
-                    self.save_last_page();
-
-                    // 画面に表示させるページリストを作成
-                    self.rebuild_spreads();
-                }
-                Ok(false) => {
-                    // 何もしない
-                }
-                Err(e) => {
-                    // エラーモーダルを表示
-                    self.error_token.show(e);
-                }
-            }
+            let result = open::file(&mut self.open_file);
+            self.open_result(result);
         }
 
         // フォルダダイアログを開くボタンが押されてたらフォルダダイアログを開く
         if self.open_dialog_token.folder_dialog {
             self.open_dialog_token.folder_dialog = false;
 
-            // エラーモーダルをリセット
-            self.error_token.reset();
-
             // フォルダを開く
-            match open::folder(&mut self.open_file) {
-                Ok(true) => {
-                    // 最後に読んだページを保存するかどうかが保存されている場合は保存
-                    self.save_last_page();
-
-                    // 画面に表示させるページリストを作成
-                    self.rebuild_spreads();
-                }
-                Ok(false) => {
-                    // 何もしない
-                }
-                Err(e) => {
-                    // エラーモーダルを表示
-                    self.error_token.show(e);
-                }
-            }
+            let result = open::folder(&mut self.open_file);
+            self.open_result(result);
         }
     }
 
@@ -212,26 +178,9 @@ impl Render {
             return;
         };
 
-        // 新しいファイルを開いたので、前回閉じたエラーを忘れさせる
-        self.error_token.reset();
-
         // ファイルを開く
-        match event::drop::path(path, &mut self.open_file) {
-            Ok(true) => {
-                // 最後に読んだページを保存するかどうかが保存されている場合は保存
-                self.save_last_page();
-
-                // 画面に表示させるページリストを作成
-                self.rebuild_spreads();
-            }
-            Ok(false) => {
-                // 何もしない
-            }
-            Err(e) => {
-                // エラーモーダルを表示
-                self.error_token.show(e);
-            }
-        }
+        let result = event::drop::path(path, &mut self.open_file);
+        self.open_result(result);
     }
 
     /// ドラッグ&ドロップされたファイルを処理
@@ -242,10 +191,23 @@ impl Render {
             return;
         };
 
-        // 新しいファイルを開いたので、前回閉じたエラーを忘れさせる
+        // ファイルを開く結果を処理
+        self.open_result(result);
+
+        // ウィンドウを前面に
+        ui.ctx().send_viewport_cmd_to(
+            egui::ViewportId::ROOT,
+            egui::ViewportCommand::Focus,
+        );
+    }
+
+    /// ファイルを開く結果を処理
+    /// * `result` - ファイルを開く結果
+    fn open_result(&mut self, result: error::Result<bool>) {
+        // エラーモーダルをリセット
         self.error_token.reset();
 
-        // エラーが発生した場合はエラーモーダルを表示
+        // ファイルを開く結果を処理
         match result {
             Ok(true) => {
                 // 最後に読んだページを保存
@@ -262,12 +224,6 @@ impl Render {
                 self.error_token.show(e);
             }
         }
-
-        // ウィンドウを前面に
-        ui.ctx().send_viewport_cmd_to(
-            egui::ViewportId::ROOT,
-            egui::ViewportCommand::Focus,
-        );
     }
 
     /// 画面に表示させるページリストを作成

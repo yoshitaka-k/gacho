@@ -205,7 +205,7 @@ impl OpenFile {
         // ページリストを取得
         let mut images = vec![];
         match self.spreads.get(current_index).copied().ok_or_else(|| {
-            error::GachoError::IndexError(current_index)
+            error::GachoError::index_error(current_index)
         })? {
             Spread::Single { index } => {
                 let image = self.book.ensure_image_by_index(index)?;

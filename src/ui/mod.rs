@@ -99,6 +99,12 @@ impl ErrorToken {
             return;
         }
 
+        // 同じ失敗が毎フレーム来ても、ログは最初の1回だけ出す
+        if self.value.is_none() {
+            let (file, line) = error.location();
+            log::error!("{error} @ {file}:{line}");
+        }
+
         self.open = true;
         self.value = Some(error);
     }

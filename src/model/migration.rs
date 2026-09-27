@@ -21,7 +21,7 @@ impl Migration {
         ]);
 
         migrations.to_latest(conn).map_err(|e| {
-            error::GachoError::DatabaseError(e.to_string())
+            error::GachoError::database_error(e.to_string())
         })?;
 
         Ok(())

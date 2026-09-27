@@ -32,6 +32,11 @@ pub(crate) fn error(ctx: &egui::Context, error_token: &mut ErrorToken) {
         if let Some(error) = &error_token.value {
             egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
                 ui.label(error.to_string());
+
+                // エラーコードを表示
+                let code = error.code();
+                ui.add_space(ui::MODAL_WINDOW_SPACING);
+                ui.label(egui::RichText::new(format!("Code: {}", code)).weak());
             });
         }
 

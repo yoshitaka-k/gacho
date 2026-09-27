@@ -129,7 +129,7 @@ fn image_load(
         }
         Err(e) => {
             // 読み込みエラー
-            let error = error::GachoError::FileError(e.to_string(), image_file.path().clone());
+            let error = error::GachoError::file_error(e.to_string(), image_file.path().clone());
             error_token.show(error);
         }
     }

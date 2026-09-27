@@ -152,17 +152,17 @@ impl Library {
     fn find_file(&mut self, path: &PathBuf, base_dir: &PathBuf, books_last_page: &Vec<(PathBuf, usize)>) -> error::Result<()> {
         // メタデータを取得
         let metadata = path.metadata().map_err(|e| {
-            error::GachoError::FileError(e.to_string(), path.clone())
+            error::GachoError::file_error(e.to_string(), path.clone())
         })?;
 
         // ファイルの場合は、同ディレクトリのファイルを探索してライブラリに追加
         if metadata.is_file() {
             // 同ディレクトリのファイルを探索
             for entry in std::fs::read_dir(&base_dir).map_err(|e| {
-                error::GachoError::FileError(e.to_string(), base_dir.clone())
+                error::GachoError::file_error(e.to_string(), base_dir.clone())
             })? {
                 let entry = entry.map_err(|e| {
-                    error::GachoError::FileError(e.to_string(), base_dir.clone())
+                    error::GachoError::file_error(e.to_string(), base_dir.clone())
                 })?;
 
                 // アーカイブ以外の場合はスキップ
@@ -184,10 +184,10 @@ impl Library {
         } else if metadata.is_dir() {
             // ディレクトリの中のファイルを探索
             for entry in std::fs::read_dir(&path).map_err(|e| {
-                error::GachoError::FileError(e.to_string(), path.clone())
+                error::GachoError::file_error(e.to_string(), path.clone())
             })? {
                 let entry = entry.map_err(|e| {
-                    error::GachoError::FileError(e.to_string(), path.clone())
+                    error::GachoError::file_error(e.to_string(), path.clone())
                 })?;
 
                 // アーカイブ以外の場合はスキップ

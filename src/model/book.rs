@@ -43,17 +43,17 @@ impl Book {
     fn get_books(&self) -> error::Result<Vec<(PathBuf, usize)>> {
         let mut stmt = self.conn
             .prepare("SELECT `path`, `page` FROM `books`")
-            .map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+            .map_err(|e| error::GachoError::database_error(e.to_string()))?;
 
         let rows = stmt.query_map([], |row| {
             let path: String = row.get(0)?;
             let page: u32 = row.get(1)?;
             Ok((PathBuf::from(path), page as usize))
-        }).map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+        }).map_err(|e| error::GachoError::database_error(e.to_string()))?;
 
         let mut results = Vec::new();
         for row in rows {
-            let (path, page) = row.map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+            let (path, page) = row.map_err(|e| error::GachoError::database_error(e.to_string()))?;
             results.push((path, page));
         }
 
@@ -66,7 +66,7 @@ impl Book {
     fn get_id(&self, path: &PathBuf) -> error::Result<Option<usize>> {
         let mut stmt = self.conn
             .prepare("SELECT `id` FROM `books` WHERE `path` = ?")
-            .map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+            .map_err(|e| error::GachoError::database_error(e.to_string()))?;
 
         self.query_row(&mut stmt, path)
     }
@@ -83,7 +83,7 @@ impl Book {
         let result: Option<i64> = stmt
             .query_row([&path], |row| row.get(0))
             .optional()
-            .map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+            .map_err(|e| error::GachoError::database_error(e.to_string()))?;
 
         // println!("{}", stmt.expanded_sql().unwrap_or_default());
 
@@ -110,7 +110,7 @@ impl Book {
                 `created_at`,
                 `updated_at`
             ) VALUES (?, ?, ?, ?)"
-        ).map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+        ).map_err(|e| error::GachoError::database_error(e.to_string()))?;
 
         // 最後に読んだページを保存
         stmt.execute([
@@ -118,7 +118,7 @@ impl Book {
             &page.to_string(),
             &created_at,
             &updated_at
-        ]).map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+        ]).map_err(|e| error::GachoError::database_error(e.to_string()))?;
 
         // println!("{}", stmt.expanded_sql().unwrap_or_default());
 
@@ -136,11 +136,11 @@ impl Book {
         // SQL を準備
         let mut stmt = self.conn.prepare(
             "UPDATE `books` SET `page` = ?, `updated_at` = ? WHERE `id` = ?"
-        ).map_err(|e| error::GachoError::DatabaseError(e.to_string()))?;
+        ).map_err(|e| error::GachoError::database_error(e.to_string()))?;
 
         // 最後に読んだページを更新
         stmt.execute([&page.to_string(), &updated_at, &id.to_string()]).map_err(|e| {
-            error::GachoError::DatabaseError(e.to_string())
+            error::GachoError::database_error(e.to_string())
         })?;
 
         // println!("{}", stmt.expanded_sql().unwrap_or_default());

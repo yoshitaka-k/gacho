@@ -61,7 +61,7 @@ impl Image {
             if let Some(name) = path.file_name() {
                 name.to_string_lossy().to_string()
             } else {
-                return Err(error::GachoError::FileError(
+                return Err(error::GachoError::file_error(
                     "File name not found".to_string(), path.clone()
                 ));
             }
@@ -71,7 +71,7 @@ impl Image {
         let extension = if let Some(ext) = path.extension() {
             file::Extension::from_str(ext)
         } else {
-            return Err(error::GachoError::FileError(
+            return Err(error::GachoError::file_error(
                 "File extension not found".to_string(), path.clone()
             ));
         };
@@ -82,16 +82,16 @@ impl Image {
         } else if file::is_image(&path) {
             // 画像ファイルを読み込む
             let reader = ImageReader::open(&path).map_err(|e| {
-                error::GachoError::FileError(e.to_string(), path.clone())
+                error::GachoError::file_error(e.to_string(), path.clone())
             })?;
             // ファイルのフォーマットを取得
             let reader_with_format = reader.with_guessed_format().map_err(|e| {
-                error::GachoError::FileError(e.to_string(), path.clone())
+                error::GachoError::file_error(e.to_string(), path.clone())
             })?;
 
             // 画像ファイルの幅・高さを取得
             let (width, height) = reader_with_format.into_dimensions().map_err(|e| {
-                error::GachoError::FileError(e.to_string(), path.clone())
+                error::GachoError::file_error(e.to_string(), path.clone())
             })?;
 
             egui::Vec2::new(width as f32, height as f32)

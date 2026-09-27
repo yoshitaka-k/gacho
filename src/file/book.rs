@@ -85,20 +85,20 @@ impl Book {
         // インデックスが範囲外の場合は None を返す
         if index >= self.len() { return Ok(None); }
         let image = self.images.get_mut(index).ok_or_else(|| {
-            error::GachoError::IndexError(index)
+            error::GachoError::index_error(index)
         })?;
 
         // アーカイブの場合は、アーカイブからファイルのバイト列を取得
         if image.is_archive() && image.is_empty_bytes() {
             let archive = self.archive.as_mut().ok_or_else(|| {
-                error::GachoError::ArchiveError(
-                    format!("Archive not found: {}", image.relative_path().display())
+                error::GachoError::archive_error(
+                    format!("Archive not found: {}", image.relative_path().display()),
                 )
             })?;
 
             let archive_file = archive.get_zipfile(*image.archive_index()).map_err(|e| {
-                error::GachoError::ArchiveError(
-                    format!("{} : {}", e.to_string(), image.relative_path().display())
+                error::GachoError::archive_error(
+                    format!("{} : {}", e, image.relative_path().display()),
                 )
             })?;
 
@@ -163,9 +163,9 @@ impl Book {
     /// * `return` - 結果
     pub fn open_from_temp_to_book(&mut self, path: &PathBuf) -> error::Result<bool> {
         if self.temp_path.is_empty() {
-            return Err(error::GachoError::FileError(
+            return Err(error::GachoError::file_error(
                 "No files to open".to_string(),
-                path.clone()
+                path.clone(),
             ));
         }
 
@@ -280,7 +280,7 @@ impl Book {
         base_dir: &Path,
     ) -> error::Result<()> {
         let metadata = path.metadata().map_err(|e| {
-            error::GachoError::FileError(e.to_string(), path.clone())
+            error::GachoError::file_error(e.to_string(), path.clone())
         })?;
 
         // ファイルの場合は、画像を新規作成
@@ -291,14 +291,14 @@ impl Book {
         } else if metadata.is_dir() {
             // ディレクトリの中のファイルを探索
             for entry in std::fs::read_dir(&path).map_err(|e| {
-                error::GachoError::FileError(e.to_string(), path.clone())
+                error::GachoError::file_error(e.to_string(), path.clone())
             })? {
                 let entry = entry.map_err(|e| {
-                    error::GachoError::FileError(e.to_string(), path.clone())
+                    error::GachoError::file_error(e.to_string(), path.clone())
                 })?;
 
                 let metadata = entry.path().metadata().map_err(|e| {
-                    error::GachoError::FileError(e.to_string(), path.clone())
+                    error::GachoError::file_error(e.to_string(), path.clone())
                 })?;
 
                 // ディレクトリの中のディレクトリはスキップ
@@ -327,7 +327,7 @@ impl Book {
         if file::is_archive(&path) {
             let mut archive = file::Archive::new();
             archive.unarchive(&path).map_err(|e| {
-                error::GachoError::ArchiveError(e.to_string())
+                error::GachoError::archive_error(e.to_string())
             })?;
 
             for file in archive.files() {
@@ -366,7 +366,7 @@ impl Book {
 
             // パスを控えておく
             let parent = path.parent().ok_or_else(|| {
-                error::GachoError::FileError(
+                error::GachoError::file_error(
                     "Parent not found".to_string(),
                     path.clone()
                 )

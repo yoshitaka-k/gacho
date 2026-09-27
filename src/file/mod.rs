@@ -16,7 +16,6 @@ use std::path::PathBuf;
 use std::sync::LazyLock;
 use regex::Regex;
 use std::iter::Peekable;
-use std::str::Chars;
 
 /// 同人形式: (カテゴリ)[著者]タイトル(ジャンル)[備考]
 /// 例:
@@ -95,8 +94,9 @@ pub(crate) fn sort_path(paths: &Vec<PathBuf>) -> Vec<PathBuf> {
 /// * `b` - 比較する文字列
 /// * `return` - 比較結果
 pub(crate) fn cmp_natural(a: &str, b: &str) -> std::cmp::Ordering {
-    let mut a = a.chars().peekable();
-    let mut b = b.chars().peekable();
+    // 全角 ASCII を半角に揃えてから比べる。Finder と Windows は幅の違いを無視する。
+    let mut a = a.chars().map(fold_fullwidth_ascii).peekable();
+    let mut b = b.chars().map(fold_fullwidth_ascii).peekable();
 
     loop {
         match (a.peek().copied(), b.peek().copied()) {
@@ -122,7 +122,10 @@ pub(crate) fn cmp_natural(a: &str, b: &str) -> std::cmp::Ordering {
 /// 数字を読み込む
 /// * `chars` - 文字列
 /// * `return` - 読み込んだ数字
-fn read_number(chars: &mut Peekable<Chars<'_>>) -> u64 {
+fn read_number<I>(chars: &mut Peekable<I>) -> u64
+where
+    I: Iterator<Item = char>,
+{
     let mut num = 0;
     while let Some(c) = chars.peek() {
         if !c.is_ascii_digit() {
@@ -137,7 +140,10 @@ fn read_number(chars: &mut Peekable<Chars<'_>>) -> u64 {
 /// テキストを読み込む
 /// * `chars` - 文字列
 /// * `return` - 読み込んだテキスト
-fn read_text(chars: &mut Peekable<Chars<'_>>) -> String {
+fn read_text<I>(chars: &mut Peekable<I>) -> String
+where
+    I: Iterator<Item = char>,
+{
     let mut text = String::new();
     while let Some(c) = chars.peek() {
         if c.is_ascii_digit() {
@@ -147,4 +153,14 @@ fn read_text(chars: &mut Peekable<Chars<'_>>) -> String {
         chars.next();
     }
     text
+}
+
+/// 全角 ASCII（U+FF01〜U+FF5E）を半角へ揃える。
+/// * `c` - 文字
+/// * `return` - 半角に揃えた文字
+fn fold_fullwidth_ascii(c: char) -> char {
+    match c as u32 {
+        code @ 0xFF01..=0xFF5E => char::from_u32(code - 0xFEE0).unwrap(),
+        _ => c,
+    }
 }

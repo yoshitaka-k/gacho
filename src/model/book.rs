@@ -60,6 +60,10 @@ impl Book {
         let created_at = chrono::Local::now().to_string();
         let updated_at = chrono::Local::now().to_string();
 
+        if path.is_empty() {
+            return Err(error::GachoError::DatabaseError("path is empty".to_string()));
+        }
+
         // SQL を準備
         let mut stmt = self.conn.prepare(
             "INSERT INTO `books` (

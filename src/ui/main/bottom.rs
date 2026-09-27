@@ -67,10 +67,11 @@ pub(crate) fn view(
                     app::ReadFrom::RightToLeft => "Previous page",
                     app::ReadFrom::LeftToRight => "Next page",
                 };
-                let prev_button = egui::Image::new(svg::KEYBOARD_ARROW_RIGHT)
+                let right_button_image = egui::Image::new(svg::KEYBOARD_ARROW_RIGHT)
                     .tint(button_color);
-                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(prev_button))
-                    .on_hover_text(hover_text).clicked()
+                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                    ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(right_button_image))
+                }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
                 {
                     pending_actions.push(event::EventAction::Right);
                 }
@@ -80,10 +81,11 @@ pub(crate) fn view(
                     app::ReadFrom::RightToLeft => "Next page",
                     app::ReadFrom::LeftToRight => "Previous page",
                 };
-                let next_button = egui::Image::new(svg::KEYBOARD_ARROW_LEFT)
+                let left_button_image = egui::Image::new(svg::KEYBOARD_ARROW_LEFT)
                     .tint(button_color);
-                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(next_button))
-                    .on_hover_text(hover_text).clicked()
+                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                    ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(left_button_image))
+                }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
                 {
                     pending_actions.push(event::EventAction::Left);
                 }
@@ -96,14 +98,18 @@ pub(crate) fn view(
                 ui.scope(|ui| {
                     ui.spacing_mut().slider_width = SLIDER_WIDTH;
                     let slider = match app.read_from() {
-                        app::ReadFrom::RightToLeft => ui.add(
-                            egui::Slider::new(&mut selected, max..=MIN_INDEX)
-                            .show_value(false)
-                        ),
-                        app::ReadFrom::LeftToRight => ui.add(
-                            egui::Slider::new(&mut selected, MIN_INDEX..=max)
-                            .show_value(false)
-                        ),
+                        app::ReadFrom::RightToLeft => {
+                            ui.add_enabled(
+                                !open_file.book_is_empty(),
+                                egui::Slider::new(&mut selected, max..=MIN_INDEX).show_value(false)
+                            )
+                        }
+                        app::ReadFrom::LeftToRight => {
+                            ui.add_enabled(
+                                !open_file.book_is_empty(),
+                                egui::Slider::new(&mut selected, MIN_INDEX..=max).show_value(false)
+                            )
+                        }
                     };
 
                     // 選択が変更された場合はインデックスを更新

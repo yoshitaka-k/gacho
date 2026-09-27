@@ -28,39 +28,35 @@ pub(crate) fn view(
             },
             |ui| {
                 // 設定ボタン
-                let hover_text = "Settings";
-                let settings_button = egui::Image::new(svg::SETTINGS)
-                    .tint(button_color);
-                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(settings_button))
-                    .on_hover_text(hover_text).clicked()
+                let settings_button_image = egui::Image::new(svg::SETTINGS).tint(button_color);
+                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(settings_button_image))
+                    .on_hover_text("Settings").clicked()
                 {
                     button::setting_open(ui, setting_token);
                 }
 
                 // 閉じるボタン
-                let close_button = egui::Image::new(svg::CLEAR_ALL)
-                    .tint(button_color);
-                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(close_button))
-                    .on_hover_text("File Close").clicked()
-                {
+                let hover_text = "File Close";
+                let close_button_image = egui::Image::new(svg::CLEAR_ALL).tint(button_color);
+                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                    ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(close_button_image))
+                }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked() {
+                    println!("File Close");
                     pending_actions.push(event::EventAction::Close);
                 }
 
                 // フォルダダイアログを開くボタン
-                let hover_text = "Folder Open";
-                let open_button = egui::Image::new(svg::FOLDER_OPEN)
-                    .tint(button_color);
-                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button))
-                    .on_hover_text(hover_text).clicked()
+                let open_button_image = egui::Image::new(svg::FOLDER_OPEN).tint(button_color);
+                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
+                    .on_hover_text("Folder Open").clicked()
                 {
                     button::folder_open(ui, open_dialog_token);
                 }
 
-                let hover_text = "Files Open";
-                let open_button = egui::Image::new(svg::FILE_OPEN)
-                    .tint(button_color);
-                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button))
-                    .on_hover_text(hover_text).clicked()
+                // ファイルダイアログを開くボタン
+                let open_button_image = egui::Image::new(svg::FILE_OPEN).tint(button_color);
+                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
+                    .on_hover_text("Files Open").clicked()
                 {
                     button::files_open(ui, open_dialog_token);
                 }

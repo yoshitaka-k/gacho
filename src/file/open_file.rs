@@ -76,16 +76,22 @@ impl OpenFile {
         &self.book.path()
     }
 
-    /// 本のページを取得
-    /// * `return` - 本のページ
-    pub fn current_page(&self) -> usize {
-        self.page.unwrap_or(DEFAULT_PAGE)
+    /// 本が空かどうか
+    /// * `return` - 本が空かどうか
+    pub fn book_is_empty(&self) -> bool {
+        self.book.is_empty()
     }
 
     /// 本の画像のIDを取得
     /// * `return` - 本の画像の ID ベクター
     pub fn book_image_ids(&self) -> Vec<u64> {
         self.book.image_ids()
+    }
+
+    /// 本のページを取得
+    /// * `return` - 本のページ
+    pub fn current_page(&self) -> usize {
+        self.page.unwrap_or(DEFAULT_PAGE)
     }
 
     /// ページリストの長さを取得

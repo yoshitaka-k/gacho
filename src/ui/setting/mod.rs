@@ -14,7 +14,7 @@ const WINDOW_TITLE: &str = "Settings";
 
 // ウィンドウのサイズ
 const WINDOW_WIDTH: f32 = 460.0;
-const WINDOW_HEIGHT: f32 = 280.0;
+const WINDOW_HEIGHT: f32 = 300.0;
 
 // ヘッダーのスペースの幅
 const HEADER_ICON_SPACING: f32 = 4.0;

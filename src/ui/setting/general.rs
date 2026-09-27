@@ -93,5 +93,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
                 });
             });
         });
+
+        // 最後に読んだページを開くかどうかを変更した場合は本を再読み込みする必要がある
+        setting::warning_note(ui, "Reopen the book to resume from the saved page.");
     });
 }

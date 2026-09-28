@@ -1,13 +1,13 @@
 use crate::app::{self, UpdateJob};
 use crate::ui::{self, setting};
-use crate::ui::assets::{self, svg, icon};
+use crate::ui::assets::{self, label, svg, icon};
 
 /// バージョンを表示
 /// * `ui` - UI
 /// * `update_job` - アップデートジョブ
 pub(crate) fn view(ui: &mut egui::Ui, update_job: &mut UpdateJob) {
     // ヘッダーパネルを表示
-    setting::header_panel(ui, svg::INFO, "About", Some(update_job));
+    setting::header_panel(ui, svg::INFO, label::SettingAbout::heading(), Some(update_job));
 
     ui.add_space(setting::HEADER_BOTTOM_SPACING);
 

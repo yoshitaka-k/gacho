@@ -51,15 +51,6 @@ pub enum SettingTab {
     About,
 }
 
-impl SettingTab {
-    fn to_string(&self) -> &str {
-        match self {
-            SettingTab::General => "General",
-            SettingTab::About => "About",
-        }
-    }
-}
-
 /// 設定ウィンドウを表示するためのトークン
 pub struct SettingToken {
     pub open: bool,

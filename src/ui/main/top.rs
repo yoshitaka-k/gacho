@@ -1,6 +1,6 @@
 use crate::event::button;
 use crate::{event, file, ui};
-use crate::ui::assets::{self, icon, svg};
+use crate::ui::assets::{self, icon, label, svg};
 
 /// 上部パネル
 /// * `ui` - UI
@@ -28,35 +28,37 @@ pub(crate) fn view(
             },
             |ui| {
                 // 設定ボタン
+                let hover_text = label::MainTop::settings();
                 let settings_button_image = egui::Image::new(svg::SETTINGS).tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(settings_button_image))
-                    .on_hover_text("Settings").clicked()
+                    .on_hover_text(hover_text).clicked()
                 {
                     button::setting_open(ui, setting_token);
                 }
 
                 // 閉じるボタン
-                let hover_text = "File Close";
+                let hover_text = label::MainTop::close();
                 let close_button_image = egui::Image::new(svg::CLEAR_ALL).tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(close_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked() {
-                    println!("File Close");
                     pending_actions.push(event::EventAction::Close);
                 }
 
                 // フォルダダイアログを開くボタン
+                let hover_text = label::MainTop::folder_open();
                 let open_button_image = egui::Image::new(svg::FOLDER_OPEN).tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
-                    .on_hover_text("Folder Open").clicked()
+                    .on_hover_text(hover_text).clicked()
                 {
                     button::folder_open(ui, open_dialog_token);
                 }
 
                 // ファイルダイアログを開くボタン
+                let hover_text = label::MainTop::files_open();
                 let open_button_image = egui::Image::new(svg::FILE_OPEN).tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
-                    .on_hover_text("Files Open").clicked()
+                    .on_hover_text(hover_text).clicked()
                 {
                     button::files_open(ui, open_dialog_token);
                 }

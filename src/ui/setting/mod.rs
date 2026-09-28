@@ -4,13 +4,10 @@ mod about;
 
 use crate::app;
 use crate::event::button;
-use crate::ui::assets::{self, icon, svg};
+use crate::ui::assets::{self, label, icon, svg};
 
 // ウィンドウのID
 pub(crate) const SETTING_WINDOW_ID: &str = "setting_window";
-
-/// ウィンドウのタイトル
-const WINDOW_TITLE: &str = "Settings";
 
 // ウィンドウのサイズ
 const WINDOW_WIDTH: f32 = 460.0;
@@ -51,7 +48,7 @@ pub(crate) fn header_panel(
         // アップデート確認ボタン
         if let Some(update_job) = update_job {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                if ui.button("Check for updates.").clicked() {
+                if ui.button(label::Setting::update_check()).clicked() {
                     button::check_for_update(update_job);
                 }
             });

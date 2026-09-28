@@ -3,6 +3,7 @@ use crate::{error, file, model};
 
 /// ファイルオープンダイアログを開いて選択結果を追加する
 pub(crate) fn file(
+    label: &str,
     open_file: &mut file::OpenFile,
     book_model: &mut model::Book,
     is_open_last_page: bool,
@@ -11,7 +12,7 @@ pub(crate) fn file(
 
     // ファイルを選択
     let path = rfd::FileDialog::new()
-        .add_filter("Archive", &extensions)
+        .add_filter(label, &extensions)
         .pick_file();
 
     // ファイルを追加
@@ -21,22 +22,16 @@ pub(crate) fn file(
 /// ファイルオープンダイアログを開いて選択結果を追加する
 /// * `files` - 開いているファイル
 pub(crate) fn folder(
+    label: &str,
     open_file: &mut file::OpenFile,
     book_model: &mut model::Book,
     is_open_last_page: bool,
 ) -> error::Result<bool> {
     let extensions = file::Extension::to_archive_vec();
 
-    // Macのみファイルとフォルダを同時選択できる
-    #[cfg(target_os = "macos")]
+    // フォルダを選択
     let path = rfd::FileDialog::new()
-        .add_filter("Archive", &extensions)
-        .pick_folder();
-
-    // Mac以外はフォルダ選択のみ
-    #[cfg(not(target_os = "macos"))]
-    let path = rfd::FileDialog::new()
-        .add_filter("Archive", &extensions)
+        .add_filter(label, &extensions)
         .pick_folder();
 
     // ファイルを追加

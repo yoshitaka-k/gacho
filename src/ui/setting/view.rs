@@ -1,5 +1,5 @@
 use crate::app;
-use crate::ui::assets::{self, icon, svg};
+use crate::ui::assets::{self, label, icon, svg};
 use crate::ui::setting::{self, general, about};
 use crate::ui::{self, modal};
 
@@ -19,7 +19,7 @@ pub(crate) fn view(
 
     // 設定ウィンドウのオプションを設定
     let mut options = egui::ViewportBuilder::default()
-        .with_title(setting::WINDOW_TITLE)
+        .with_title(label::Setting::heading())
         .with_inner_size([setting::WINDOW_WIDTH, setting::WINDOW_HEIGHT])
         .with_maximize_button(false)
         .with_resizable(false);
@@ -66,8 +66,8 @@ pub(crate) fn view(
                 let selection_bg_fill = ui.style_mut().visuals.selection.bg_fill;
 
                 // タブを表示
-                ui.selectable_value(&mut setting_token.tab, ui::SettingTab::General, ui::SettingTab::General.to_string());
-                ui.selectable_value(&mut setting_token.tab, ui::SettingTab::About, ui::SettingTab::About.to_string());
+                ui.selectable_value(&mut setting_token.tab, ui::SettingTab::General, label::Setting::general());
+                ui.selectable_value(&mut setting_token.tab, ui::SettingTab::About, label::Setting::about());
 
                 // タブの選択時の背景色をリセット
                 ui.style_mut().visuals.selection.bg_fill = selection_bg_fill;

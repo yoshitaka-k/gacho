@@ -1,5 +1,5 @@
 use crate::{app, event, file, ui};
-use crate::ui::assets::{self, icon, svg};
+use crate::ui::assets::{self, icon, label, svg};
 
 const SLIDER_WIDTH: f32 = 50.0;
 const MIN_INDEX: usize = 0;
@@ -63,10 +63,7 @@ pub(crate) fn view(
             },
             |ui| {
                 // 右端のページボタン
-                let hover_text = match app.read_from() {
-                    app::ReadFrom::RightToLeft => "First page",
-                    app::ReadFrom::LeftToRight => "Last page",
-                };
+                let hover_text = label::MainBottom::rightmost(app.read_from());
                 let rightmost_button_image = egui::Image::new(svg::LAST_PAGE)
                     .tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
@@ -77,10 +74,7 @@ pub(crate) fn view(
                 }
 
                 // 右矢印のファイルボタン
-                let hover_text = match app.read_from() {
-                    app::ReadFrom::RightToLeft => "Previous page",
-                    app::ReadFrom::LeftToRight => "Next page",
-                };
+                let hover_text = label::MainBottom::right(app.read_from());
                 let right_button_image = egui::Image::new(svg::KEYBOARD_ARROW_RIGHT)
                     .tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
@@ -91,10 +85,7 @@ pub(crate) fn view(
                 }
 
                 // 左矢印のファイルボタン
-                let hover_text = match app.read_from() {
-                    app::ReadFrom::RightToLeft => "Next page",
-                    app::ReadFrom::LeftToRight => "Previous page",
-                };
+                let hover_text = label::MainBottom::left(app.read_from());
                 let left_button_image = egui::Image::new(svg::KEYBOARD_ARROW_LEFT)
                     .tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
@@ -105,10 +96,7 @@ pub(crate) fn view(
                 }
 
                 // 左端のページボタン
-                let hover_text = match app.read_from() {
-                    app::ReadFrom::RightToLeft => "Last page",
-                    app::ReadFrom::LeftToRight => "First page",
-                };
+                let hover_text = label::MainBottom::leftmost(app.read_from());
                 let leftmost_button_image = egui::Image::new(svg::FIRST_PAGE)
                     .tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {

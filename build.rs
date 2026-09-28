@@ -12,7 +12,7 @@ fn main() {
     // フォントのディレクトリを取得
     let fonts_dir = manifest_path.join("assets/fonts");
     println!("cargo:rerun-if-changed={}", fonts_dir.display());
-    build::fonts::generate_fonts_generated(&fonts_dir, &out_dir);
+    build::font::generate_fonts_generated(&fonts_dir, &out_dir);
 
     // SVGのディレクトリを取得
     let svg_dir = manifest_path.join("assets/svg");

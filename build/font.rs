@@ -25,7 +25,7 @@ pub const {const_name}: &[u8] = include_bytes!({});\n",
     }
     output.push_str("];\n");
 
-    println!("cargo:warning=generated fonts: {:?}", font_names);
+    println!("cargo:warning=generated font: {:?}", font_names);
 
     let out_path = Path::new(out_dir).join("fonts_generated.rs");
     fs::write(&out_path, output).expect("failed to write generated fonts");

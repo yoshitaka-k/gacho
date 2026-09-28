@@ -6,7 +6,11 @@
 
 Comic Book ZIP viewer
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/yoshitaka-k/gacho)![License](https://img.shields.io/github/license/yoshitaka-k/gacho)![GitHub top language](https://img.shields.io/github/languages/top/yoshitaka-k/gacho)![Lines of code](https://www.aschey.tech/tokei/github/yoshitaka-k/gacho)![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/yoshitaka-k/gacho)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/yoshitaka-k/gacho)
+![License](https://img.shields.io/github/license/yoshitaka-k/gacho)
+![GitHub top language](https://img.shields.io/github/languages/top/yoshitaka-k/gacho)
+![Lines of code](https://www.aschey.tech/tokei/github/yoshitaka-k/gacho)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/yoshitaka-k/gacho)
 
 Rust の勉強がてら、自分用に CBZビューア ってことで、Gacho（画帳）を作ってみようと思って作成なぅ。
 

@@ -1,7 +1,7 @@
 pub(crate) mod color;
 pub(crate) mod icon;
 pub(crate) mod svg;
-pub(crate) mod fonts;
+pub(crate) mod font;
 
 /// アプリアイコン
 pub(crate) const APP_ICON: egui::ImageSource<'static> = svg::bytes_source(

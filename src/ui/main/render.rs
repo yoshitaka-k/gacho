@@ -1,7 +1,7 @@
 use crate::{app, error, event, file, model};
 use crate::event::{button, open, input};
 use crate::ui::{self, modal};
-use crate::ui::assets::{fonts, svg};
+use crate::ui::assets::{font, svg};
 use crate::ui::main::{top, bottom, middle};
 use crate::ui::setting::view as setting_window;
 
@@ -35,7 +35,7 @@ pub struct Render {
 impl Render {
     pub fn new(cc: &eframe::CreationContext<'_>, app: app::App) -> Self {
         // フォントと SVG ローダーを追加
-        fonts::install(&cc.egui_ctx);
+        font::install(&cc.egui_ctx);
         svg::install(&cc.egui_ctx);
         event::launch::set_ctx(cc.egui_ctx.clone());
 

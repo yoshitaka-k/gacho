@@ -90,43 +90,123 @@ impl MainTop {
 /// メインボトムのラベル
 pub(crate) struct MainBottom;
 impl MainBottom {
+    /// 最初のページボタンのラベル
+    /// * `is_current_pages` - 現在のページの状態
+    /// * `is_current_books` - 現在の本の状態
+    /// * `return` - 最初のページボタンのラベル
+    fn firstmost_label(is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &'static str {
+        let (is_first_page, _) = is_current_pages;
+        let (is_prev_book, _) = is_current_books;
+
+        if is_first_page && is_prev_book {
+            "First page (Prev book)"
+        } else {
+            "First page"
+        }
+    }
+
+    /// 最後のページボタンのラベル
+    /// * `is_current_pages` - 現在のページの状態
+    /// * `is_current_books` - 現在の本の状態
+    /// * `return` - 最後のページボタンのラベル
+    fn lastmost_label(is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &'static str {
+        let (_, is_last_page) = is_current_pages;
+        let (_, is_next_book) = is_current_books;
+
+        if is_last_page && is_next_book {
+            "Last page (Next book)"
+        } else {
+            "Last page"
+        }
+    }
+
+    fn prev_label(is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &'static str {
+        let (is_first_page, _) = is_current_pages;
+        let (is_prev_book, _) = is_current_books;
+
+        if is_first_page && is_prev_book {
+            "Prev page (Prev book)"
+        } else {
+            "Prev page"
+        }
+    }
+
+    fn next_label(is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &'static str {
+        let (_, is_last_page) = is_current_pages;
+        let (_, is_next_book) = is_current_books;
+
+        if is_last_page && is_next_book {
+            "Next page (Next book)"
+        } else {
+            "Next page"
+        }
+    }
+
     /// 右端のページボタンのラベル
     /// * `read_from` - ページ送り方向
     /// * `return` - 右端のページボタンのラベル
-    pub fn rightmost(read_from: &app::ReadFrom) -> &str {
+    pub fn rightmost(read_from: &app::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
+        let first_label = Self::firstmost_label(is_current_pages, is_current_books);
+        let last_label = Self::lastmost_label(is_current_pages, is_current_books);
+
         match read_from {
-            app::ReadFrom::RightToLeft => "First page",
-            app::ReadFrom::LeftToRight => "Last page",
+            app::ReadFrom::RightToLeft => {
+                first_label
+            },
+            app::ReadFrom::LeftToRight => {
+                last_label
+            },
         }
     }
 
     /// 右矢印のファイルボタンのラベル
     /// * `read_from` - ページ送り方向
     /// * `return` - 右矢印のファイルボタンのラベル
-    pub fn right(read_from: &app::ReadFrom) -> &str {
+    pub fn right(read_from: &app::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
+        let prev_label = Self::prev_label(is_current_pages, is_current_books);
+        let next_label = Self::next_label(is_current_pages, is_current_books);
+
         match read_from {
-            app::ReadFrom::RightToLeft => "Previous page",
-            app::ReadFrom::LeftToRight => "Next page",
+            app::ReadFrom::RightToLeft => {
+                prev_label
+            },
+            app::ReadFrom::LeftToRight => {
+                next_label
+            },
         }
     }
 
     /// 左矢印のファイルボタンのラベル
     /// * `read_from` - ページ送り方向
     /// * `return` - 左矢印のファイルボタンのラベル
-    pub fn left(read_from: &app::ReadFrom) -> &str {
+    pub fn left(read_from: &app::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
+        let prev_label = Self::prev_label(is_current_pages, is_current_books);
+        let next_label = Self::next_label(is_current_pages, is_current_books);
+
         match read_from {
-            app::ReadFrom::RightToLeft => "Next page",
-            app::ReadFrom::LeftToRight => "Previous page",
+            app::ReadFrom::RightToLeft => {
+                next_label
+            },
+            app::ReadFrom::LeftToRight => {
+                prev_label
+            },
         }
     }
 
     /// 左端のページボタンのラベル
     /// * `read_from` - ページ送り方向
     /// * `return` - 左端のページボタンのラベル
-    pub fn leftmost(read_from: &app::ReadFrom) -> &str {
+    pub fn leftmost(read_from: &app::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
+        let first_label = Self::firstmost_label(is_current_pages, is_current_books);
+        let last_label = Self::lastmost_label(is_current_pages, is_current_books);
+
         match read_from {
-            app::ReadFrom::RightToLeft => "Last page",
-            app::ReadFrom::LeftToRight => "First page",
+            app::ReadFrom::RightToLeft => {
+                last_label
+            },
+            app::ReadFrom::LeftToRight => {
+                first_label
+            },
         }
     }
 }

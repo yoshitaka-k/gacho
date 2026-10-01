@@ -63,7 +63,7 @@ pub(crate) fn view(
             },
             |ui| {
                 // 右端のページボタン
-                let hover_text = label::MainBottom::rightmost(app.read_from());
+                let hover_text = label::MainBottom::rightmost(app.read_from(), open_file.is_current_pages(), open_file.is_current_books());
                 let rightmost_button_image = egui::Image::new(svg::LAST_PAGE)
                     .tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
@@ -74,7 +74,7 @@ pub(crate) fn view(
                 }
 
                 // 右矢印のファイルボタン
-                let hover_text = label::MainBottom::right(app.read_from());
+                let hover_text = label::MainBottom::right(app.read_from(), open_file.is_current_pages(), open_file.is_current_books());
                 let right_button_image = egui::Image::new(svg::KEYBOARD_ARROW_RIGHT)
                     .tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
@@ -85,7 +85,7 @@ pub(crate) fn view(
                 }
 
                 // 左矢印のファイルボタン
-                let hover_text = label::MainBottom::left(app.read_from());
+                let hover_text = label::MainBottom::left(app.read_from(), open_file.is_current_pages(), open_file.is_current_books());
                 let left_button_image = egui::Image::new(svg::KEYBOARD_ARROW_LEFT)
                     .tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
@@ -96,7 +96,7 @@ pub(crate) fn view(
                 }
 
                 // 左端のページボタン
-                let hover_text = label::MainBottom::leftmost(app.read_from());
+                let hover_text = label::MainBottom::leftmost(app.read_from(), open_file.is_current_pages(), open_file.is_current_books());
                 let leftmost_button_image = egui::Image::new(svg::FIRST_PAGE)
                     .tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {

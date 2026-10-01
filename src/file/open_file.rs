@@ -100,6 +100,18 @@ impl OpenFile {
         self.spreads.len()
     }
 
+    /// 現在のページの状態を取得
+    /// * `return` - 現在のページの状態（前後にページがあるかどうか）
+    pub fn is_current_pages(&self) -> (bool, bool) {
+        (self.is_first_page(), self.is_last_page())
+    }
+
+    /// 現在の本の状態を取得
+    /// * `return` - 現在の本の状態（前後に本があるかどうか）
+    pub fn is_current_books(&self) -> (bool, bool) {
+        (self.is_prev_book(), self.is_next_book())
+    }
+
     /// 現在のページリストのインデックスを設定
     /// * `index` - 現在のページリストのインデックス
     pub fn set_current_spread(&mut self, index: usize) {
@@ -361,6 +373,20 @@ impl OpenFile {
     fn is_last_page(&self) -> bool {
         let Some(index) = self.current_spread else { return false; };
         index >= self.spreads.len().saturating_sub(1)
+    }
+
+    /// 前に本があるかどうか
+    /// * `return` - 前に本があるかどうか
+    fn is_prev_book(&self) -> bool {
+        let Some(index) = self.volume else { return false; };
+        index > 0
+    }
+
+    /// 次に本があるかどうか
+    /// * `return` - 次に本があるかどうか
+    fn is_next_book(&self) -> bool {
+        let Some(index) = self.volume else { return false; };
+        index < self.library.len().saturating_sub(1)
     }
 
     /// 次のページを取得

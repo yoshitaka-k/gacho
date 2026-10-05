@@ -10,8 +10,8 @@ use crate::ui::assets::{self, label, icon, svg};
 pub(crate) const SETTING_WINDOW_ID: &str = "setting_window";
 
 // ウィンドウのサイズ
-const WINDOW_WIDTH: f32 = 460.0;
-const WINDOW_HEIGHT: f32 = 310.0;
+const WINDOW_WIDTH: f32 = 420.0;
+const WINDOW_HEIGHT: f32 = 390.0;
 
 // ヘッダーのスペースの幅
 const HEADER_ICON_SPACING: f32 = 4.0;
@@ -24,6 +24,8 @@ pub(crate) const GENERAL_LONG_LABEL_WIDTH: f32 = 140.0;
 
 // 追加のスペースの幅
 pub(crate) const SETTING_ADD_SPACING: f32 = 4.0;
+
+pub(crate) const SETTING_INDENT_SPACING: f32 = 10.0;
 
 /// ヘッダーパネルを表示
 /// * `ui` - UI

@@ -248,6 +248,24 @@ impl SettingGeneral {
 
     /// 画面表示の表示方式のラベル
     /// * `return` - 画面表示の表示方式のラベル
+    pub fn header_layout() -> &'static str {
+        "Layout"
+    }
+
+    /// メモリのラベル
+    /// * `return` - メモリのラベル
+    pub fn header_memory() -> &'static str {
+        "Memory"
+    }
+
+    /// 前処理数のラベル
+    /// * `return` - 前処理数のラベル
+    pub fn header_preloading() -> &'static str {
+        "Preloading"
+    }
+
+    /// 画面表示の表示方式のラベル
+    /// * `return` - 画面表示の表示方式のラベル
     pub fn page_layout() -> &'static str {
         "Page Layout"
     }
@@ -302,8 +320,8 @@ impl SettingGeneral {
 
     /// 前処理数のラベル
     /// * `return` - 前処理数のラベル
-    pub fn preloading() -> &'static str {
-        "Preloading"
+    pub fn load_pages() -> &'static str {
+        "Load Pages"
     }
 
     /// 最後に読んだページを保存するかどうかのラベル

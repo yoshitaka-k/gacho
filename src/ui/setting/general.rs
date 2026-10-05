@@ -16,6 +16,21 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
     ui.separator();
     ui.add_space(setting::SETTING_ADD_SPACING);
 
+    // ページ送り方向を表示
+    egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
+        ui.horizontal(|ui| {
+            ui::add_label(ui, label::SettingGeneral::read_from(), setting::GENERAL_LABEL_WIDTH);
+            ui.scope(|ui| {
+                ui.radio_value(app.read_from_mut(), app::ReadFrom::RightToLeft, label::SettingGeneral::read_from_right_to_left());
+                ui.radio_value(app.read_from_mut(), app::ReadFrom::LeftToRight, label::SettingGeneral::read_from_left_to_right());
+            });
+        });
+    });
+
+    ui.add_space(setting::SETTING_ADD_SPACING);
+    ui.separator();
+    ui.add_space(setting::SETTING_ADD_SPACING);
+
     egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
         // 画面表示の表示方式を表示
         ui.horizontal(|ui| {
@@ -37,36 +52,6 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
 
         // 画面表示の表示方式を変更した場合は本を再読み込みする必要がある
         setting::warning_note(ui, label::SettingGeneral::layout_warning());
-    });
-
-    ui.add_space(setting::SETTING_ADD_SPACING);
-    ui.separator();
-    ui.add_space(setting::SETTING_ADD_SPACING);
-
-    // ページ送り方向を表示
-    egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
-        ui.horizontal(|ui| {
-            ui::add_label(ui, label::SettingGeneral::read_from(), setting::GENERAL_LABEL_WIDTH);
-            ui.scope(|ui| {
-                ui.radio_value(app.read_from_mut(), app::ReadFrom::RightToLeft, label::SettingGeneral::read_from_right_to_left());
-                ui.radio_value(app.read_from_mut(), app::ReadFrom::LeftToRight, label::SettingGeneral::read_from_left_to_right());
-            });
-        });
-    });
-
-    ui.add_space(setting::SETTING_ADD_SPACING);
-    ui.separator();
-    ui.add_space(setting::SETTING_ADD_SPACING);
-
-    // 前処理数を表示
-    egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
-        ui.horizontal(|ui| {
-            ui::add_label(ui, label::SettingGeneral::preloading(), setting::GENERAL_LABEL_WIDTH);
-            ui.scope(|ui| {
-                ui.spacing_mut().slider_width = setting::remaining_slider_width(ui);
-                ui.add(egui::Slider::new(app.preloading_mut(), MIN_PRELOADING..=MAX_PRELOADING));
-            });
-        });
     });
 
     ui.add_space(setting::SETTING_ADD_SPACING);
@@ -96,5 +81,20 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
 
         // 最後に読んだページを開くかどうかを変更した場合は本を再読み込みする必要がある
         setting::warning_note(ui, label::SettingGeneral::reopen_book_warning());
+    });
+
+    ui.add_space(setting::SETTING_ADD_SPACING);
+    ui.separator();
+    ui.add_space(setting::SETTING_ADD_SPACING);
+
+    // 前処理数を表示
+    egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
+        ui.horizontal(|ui| {
+            ui::add_label(ui, label::SettingGeneral::preloading(), setting::GENERAL_LABEL_WIDTH);
+            ui.scope(|ui| {
+                ui.spacing_mut().slider_width = setting::remaining_slider_width(ui);
+                ui.add(egui::Slider::new(app.preloading_mut(), MIN_PRELOADING..=MAX_PRELOADING));
+            });
+        });
     });
 }

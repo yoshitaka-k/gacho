@@ -58,6 +58,15 @@ pub(crate) fn header_panel(
     });
 }
 
+/// グループヘッダーパネルを表示
+/// * `ui` - UI
+pub(crate) fn group_header_panel(ui: &mut egui::Ui, label: &str) {
+    ui.horizontal(|ui| {
+        ui.add_space(SETTING_INDENT_SPACING);
+        ui.label(label);
+    });
+}
+
 /// ラベル後の残り幅に合わせてスライダーのレール幅を決める
 /// * `ui` - UI
 /// * `return` - スライダーのレール幅

@@ -16,10 +16,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
     ui.separator();
     ui.add_space(setting::SETTING_ADD_SPACING);
 
-    ui.horizontal(|ui| {
-        ui.add_space(setting::SETTING_INDENT_SPACING);
-        ui.label(label::SettingGeneral::header_layout());
-    });
+    // グループパネル名を表示
+    setting::group_header_panel(ui, label::SettingGeneral::header_layout());
 
     egui::Frame::group(ui.style()).show(ui, |ui| {
         // 横幅いっぱいまで伸ばす
@@ -62,10 +60,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
 
     ui.add_space(setting::SETTING_ADD_SPACING);
 
-    ui.horizontal(|ui| {
-        ui.add_space(setting::SETTING_INDENT_SPACING);
-        ui.label(label::SettingGeneral::header_memory());
-    });
+    // グループヘッダーパネルを表示
+    setting::group_header_panel(ui, label::SettingGeneral::header_memory());
 
     egui::Frame::group(ui.style()).show(ui, |ui| {
         ui.take_available_width();
@@ -96,10 +92,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
 
     ui.add_space(setting::SETTING_ADD_SPACING);
 
-    ui.horizontal(|ui| {
-        ui.add_space(setting::SETTING_INDENT_SPACING);
-        ui.label(label::SettingGeneral::header_preloading());
-    });
+    // グループヘッダーパネルを表示
+    setting::group_header_panel(ui, label::SettingGeneral::header_preloading());
 
     egui::Frame::group(ui.style()).show(ui, |ui| {
         ui.take_available_width();

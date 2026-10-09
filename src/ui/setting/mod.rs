@@ -24,7 +24,6 @@ pub(crate) const GENERAL_LONG_LABEL_WIDTH: f32 = 140.0;
 
 // 追加のスペースの幅
 pub(crate) const SETTING_ADD_SPACING: f32 = 4.0;
-
 pub(crate) const SETTING_INDENT_SPACING: f32 = 10.0;
 
 /// ヘッダーパネルを表示

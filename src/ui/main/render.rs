@@ -37,6 +37,8 @@ impl Render {
         // フォントと SVG ローダーを追加
         font::install(&cc.egui_ctx);
         svg::install(&cc.egui_ctx);
+
+        // イベントコンテキストを設定
         event::launch::set_ctx(cc.egui_ctx.clone());
 
         // 前回保存した App があれば復元（なければ引数の app を使う）

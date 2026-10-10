@@ -39,9 +39,9 @@ pub(crate) fn view(
     }
 
     // 設定ウィンドウを表示
-    ctx.show_viewport_immediate(window_id, options, |ctx, _class| {
+    ctx.show_viewport_immediate(window_id, options, |ui, _class| {
         // Command + W キーが押されたら閉じる
-        if ctx.input(|input| {
+        if ui.input(|input| {
             input.modifiers.matches_exact(egui::Modifiers::COMMAND)
             && input.key_pressed(egui::Key::W)
         }) {
@@ -52,13 +52,13 @@ pub(crate) fn view(
         update_job.result(updated_token);
 
         // パネルのスタイルを設定
-        let panel_style = ui::panel_style(ctx, ui::TOP_PANEL_INNER_MARGIN);
+        let panel_style = ui::panel_style(ui, ui::TOP_PANEL_INNER_MARGIN);
 
         // アイコンの色を取得
-        let icon_color = assets::icon_color(ctx);
+        let icon_color = assets::icon_color(ui);
 
         // タブを表示
-        egui::Panel::top("setting_top_taskbar").frame(panel_style).show(ctx, |ui| {
+        egui::Panel::top("setting_top_taskbar").frame(panel_style).show(ui, |ui| {
             ui.horizontal(|ui| {
                 ui.add(egui::Image::new(svg::SETTINGS).max_height(icon::TOP_MENU_SETTINGS_ICON_SIZE).tint(icon_color));
 
@@ -74,7 +74,7 @@ pub(crate) fn view(
             });
         });
 
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().show(ui, |ui| {
             // タブに応じて表示内容を切り替え
             match setting_token.tab {
                 ui::SettingTab::General => general::view(ui, app),
@@ -83,13 +83,13 @@ pub(crate) fn view(
         });
 
         // ウィンドウの閉じるボタンが押されたら閉じる
-        if ctx.input(|input| input.viewport().close_requested()) {
+        if ui.input(|input| input.viewport().close_requested()) {
             setting_token.open = false;
         }
 
         // 更新モーダルを表示
         if updated_token.open {
-            modal::updated(ctx, updated_token);
+            modal::updated(ui, updated_token);
         }
     });
 }

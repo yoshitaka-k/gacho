@@ -2,6 +2,11 @@ use std::path::PathBuf;
 use crate::{error, file, model};
 
 /// ファイルオープンダイアログを開いて選択結果を追加する
+/// * `label` - フィルターのラベル
+/// * `open_file` - 開いているファイル
+/// * `book_model` - 本のモデル
+/// * `is_open_last_page` - 最後に読んだページを開くかどうか
+/// * `return` - ファイルを開けたかどうか
 pub(crate) fn file(
     label: &str,
     open_file: &mut file::OpenFile,
@@ -19,8 +24,12 @@ pub(crate) fn file(
     open_path(path, open_file, book_model, is_open_last_page)
 }
 
-/// ファイルオープンダイアログを開いて選択結果を追加する
-/// * `files` - 開いているファイル
+/// フォルダオープンダイアログを開いて選択結果を追加する
+/// * `label` - フィルターのラベル
+/// * `open_file` - 開いているファイル
+/// * `book_model` - 本のモデル
+/// * `is_open_last_page` - 最後に読んだページを開くかどうか
+/// * `return` - ファイルを開けたかどうか
 pub(crate) fn folder(
     label: &str,
     open_file: &mut file::OpenFile,

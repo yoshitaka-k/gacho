@@ -12,7 +12,7 @@ pub(crate) use image::Image;
 pub(crate) use archive::Archive;
 pub(crate) use library::Library;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 use regex::Regex;
 use std::iter::Peekable;
@@ -40,7 +40,7 @@ pub(crate) static RE_BOOK_NAME_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
 /// ファイルが画像かどうかを判断
 /// * `path` - ファイルのパス
 /// * `return` - ファイルが画像かどうか
-pub(crate) fn is_image(path: &PathBuf) -> bool {
+pub(crate) fn is_image(path: &Path) -> bool {
     let Some(ext) = path.extension() else {
         return false;
     };
@@ -55,7 +55,7 @@ pub(crate) fn is_image(path: &PathBuf) -> bool {
 /// ファイルがアーカイブかどうかを判断
 /// * `path` - ファイルのパス
 /// * `return` - ファイルがアーカイブかどうか
-pub(crate) fn is_archive(path: &PathBuf) -> bool {
+pub(crate) fn is_archive(path: &Path) -> bool {
     let Some(ext) = path.extension() else {
         return false;
     };
@@ -70,7 +70,7 @@ pub(crate) fn is_archive(path: &PathBuf) -> bool {
 /// ファイルが隠しファイルかどうかをチェックする
 /// * `path` - ファイルのパス
 /// * `return` - ファイルが隠しファイルかどうか
-pub(crate) fn is_hidden_entry(path: &PathBuf) -> bool {
+pub(crate) fn is_hidden_entry(path: &Path) -> bool {
     path.components().any(|c| {
         let s = c.as_os_str().to_string_lossy();
         s.starts_with('.') || s == "__MACOSX"

@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use getset::{Getters, Setters};
 use crate::{error, file};
@@ -80,10 +80,10 @@ impl Library {
     /// パスで index を取得
     /// * `path` - パス
     /// * `return` - index
-    pub fn get_index_by_path(&self, path: &PathBuf) -> Option<usize> {
+    pub fn get_index_by_path(&self, path: &Path) -> Option<usize> {
         // パスが一致するindexを取得
         self.entries.iter().position(|entry| {
-            entry.path == *path
+            entry.path.as_path() == path
         })
     }
 
@@ -149,20 +149,20 @@ impl Library {
     /// * `base_dir` - ベースディレクトリのパス
     /// * `books_last_page` - 本のリスト
     /// * `return` - 結果
-    fn find_file(&mut self, path: &PathBuf, base_dir: &PathBuf, books_last_page: &Vec<(PathBuf, usize)>) -> error::Result<()> {
+    fn find_file(&mut self, path: &Path, base_dir: &Path, books_last_page: &Vec<(PathBuf, usize)>) -> error::Result<()> {
         // メタデータを取得
         let metadata = path.metadata().map_err(|e| {
-            error::GachoError::file_error(e.to_string(), path.clone())
+            error::GachoError::file_error(e.to_string(), path.to_path_buf())
         })?;
 
         // ファイルの場合は、同ディレクトリのファイルを探索してライブラリに追加
         if metadata.is_file() {
             // 同ディレクトリのファイルを探索
             for entry in std::fs::read_dir(&base_dir).map_err(|e| {
-                error::GachoError::file_error(e.to_string(), base_dir.clone())
+                error::GachoError::file_error(e.to_string(), base_dir.to_path_buf())
             })? {
                 let entry = entry.map_err(|e| {
-                    error::GachoError::file_error(e.to_string(), base_dir.clone())
+                    error::GachoError::file_error(e.to_string(), base_dir.to_path_buf())
                 })?;
 
                 // アーカイブ以外の場合はスキップ
@@ -184,10 +184,10 @@ impl Library {
         } else if metadata.is_dir() {
             // ディレクトリの中のファイルを探索
             for entry in std::fs::read_dir(&path).map_err(|e| {
-                error::GachoError::file_error(e.to_string(), path.clone())
+                error::GachoError::file_error(e.to_string(), path.to_path_buf())
             })? {
                 let entry = entry.map_err(|e| {
-                    error::GachoError::file_error(e.to_string(), path.clone())
+                    error::GachoError::file_error(e.to_string(), path.to_path_buf())
                 })?;
 
                 // アーカイブ以外の場合はスキップ
@@ -208,7 +208,7 @@ impl Library {
             // ディレクトリで何も追加されていない場合は、ディレクトリのパスをライブラリに追加
             if self.entries.is_empty() {
                 self.entries.push(
-                    LibraryEntry::new(path.clone(), self.get_file_name(&path), None)
+                    LibraryEntry::new(path.to_path_buf(), self.get_file_name(path), None)
                 );
             }
         }
@@ -219,7 +219,7 @@ impl Library {
     /// ファイルの名前を取得
     /// * `path` - ファイルのパス
     /// * `return` - ファイルの名前
-    fn get_file_name(&self, path: &PathBuf) -> String {
+    fn get_file_name(&self, path: &Path) -> String {
         if let Some(file_name) = path.file_name() {
             file_name.to_string_lossy().to_string()
         } else {

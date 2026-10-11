@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use rusqlite::{Connection, OptionalExtension};
 use crate::{error, model};
 
@@ -20,7 +20,7 @@ impl Book {
     /// * `path`: 本のパス
     /// * `page`: 最後に読んだページ
     /// * `return`: 成功したかどうか
-    pub fn save_last_page(&mut self, path: &PathBuf, page: usize) -> error::Result<bool> {
+    pub fn save_last_page(&mut self, path: &Path, page: usize) -> error::Result<bool> {
         let id = self.get_id(path)?;
         if id.is_none() {
             self.insert_page(path, page)
@@ -63,7 +63,7 @@ impl Book {
     /// 最後に読んだページを取得
     /// * `path`: 本のパス
     /// * `return`: 本ID
-    fn get_id(&self, path: &PathBuf) -> error::Result<Option<usize>> {
+    fn get_id(&self, path: &Path) -> error::Result<Option<usize>> {
         let mut stmt = self.conn
             .prepare("SELECT `id` FROM `books` WHERE `path` = ?")
             .map_err(|e| error::GachoError::database_error(e.to_string()))?;
@@ -75,7 +75,7 @@ impl Book {
     /// * `stmt`: ステートメント
     /// * `path`: 本のパス
     /// * `return`: 結果
-    fn query_row(&self, stmt: &mut rusqlite::Statement<'_>, path: &PathBuf) -> error::Result<Option<usize>> {
+    fn query_row(&self, stmt: &mut rusqlite::Statement<'_>, path: &Path) -> error::Result<Option<usize>> {
         let path = path.to_string_lossy().to_string();
         if path.is_empty() { return Ok(None); }
 
@@ -94,7 +94,7 @@ impl Book {
     /// * `path`: 本のパス
     /// * `page`: 最後に読んだページ
     /// * `return`: 成功したかどうか
-    fn insert_page(&mut self, path: &PathBuf, page: usize) -> error::Result<bool> {
+    fn insert_page(&mut self, path: &Path, page: usize) -> error::Result<bool> {
         // パラメータを準備
         let path = path.to_string_lossy().to_string();
         if path.is_empty() { return Ok(false); }

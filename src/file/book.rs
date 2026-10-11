@@ -161,11 +161,11 @@ impl Book {
     /// 一時ファイルから本を開く
     /// * `base_dir` - ドロップされたパスの親（相対パスの基準）
     /// * `return` - 結果
-    pub fn open_from_temp_to_book(&mut self, path: &PathBuf) -> error::Result<bool> {
+    pub fn open_from_temp_to_book(&mut self, path: &Path) -> error::Result<bool> {
         if self.temp_path.is_empty() {
             return Err(error::GachoError::file_error(
                 "No files to open".to_string(),
-                path.clone(),
+                path.to_path_buf(),
             ));
         }
 
@@ -276,29 +276,29 @@ impl Book {
     /// * `base_dir` - ドロップされたパスの親（相対パスの基準）
     /// * `return` - ファイルのパス
     fn find_file(&mut self,
-        path: &PathBuf,
+        path: &Path,
         base_dir: &Path,
     ) -> error::Result<()> {
         let metadata = path.metadata().map_err(|e| {
-            error::GachoError::file_error(e.to_string(), path.clone())
+            error::GachoError::file_error(e.to_string(), path.to_path_buf())
         })?;
 
         // ファイルの場合は、画像を新規作成
         if metadata.is_file() {
-            self.temp_path.push(path.clone());
+            self.temp_path.push(path.to_path_buf());
 
         // ディレクトリの場合は、ディレクトリの中のファイルを再起で探索
         } else if metadata.is_dir() {
             // ディレクトリの中のファイルを探索
             for entry in std::fs::read_dir(&path).map_err(|e| {
-                error::GachoError::file_error(e.to_string(), path.clone())
+                error::GachoError::file_error(e.to_string(), path.to_path_buf())
             })? {
                 let entry = entry.map_err(|e| {
-                    error::GachoError::file_error(e.to_string(), path.clone())
+                    error::GachoError::file_error(e.to_string(), path.to_path_buf())
                 })?;
 
                 let metadata = entry.path().metadata().map_err(|e| {
-                    error::GachoError::file_error(e.to_string(), path.clone())
+                    error::GachoError::file_error(e.to_string(), path.to_path_buf())
                 })?;
 
                 // ディレクトリの中のディレクトリはスキップ
@@ -317,7 +317,7 @@ impl Book {
     /// * `path` - ドロップされたファイルのパス
     /// * `base_dir` - ドロップされたパスの親（相対パスの基準）
     /// * `return` - 結果
-    fn image_new(&mut self, path: &PathBuf, base_dir: &Path) -> error::Result<()> {
+    fn image_new(&mut self, path: &Path, base_dir: &Path) -> error::Result<()> {
         // 相対パスを取得
         let relative_path = path.strip_prefix(base_dir)
             .unwrap_or(&path)
@@ -332,7 +332,7 @@ impl Book {
 
             for file in archive.files() {
                 let image_file = file::Image::new(
-                    path.clone(),
+                    path.to_path_buf(),
                     file.relative_path().clone(),
                     Some(file.file_name().clone()),
                     Some(*file.size()),
@@ -348,12 +348,12 @@ impl Book {
             self.archive = Some(archive);
 
             // パスを控えておく
-            self.path = path.clone();
+            self.path = path.to_path_buf();
 
         } else if file::is_image(&path) {
             // ファイルを作成
             let image_file = file::Image::new(
-                path.clone(),
+                path.to_path_buf(),
                 relative_path,
                 None,
                 None,
@@ -368,7 +368,7 @@ impl Book {
             let parent = path.parent().ok_or_else(|| {
                 error::GachoError::file_error(
                     "Parent not found".to_string(),
-                    path.clone()
+                    path.to_path_buf()
                 )
             })?;
             self.path = parent.to_path_buf();

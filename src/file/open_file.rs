@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use getset::{Getters, MutGetters, Setters};
 
 use crate::{app, file, error};
@@ -72,8 +72,8 @@ impl OpenFile {
 
     /// 本のパスを取得
     /// * `return` - 本のパス
-    pub fn book_path(&self) -> &PathBuf {
-        &self.book.path()
+    pub fn book_path(&self) -> &Path {
+        self.book.path()
     }
 
     /// 本が空かどうか

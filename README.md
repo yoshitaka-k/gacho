@@ -9,11 +9,11 @@
 </p>
 
 <p align="center">
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/yoshitaka-k/keiga">&nbsp;
-  <img alt="License" src="https://img.shields.io/github/license/yoshitaka-k/keiga">&nbsp;
-  <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/yoshitaka-k/keiga">&nbsp;
-  <img alt="Lines of code" src="https://www.aschey.tech/tokei/github/yoshitaka-k/keiga">&nbsp;
-  <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/yoshitaka-k/keiga">
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/yoshitaka-k/gacho">&nbsp;
+  <a href="https://github.com/yoshitaka-k/gacho/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/yoshitaka-k/gacho"></a>&nbsp;
+  <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/yoshitaka-k/gacho">&nbsp;
+  <img alt="Lines of code" src="https://www.aschey.tech/tokei/github/yoshitaka-k/gacho">&nbsp;
+  <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/yoshitaka-k/gacho">
 </p>
 
 Rust の勉強がてら、自分用に CBZビューア ってことで、Gacho（画帳）を作ってみようと思って作成なぅ。

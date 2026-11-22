@@ -2,7 +2,7 @@ pub(crate) mod view;
 mod general;
 mod about;
 
-use crate::app;
+use crate::update;
 use crate::event::button;
 use crate::ui::assets::{self, label, icon, svg};
 
@@ -33,11 +33,8 @@ pub(crate) fn header_panel(
     ui: &mut egui::Ui,
     icon: egui::ImageSource<'static>,
     label: &str,
-    update_job: Option<&mut app::UpdateJob>,
 ) {
     let spacing = ui.spacing().item_spacing.x;
-
-    // ボタンの色を設定
     let icon_color = assets::icon_color(ui);
 
     ui.horizontal(|ui| {
@@ -45,15 +42,30 @@ pub(crate) fn header_panel(
         ui.add(egui::Image::new(icon).max_height(icon::SETTINGS_ICON_SIZE).tint(icon_color));
         ui.spacing_mut().item_spacing.x = spacing;
         ui.label(label);
+    });
+}
+
+/// ヘッダーパネルを表示
+/// * `ui` - UI
+/// * `icon` - アイコン
+pub(crate) fn about_header_panel(
+    ui: &mut egui::Ui,
+    icon: egui::ImageSource<'static>,
+    label: &str,
+    update_job: &mut update::UpdateJob,
+    update_token: &mut update::UpdateToken,
+) {
+    ui.horizontal(|ui| {
+        header_panel(ui, icon, label);
 
         // アップデート確認ボタン
-        if let Some(update_job) = update_job {
-            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            ui.add_enabled_ui(!update_token.running, |ui| {
                 if ui.button(label::Setting::update_check()).clicked() {
-                    button::check_for_update(update_job);
+                    button::check_for_update(update_job, update_token);
                 }
             });
-        }
+        });
     });
 }
 

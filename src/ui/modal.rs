@@ -1,5 +1,5 @@
-use crate::app::{UpdateCheck, UpdatedToken};
-use crate::ui::{self, ErrorToken};
+use crate::{ui, update};
+use crate::ui::ErrorToken;
 use crate::ui::assets::{icon, label, svg};
 
 // モーダルのラベルの幅
@@ -51,9 +51,9 @@ pub(crate) fn error(ctx: &egui::Context, error_token: &mut ErrorToken) {
 
 /// 更新モーダルを表示
 /// * `ctx` - コンテキスト
-/// * `updated_token` - 更新モーダルを表示するためのトークン
-pub(crate) fn updated(ctx: &egui::Context, updated_token: &mut UpdatedToken) {
-    let Some(check) = updated_token.check.clone() else {
+/// * `update_token` - 更新モーダルを表示するためのトークン
+pub(crate) fn updated(ctx: &egui::Context, update_token: &mut update::UpdateToken) {
+    let Some(check) = update_token.check.clone() else {
         return;
     };
 
@@ -65,17 +65,17 @@ pub(crate) fn updated(ctx: &egui::Context, updated_token: &mut UpdatedToken) {
         ui.horizontal(|ui| {
             match &check {
                 // アップデートがある場合
-                UpdateCheck::Available { .. } => {
+                update::UpdateCheck::Available { .. } => {
                     ui.add(heading_icon(svg::UPDATE, icon::MODAL_UPDATE_ICON_SIZE, egui::Color32::GREEN));
                     ui.heading(label::ModalUpdated::available());
                 }
                 // アップデートが最新の場合
-                UpdateCheck::Latest => {
+                update::UpdateCheck::Latest => {
                     ui.add(heading_icon(svg::UPDATE, icon::MODAL_UPDATE_ICON_SIZE, ui.visuals().text_color()));
                     ui.heading(label::ModalUpdated::latest());
                 }
                 // アップデートが取得できなかった場合
-                UpdateCheck::Failed => {
+                update::UpdateCheck::Failed(_) => {
                     ui.add(heading_icon(svg::ERROR, icon::MODAL_ERROR_ICON_SIZE, egui::Color32::RED));
                     ui.heading(label::ModalUpdated::failed());
                 }
@@ -89,7 +89,7 @@ pub(crate) fn updated(ctx: &egui::Context, updated_token: &mut UpdatedToken) {
         // 内容部分
         match &check {
             // アップデートがある場合
-            UpdateCheck::Available { version, url } => {
+            update::UpdateCheck::Available { version, url } => {
                 egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
                     ui::add_label(ui, &format!("{}{}", label::ModalUpdated::new_version(), version), MODAL_LABEL_WIDTH);
                     ui.add(egui::Label::new(
@@ -107,15 +107,16 @@ pub(crate) fn updated(ctx: &egui::Context, updated_token: &mut UpdatedToken) {
                 });
             }
             // アップデートが最新の場合
-            UpdateCheck::Latest => {
+            update::UpdateCheck::Latest => {
                 egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
                     ui.label(format!("{}{}", label::ModalUpdated::current_version(), env!("CARGO_PKG_VERSION")));
                     ui.add_space(ui::MODAL_WINDOW_SPACING);
                 });
             }
             // アップデートが取得できなかった場合
-            UpdateCheck::Failed => {
+            update::UpdateCheck::Failed(e) => {
                 egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
+                    ui.label(e.to_string());
                     ui.add_space(ui::MODAL_WINDOW_SPACING);
                 });
             }
@@ -124,8 +125,8 @@ pub(crate) fn updated(ctx: &egui::Context, updated_token: &mut UpdatedToken) {
 
     // モーダルを閉じたらモーダルを非表示にする
     if modal.should_close() {
-        updated_token.open = false;
-        updated_token.check = None;
+        update_token.open = false;
+        update_token.check = None;
     }
 }
 

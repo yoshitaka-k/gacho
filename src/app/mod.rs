@@ -1,15 +1,5 @@
-mod update;
-
-pub(crate) use update::{UpdateCheck, UpdateJob, UpdatedToken};
-
 use getset::{Getters, MutGetters};
 use serde::{Deserialize, Serialize};
-
-/// GitHub リポジトリ URL
-pub(crate) const GITHUB_URL: &str = "https://github.com/{repository}";
-
-/// アップデート確認リクエスト URL
-pub(crate) const REQUEST_URL: &str = "https://api.github.com/repos/{repository}/releases/latest";
 
 /// 次の画像の表示数
 const DEFAULT_PRELOADING: usize = 5;

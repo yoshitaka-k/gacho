@@ -10,7 +10,7 @@ const MAX_PRELOADING: usize = 10;
 /// * `ui` - UI
 pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
     // ヘッダーパネルを表示
-    setting::header_panel(ui, svg::SETTINGS, label::SettingGeneral::heading(), None);
+    setting::header_panel(ui, svg::SETTINGS, label::SettingGeneral::heading());
 
     ui.add_space(setting::SETTING_ADD_SPACING);
     ui.separator();

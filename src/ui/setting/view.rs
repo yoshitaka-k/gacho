@@ -1,19 +1,19 @@
-use crate::app;
-use crate::ui::assets::{self, label, icon, svg};
-use crate::ui::setting::{self, general, about};
-use crate::ui::{self, modal};
+use crate::{app, ui, update};
+use crate::ui::{assets, setting, modal};
+use crate::ui::assets::{label, icon, svg};
+use crate::ui::setting::{general, about};
 
 /// 設定ウィンドウを表示
 /// * `ctx` - コンテキスト
 /// * `app` - アプリケーション
 /// * `setting_token` - 設定トークン
-/// * `updated_token` - アップデートトークン
+/// * `update_token` - アップデートトークン
 pub(crate) fn view(
     ctx: &egui::Context,
     app: &mut app::App,
     setting_token: &mut ui::SettingToken,
-    updated_token: &mut app::UpdatedToken,
-    mut update_job: &mut app::UpdateJob,
+    update_token: &mut update::UpdateToken,
+    mut update_job: &mut update::UpdateJob,
 ) {
     let window_id = egui::ViewportId::from_hash_of(setting::SETTING_WINDOW_ID);
 
@@ -49,7 +49,7 @@ pub(crate) fn view(
         }
 
         // 更新結果を取得
-        update_job.result(updated_token);
+        update_job.result(update_token);
 
         // パネルのスタイルを設定
         let panel_style = ui::panel_style(ui, ui::TOP_PANEL_INNER_MARGIN);
@@ -78,7 +78,7 @@ pub(crate) fn view(
             // タブに応じて表示内容を切り替え
             match setting_token.tab {
                 ui::SettingTab::General => general::view(ui, app),
-                ui::SettingTab::About => about::view(ui, &mut update_job),
+                ui::SettingTab::About => about::view(ui, &mut update_job, update_token),
             }
         });
 
@@ -88,8 +88,8 @@ pub(crate) fn view(
         }
 
         // 更新モーダルを表示
-        if updated_token.open {
-            modal::updated(ui, updated_token);
+        if update_token.open {
+            modal::updated(ui, update_token);
         }
     });
 }

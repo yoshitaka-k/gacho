@@ -1,13 +1,18 @@
-use crate::app::{self, UpdateJob};
-use crate::ui::{self, setting};
-use crate::ui::assets::{self, label, svg, icon};
+use crate::{GITHUB_URL, ui, update};
+use crate::ui::{assets, setting};
+use crate::ui::assets::{label, svg, icon};
 
 /// バージョンを表示
 /// * `ui` - UI
 /// * `update_job` - アップデートジョブ
-pub(crate) fn view(ui: &mut egui::Ui, update_job: &mut UpdateJob) {
+/// * `update_token` - アップデートトークン
+pub(crate) fn view(
+    ui: &mut egui::Ui,
+    update_job: &mut update::UpdateJob,
+    update_token: &mut update::UpdateToken,
+) {
     // ヘッダーパネルを表示
-    setting::header_panel(ui, svg::INFO, label::SettingAbout::heading(), Some(update_job));
+    setting::about_header_panel(ui, svg::INFO, label::SettingAbout::heading(), update_job, update_token);
 
     ui.add_space(setting::HEADER_BOTTOM_SPACING);
 
@@ -31,7 +36,7 @@ pub(crate) fn view(ui: &mut egui::Ui, update_job: &mut UpdateJob) {
         // リポジトリを表示
         ui.horizontal(|ui| {
             ui.label("Repository:");
-            ui.hyperlink_to(env!("CARGO_PKG_REPOSITORY"), app::GITHUB_URL.replace("{repository}", env!("CARGO_PKG_REPOSITORY")));
+            ui.hyperlink_to(env!("CARGO_PKG_REPOSITORY"), GITHUB_URL.replace("{repository}", env!("CARGO_PKG_REPOSITORY")));
         });
     });
 }

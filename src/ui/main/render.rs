@@ -1,6 +1,6 @@
-use crate::{app, error, event, file, model};
+use crate::{app, error, event, file, ui, model, update};
 use crate::event::{button, open, input};
-use crate::ui::{self, modal};
+use crate::ui::modal;
 use crate::ui::assets::{font, svg, label};
 use crate::ui::main::{top, bottom, middle};
 use crate::ui::setting::view as setting_window;
@@ -18,10 +18,10 @@ pub struct Render {
     setting_token: ui::SettingToken,
 
     // アップデートトークン
-    updated_token: app::UpdatedToken,
+    update_token: update::UpdateToken,
 
     // アップデートジョブ
-    update_job: app::UpdateJob,
+    update_job: update::UpdateJob,
 
     // エラーモーダルのトークン
     error_token: ui::ErrorToken,
@@ -55,9 +55,9 @@ impl Render {
             pending_actions: Vec::new(),
             open_dialog_token: ui::OpenDialogToken::new(),
             setting_token: ui::SettingToken::new(),
-            updated_token: app::UpdatedToken::new(),
+            update_token: update::UpdateToken::new(),
             error_token: ui::ErrorToken::new(),
-            update_job: app::UpdateJob::new(cc.egui_ctx.clone()),
+            update_job: update::UpdateJob::new(cc.egui_ctx.clone()),
             book_model,
         }
     }
@@ -135,7 +135,7 @@ impl eframe::App for Render {
                 ui.ctx(),
                 &mut self.app,
                 &mut self.setting_token,
-                &mut self.updated_token,
+                &mut self.update_token,
                 &mut self.update_job,
             );
         }

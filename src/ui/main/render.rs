@@ -1,4 +1,4 @@
-use crate::{app, error, event, file, ui, model, update};
+use crate::{config, error, event, file, ui, model, update};
 use crate::event::{button, open, input};
 use crate::ui::modal;
 use crate::ui::assets::{font, svg, label};
@@ -7,7 +7,7 @@ use crate::ui::setting::view as setting_window;
 
 /// 描画用のウィジェット
 pub struct Render {
-    app: app::App,
+    config: config::Config,
     open_file: file::OpenFile,
     pending_actions: Vec<event::EventAction>,
 
@@ -33,7 +33,7 @@ pub struct Render {
 
 /// public methods
 impl Render {
-    pub fn new(cc: &eframe::CreationContext<'_>, app: app::App) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>, config: config::Config) -> Self {
         // フォントと SVG ローダーを追加
         font::install(&cc.egui_ctx);
         svg::install(&cc.egui_ctx);
@@ -41,16 +41,16 @@ impl Render {
         // イベントコンテキストを設定
         event::launch::set_ctx(cc.egui_ctx.clone());
 
-        // 前回保存した App があれば復元（なければ引数の app を使う）
-        let app = cc.storage
+        // 前回保存した Config があれば復元（なければ引数の config を使う）
+        let config = cc.storage
             .and_then(|storage| eframe::get_value(storage, eframe::APP_KEY))
-            .unwrap_or(app);
+            .unwrap_or(config);
 
         // 本のモデルを作成
         let book_model = model::Book::new();
 
         Self {
-            app,
+            config,
             open_file: file::OpenFile::new(),
             pending_actions: Vec::new(),
             open_dialog_token: ui::OpenDialogToken::new(),
@@ -65,10 +65,10 @@ impl Render {
 
 /// eframe::App の実装
 impl eframe::App for Render {
-    /// 終了前に App の状態を保存
+    /// 終了前に Config の状態を保存
     /// * `storage` - ストレージ
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
-        eframe::set_value(storage, eframe::APP_KEY, &self.app);
+        eframe::set_value(storage, eframe::APP_KEY, &self.config);
     }
 
     /// 描画
@@ -115,7 +115,7 @@ impl eframe::App for Render {
         // 下部パネルを表示
         bottom::view(
             ui,
-            &self.app,
+            &self.config,
             &mut self.open_file,
             &mut self.pending_actions,
         );
@@ -123,7 +123,7 @@ impl eframe::App for Render {
         // 中央パネルを表示
         middle::view(
             ui,
-            &self.app,
+            &self.config,
             &mut self.open_file,
             &mut self.pending_actions,
             &mut self.error_token,
@@ -133,7 +133,7 @@ impl eframe::App for Render {
         if self.setting_token.open {
             setting_window::view(
                 ui.ctx(),
-                &mut self.app,
+                &mut self.config,
                 &mut self.setting_token,
                 &mut self.update_token,
                 &mut self.update_job,
@@ -163,7 +163,7 @@ impl Render {
                 label::OpenDialog::archive(),
                 &mut self.open_file,
                 &mut self.book_model,
-                *self.app.open_last_page(),
+                *self.config.open_last_page(),
             );
             self.open_result(result);
         }
@@ -177,7 +177,7 @@ impl Render {
                 label::OpenDialog::archive(),
                 &mut self.open_file,
                 &mut self.book_model,
-                *self.app.open_last_page(),
+                *self.config.open_last_page(),
             );
             self.open_result(result);
         }
@@ -194,7 +194,7 @@ impl Render {
             path,
             &mut self.open_file,
             &mut self.book_model,
-            *self.app.open_last_page(),
+            *self.config.open_last_page(),
         );
         self.open_result(result);
     }
@@ -207,7 +207,7 @@ impl Render {
             ui,
             &mut self.open_file,
             &mut self.book_model,
-            *self.app.open_last_page(),
+            *self.config.open_last_page(),
         ) else {
             return;
         };
@@ -244,7 +244,7 @@ impl Render {
 
     /// 画面に表示させるページリストを作成
     fn rebuild_spreads(&mut self) {
-        self.open_file.build_spreads(*self.app.cover_layout(), *self.app.page_layout());
+        self.open_file.build_spreads(*self.config.cover_layout(), *self.config.page_layout());
     }
 
     /// イベントアクションを処理
@@ -266,11 +266,11 @@ impl Render {
                 event::EventAction::Click(pos) => {
                     // クリックした位置が左半分の場合は次のファイルを表示
                     if pos.x < ui.max_rect().max.x / 2.0 {
-                        if let Err(e) = self.open_file.left_page(&self.app) {
+                        if let Err(e) = self.open_file.left_page(&self.config) {
                             self.error_token.show(e);
                         }
                     } else {
-                        if let Err(e) = self.open_file.right_page(&self.app) {
+                        if let Err(e) = self.open_file.right_page(&self.config) {
                             self.error_token.show(e);
                         }
                     }
@@ -278,28 +278,28 @@ impl Render {
                 }
                 // 左矢印ボタンイベント
                 event::EventAction::Left => {
-                    if let Err(e) = self.open_file.left_page(&self.app) {
+                    if let Err(e) = self.open_file.left_page(&self.config) {
                         self.error_token.show(e);
                     }
                     is_saved = true;
                 }
                 // 右矢印ボタンイベント
                 event::EventAction::Right => {
-                    if let Err(e) = self.open_file.right_page(&self.app) {
+                    if let Err(e) = self.open_file.right_page(&self.config) {
                         self.error_token.show(e);
                     }
                     is_saved = true;
                 }
                 // 左端ボタンイベント
                 event::EventAction::Leftmost => {
-                    if let Err(e) = self.open_file.leftmost_page(&self.app) {
+                    if let Err(e) = self.open_file.leftmost_page(&self.config) {
                         self.error_token.show(e);
                     }
                     is_saved = true;
                 }
                 // 右端ボタンイベント
                 event::EventAction::Rightmost => {
-                    if let Err(e) = self.open_file.rightmost_page(&self.app) {
+                    if let Err(e) = self.open_file.rightmost_page(&self.config) {
                         self.error_token.show(e);
                     }
                     is_saved = true;
@@ -326,7 +326,7 @@ impl Render {
 
     /// sqlite に最後に読んだページを保存
     fn save_last_page(&mut self) {
-        if !*self.app.remembered_last_page() {
+        if !*self.config.remembered_last_page() {
             return;
         }
 

@@ -1,6 +1,6 @@
 #![warn(clippy::all, rust_2018_idioms)]
 
-mod app;
+mod config;
 mod event;
 mod file;
 mod ui;
@@ -8,7 +8,7 @@ mod error;
 mod model;
 mod update;
 
-pub use app::App;
+pub use config::Config;
 pub use ui::Render;
 
 /// アプリケーション名

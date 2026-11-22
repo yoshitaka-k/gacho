@@ -1,16 +1,16 @@
 use std::sync::Arc;
-use crate::{app, error, event, file, ui};
+use crate::{config, error, event, file, ui};
 
 /// メインパネルを表示する
 /// * `ui` - UI
-/// * `app` - アプリケーション
+/// * `config` - 設定
 /// * `open_file` - 開いているファイル
 /// * `pending_actions` - 処理予約
 /// * `error_token` - エラートークン
 /// メインパネル
 pub(crate) fn view(
     ui: &mut egui::Ui,
-    app: &app::App,
+    config: &config::Config,
     open_file: &mut file::OpenFile,
     pending_actions: &mut Vec<event::EventAction>,
     error_token: &mut ui::ErrorToken,
@@ -44,7 +44,7 @@ pub(crate) fn view(
                         let mut images: Vec<(&file::Image, egui::Vec2)> = images.iter().zip(sizes).collect();
 
                         // 読み込み方向によって画像を反転
-                        if matches!(app.read_from(), app::ReadFrom::LeftToRight) {
+                        if matches!(config.read_from(), config::ReadFrom::LeftToRight) {
                             images.reverse();
                         }
 
@@ -63,7 +63,7 @@ pub(crate) fn view(
         };
 
         // 前後の画像を先読み
-        for i in 1..=*app.preloading() {
+        for i in 1..=*config.preloading() {
             if let Ok(images) = open_file.page_images(Some(i as isize)) {
                 for image_file in images {
                     let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);

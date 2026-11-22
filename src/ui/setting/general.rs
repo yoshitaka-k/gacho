@@ -1,4 +1,4 @@
-use crate::{app, ui};
+use crate::{config, ui};
 use crate::ui::assets::{label, svg};
 use crate::ui::setting;
 
@@ -6,9 +6,9 @@ const MIN_PRELOADING: usize = 0;
 const MAX_PRELOADING: usize = 10;
 
 /// 前処理数を表示
-/// * `app` - アプリケーション
+/// * `config` - 設定
 /// * `ui` - UI
-pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
+pub(crate) fn view(ui: &mut egui::Ui, config: &mut config::Config) {
     // ヘッダーパネルを表示
     setting::header_panel(ui, svg::SETTINGS, label::SettingGeneral::heading());
 
@@ -27,8 +27,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
         ui.horizontal(|ui| {
             ui::add_label(ui, label::SettingGeneral::read_from(), setting::GENERAL_LABEL_WIDTH);
             ui.scope(|ui| {
-                ui.radio_value(app.read_from_mut(), app::ReadFrom::RightToLeft, label::SettingGeneral::read_from_right_to_left());
-                ui.radio_value(app.read_from_mut(), app::ReadFrom::LeftToRight, label::SettingGeneral::read_from_left_to_right());
+                ui.radio_value(config.read_from_mut(), config::ReadFrom::RightToLeft, label::SettingGeneral::read_from_right_to_left());
+                ui.radio_value(config.read_from_mut(), config::ReadFrom::LeftToRight, label::SettingGeneral::read_from_left_to_right());
             });
         });
 
@@ -40,8 +40,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
         ui.horizontal(|ui| {
             ui::add_label(ui, label::SettingGeneral::page_layout(), setting::GENERAL_LABEL_WIDTH);
             ui.scope(|ui| {
-                ui.radio_value(app.page_layout_mut(), app::PageLayout::Single, label::SettingGeneral::page_layout_single());
-                ui.radio_value(app.page_layout_mut(), app::PageLayout::Spread, label::SettingGeneral::page_layout_spread());
+                ui.radio_value(config.page_layout_mut(), config::PageLayout::Single, label::SettingGeneral::page_layout_single());
+                ui.radio_value(config.page_layout_mut(), config::PageLayout::Spread, label::SettingGeneral::page_layout_spread());
             });
         });
 
@@ -49,8 +49,8 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
         ui.horizontal(|ui| {
             ui::add_label(ui, label::SettingGeneral::cover_layout(), setting::GENERAL_LABEL_WIDTH);
             ui.scope(|ui| {
-                ui.radio_value(app.cover_layout_mut(), app::CoverLayout::Single, label::SettingGeneral::cover_layout_single());
-                ui.radio_value(app.cover_layout_mut(), app::CoverLayout::Spread, label::SettingGeneral::cover_layout_spread());
+                ui.radio_value(config.cover_layout_mut(), config::CoverLayout::Single, label::SettingGeneral::cover_layout_single());
+                ui.radio_value(config.cover_layout_mut(), config::CoverLayout::Spread, label::SettingGeneral::cover_layout_spread());
             });
         });
 
@@ -70,18 +70,18 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
         ui.horizontal(|ui| {
             ui::add_label(ui, label::SettingGeneral::remembered_last_page(), setting::GENERAL_LONG_LABEL_WIDTH);
             ui.scope(|ui| {
-                ui.radio_value(app.remembered_last_page_mut(), true, label::SettingGeneral::yes());
-                ui.radio_value(app.remembered_last_page_mut(), false, label::SettingGeneral::no());
+                ui.radio_value(config.remembered_last_page_mut(), true, label::SettingGeneral::yes());
+                ui.radio_value(config.remembered_last_page_mut(), false, label::SettingGeneral::no());
             });
         });
 
         // 最後に読んだページを開くかどうかを表示
-        ui.add_enabled_ui(*app.remembered_last_page(), |ui| {
+        ui.add_enabled_ui(*config.remembered_last_page(), |ui| {
             ui.horizontal(|ui| {
                 ui::add_label(ui, label::SettingGeneral::open_last_page(), setting::GENERAL_LONG_LABEL_WIDTH);
                 ui.scope(|ui| {
-                    ui.radio_value(app.open_last_page_mut(), true, label::SettingGeneral::yes());
-                    ui.radio_value(app.open_last_page_mut(), false, label::SettingGeneral::no());
+                    ui.radio_value(config.open_last_page_mut(), true, label::SettingGeneral::yes());
+                    ui.radio_value(config.open_last_page_mut(), false, label::SettingGeneral::no());
                 });
             });
         });
@@ -103,7 +103,7 @@ pub(crate) fn view(ui: &mut egui::Ui, app: &mut app::App) {
             ui::add_label(ui, label::SettingGeneral::load_pages(), setting::GENERAL_LABEL_WIDTH);
             ui.scope(|ui| {
                 ui.spacing_mut().slider_width = setting::remaining_slider_width(ui);
-                ui.add(egui::Slider::new(app.preloading_mut(), MIN_PRELOADING..=MAX_PRELOADING));
+                ui.add(egui::Slider::new(config.preloading_mut(), MIN_PRELOADING..=MAX_PRELOADING));
             });
         });
     });

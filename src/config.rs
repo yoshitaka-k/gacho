@@ -25,11 +25,11 @@ pub(crate) enum PageLayout {
     Spread,
 }
 
-/// アプリケーションの状態
+/// アプリケーションの設定
 #[derive(Deserialize, Serialize, Getters, MutGetters)]
 #[getset(get = "pub", get_mut = "pub")]
 #[serde(default)]
-pub struct App {
+pub struct Config {
     /// 前処理数
     preloading: usize,
 
@@ -53,7 +53,7 @@ pub struct App {
     open_last_page: bool,
 }
 
-impl Default for App {
+impl Default for Config {
     fn default() -> Self {
         Self {
             preloading: DEFAULT_PRELOADING,
@@ -66,9 +66,9 @@ impl Default for App {
     }
 }
 
-impl App {
-    /// 新しいアプリケーションを作成
-    /// * `return` - 新しいアプリケーション
+impl Config {
+    /// 新しい設定を作成
+    /// * `return` - 新しい設定
     pub fn new() -> Self {
         Self::default()
     }

@@ -1,16 +1,16 @@
-use crate::{app, ui, update};
+use crate::{config, ui, update};
 use crate::ui::{assets, setting, modal};
 use crate::ui::assets::{label, icon, svg};
 use crate::ui::setting::{general, about};
 
 /// 設定ウィンドウを表示
 /// * `ctx` - コンテキスト
-/// * `app` - アプリケーション
+/// * `config` - 設定
 /// * `setting_token` - 設定トークン
 /// * `update_token` - アップデートトークン
 pub(crate) fn view(
     ctx: &egui::Context,
-    app: &mut app::App,
+    config: &mut config::Config,
     setting_token: &mut ui::SettingToken,
     update_token: &mut update::UpdateToken,
     mut update_job: &mut update::UpdateJob,
@@ -77,7 +77,7 @@ pub(crate) fn view(
         egui::CentralPanel::default().show(ui, |ui| {
             // タブに応じて表示内容を切り替え
             match setting_token.tab {
-                ui::SettingTab::General => general::view(ui, app),
+                ui::SettingTab::General => general::view(ui, config),
                 ui::SettingTab::About => about::view(ui, &mut update_job, update_token),
             }
         });

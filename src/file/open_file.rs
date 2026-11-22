@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use getset::{Getters, MutGetters, Setters};
 
-use crate::{app, file, error};
+use crate::{config, file, error};
 
 const DEFAULT_PAGE: usize = 0;
 
@@ -135,12 +135,12 @@ impl OpenFile {
 
     /// 画面に表示させるページリストを作成
     /// * `page_layout` - ページ送り表示方式
-    pub fn build_spreads(&mut self, cover_layout: app::CoverLayout, page_layout: app::PageLayout) {
+    pub fn build_spreads(&mut self, cover_layout: config::CoverLayout, page_layout: config::PageLayout) {
         self.spreads.clear();
         let mut page_index = 0;
 
         // 表紙（0ページ目）を単独表示
-        if !self.book.is_empty() && matches!(cover_layout, app::CoverLayout::Single) {
+        if !self.book.is_empty() && matches!(cover_layout, config::CoverLayout::Single) {
             self.spreads.push(Spread::Single { index: 0 });
             page_index += 1;
         }
@@ -153,7 +153,7 @@ impl OpenFile {
             };
 
             // 単一ページで表示
-            if matches!(page_layout, app::PageLayout::Single) {
+            if matches!(page_layout, config::PageLayout::Single) {
                 self.spreads.push(Spread::Single { index: page_index });
                 page_index += 1;
                 continue;
@@ -199,7 +199,7 @@ impl OpenFile {
     }
 
     /// 選択された画像のパスを取得
-    /// * `app` - アプリケーション
+    /// * `config` - 設定
     /// * `return` - 選択された Image ベクター
     pub fn page_images(&mut self, offset: Option<isize>) -> error::Result<Vec<file::Image>> {
         let Some(mut current_index) = self.current_spread else { return Ok(vec![]); };
@@ -243,15 +243,15 @@ impl OpenFile {
     }
 
     /// 左へのインデックス
-    /// * `app` - アプリケーション
+    /// * `config` - 設定
     /// * `return` - 左へのインデックス
-    pub fn left_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
-        match app.read_from() {
-            app::ReadFrom::RightToLeft => {
-                self.next_page(app)?;
+    pub fn left_page(&mut self, config: &config::Config) -> error::Result<Option<usize>> {
+        match config.read_from() {
+            config::ReadFrom::RightToLeft => {
+                self.next_page(config)?;
             }
-            app::ReadFrom::LeftToRight => {
-                self.prev_page(app)?;
+            config::ReadFrom::LeftToRight => {
+                self.prev_page(config)?;
             }
         }
 
@@ -260,15 +260,15 @@ impl OpenFile {
 
     /// 右へのインデックス
     // 読み込み方向によって前後が変わる
-    /// * `app` - アプリケーション
+    /// * `config` - 設定
     /// * `return` - 右へのインデックス
-    pub fn right_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
-        match app.read_from() {
-            app::ReadFrom::RightToLeft => {
-                self.prev_page(app)?;
+    pub fn right_page(&mut self, config: &config::Config) -> error::Result<Option<usize>> {
+        match config.read_from() {
+            config::ReadFrom::RightToLeft => {
+                self.prev_page(config)?;
             }
-            app::ReadFrom::LeftToRight => {
-                self.next_page(app)?;
+            config::ReadFrom::LeftToRight => {
+                self.next_page(config)?;
             }
         }
 
@@ -276,15 +276,15 @@ impl OpenFile {
     }
 
     /// 左端のページへのインデックス
-    /// * `app` - アプリケーション
+    /// * `config` - 設定
     /// * `return` - 左端のページへのインデックス
-    pub fn leftmost_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
-        match app.read_from() {
-            app::ReadFrom::RightToLeft => {
-                self.last_page(app)?;
+    pub fn leftmost_page(&mut self, config: &config::Config) -> error::Result<Option<usize>> {
+        match config.read_from() {
+            config::ReadFrom::RightToLeft => {
+                self.last_page(config)?;
             }
-            app::ReadFrom::LeftToRight => {
-                self.first_page(app)?;
+            config::ReadFrom::LeftToRight => {
+                self.first_page(config)?;
             }
         }
 
@@ -292,15 +292,15 @@ impl OpenFile {
     }
 
     /// 右端のページへのインデックス
-    /// * `app` - アプリケーション
+    /// * `config` - 設定
     /// * `return` - 右端のページへのインデックス
-    pub fn rightmost_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
-        match app.read_from() {
-            app::ReadFrom::RightToLeft => {
-                self.first_page(app)?;
+    pub fn rightmost_page(&mut self, config: &config::Config) -> error::Result<Option<usize>> {
+        match config.read_from() {
+            config::ReadFrom::RightToLeft => {
+                self.first_page(config)?;
             }
-            app::ReadFrom::LeftToRight => {
-                self.last_page(app)?;
+            config::ReadFrom::LeftToRight => {
+                self.last_page(config)?;
             }
         }
 
@@ -368,7 +368,6 @@ impl OpenFile {
     }
 
     /// 最後のページかどうか
-    /// * `app` - アプリケーション
     /// * `return` - 最後のページかどうか
     fn is_last_page(&self) -> bool {
         let Some(index) = self.current_spread else { return false; };
@@ -390,14 +389,14 @@ impl OpenFile {
     }
 
     /// 次のページを取得
-    /// * `app` - アプリケーション
+    /// * `config` - 設定
     /// * `return` - 次のページ
-    fn next_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+    fn next_page(&mut self, config: &config::Config) -> error::Result<Option<usize>> {
         if self.is_last_page() {
             // 次のライブラリを読み込む
-            if self.read_next_library(*app.open_last_page())? {
+            if self.read_next_library(*config.open_last_page())? {
                 // ページリストを再構築
-                self.build_spreads(*app.cover_layout(), *app.page_layout());
+                self.build_spreads(*config.cover_layout(), *config.page_layout());
             }
         } else {
             if self.page_add() {
@@ -409,14 +408,14 @@ impl OpenFile {
     }
 
     /// 前のページを取得
-    /// * `app` - アプリケーション
+    /// * `config` - 設定
     /// * `return` - 前のページ
-    fn prev_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+    fn prev_page(&mut self, config: &config::Config) -> error::Result<Option<usize>> {
         if self.is_first_page() {
             // 前のライブラリを読み込む
-            if self.read_prev_library(*app.open_last_page())? {
+            if self.read_prev_library(*config.open_last_page())? {
                 // ページリストを再構築
-                self.build_spreads(*app.cover_layout(), *app.page_layout());
+                self.build_spreads(*config.cover_layout(), *config.page_layout());
             }
         } else {
             if self.page_subtract() {
@@ -428,14 +427,14 @@ impl OpenFile {
     }
 
     /// 最後のページを取得
-    /// * `app` - アプリケーション
+    /// * `config` - 設定
     /// * `return` - 最後のページ
-    fn last_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+    fn last_page(&mut self, config: &config::Config) -> error::Result<Option<usize>> {
         if self.is_last_page() {
             // 次のライブラリを読み込む
-            if self.read_next_library(*app.open_last_page())? {
+            if self.read_next_library(*config.open_last_page())? {
                 // ページリストを再構築
-                self.build_spreads(*app.cover_layout(), *app.page_layout());
+                self.build_spreads(*config.cover_layout(), *config.page_layout());
             }
         } else {
             self.current_spread = Some(self.spreads.len() - 1);
@@ -446,14 +445,14 @@ impl OpenFile {
     }
 
     /// 最初のページを取得
-    /// * `app` - アプリケーション
+    /// * `config` - 設定
     /// * `return` - 最初のページ
-    fn first_page(&mut self, app: &app::App) -> error::Result<Option<usize>> {
+    fn first_page(&mut self, config: &config::Config) -> error::Result<Option<usize>> {
         if self.is_first_page() {
             // 前のライブラリを読み込む
-            if self.read_prev_library(*app.open_last_page())? {
+            if self.read_prev_library(*config.open_last_page())? {
                 // ページリストを再構築
-                self.build_spreads(*app.cover_layout(), *app.page_layout());
+                self.build_spreads(*config.cover_layout(), *config.page_layout());
             }
         } else {
             self.current_spread = Some(0);

@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![warn(clippy::all, rust_2018_idioms)]
 
-use gacho::{APP_NAME, App, Render};
+use gacho::{APP_NAME, Config, Render};
 
 /// アプリケーションバージョン
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -21,7 +21,7 @@ fn main() -> eframe::Result {
     gacho::install_open_handler();
 
     // アプリケーションを作成
-    let app = App::new();
+    let config = Config::new();
 
     // アプリケーションアイコンを読み込む
     let icon = eframe::icon_data::from_png_bytes(include_bytes!(concat!(
@@ -42,6 +42,6 @@ fn main() -> eframe::Result {
     eframe::run_native(
         APP_NAME,
         options,
-        Box::new(|cc| Ok(Box::new(Render::new(cc, app))))
+        Box::new(|cc| Ok(Box::new(Render::new(cc, config))))
     )
 }

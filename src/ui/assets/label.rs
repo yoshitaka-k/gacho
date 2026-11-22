@@ -1,4 +1,4 @@
-use crate::app;
+use crate::config;
 
 pub(crate) struct OpenDialog;
 impl OpenDialog {
@@ -145,15 +145,15 @@ impl MainBottom {
     /// 右端のページボタンのラベル
     /// * `read_from` - ページ送り方向
     /// * `return` - 右端のページボタンのラベル
-    pub fn rightmost(read_from: &app::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
+    pub fn rightmost(read_from: &config::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
         let first_label = Self::firstmost_label(is_current_pages, is_current_books);
         let last_label = Self::lastmost_label(is_current_pages, is_current_books);
 
         match read_from {
-            app::ReadFrom::RightToLeft => {
+            config::ReadFrom::RightToLeft => {
                 first_label
             },
-            app::ReadFrom::LeftToRight => {
+            config::ReadFrom::LeftToRight => {
                 last_label
             },
         }
@@ -162,15 +162,15 @@ impl MainBottom {
     /// 右矢印のファイルボタンのラベル
     /// * `read_from` - ページ送り方向
     /// * `return` - 右矢印のファイルボタンのラベル
-    pub fn right(read_from: &app::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
+    pub fn right(read_from: &config::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
         let prev_label = Self::prev_label(is_current_pages, is_current_books);
         let next_label = Self::next_label(is_current_pages, is_current_books);
 
         match read_from {
-            app::ReadFrom::RightToLeft => {
+            config::ReadFrom::RightToLeft => {
                 prev_label
             },
-            app::ReadFrom::LeftToRight => {
+            config::ReadFrom::LeftToRight => {
                 next_label
             },
         }
@@ -179,15 +179,15 @@ impl MainBottom {
     /// 左矢印のファイルボタンのラベル
     /// * `read_from` - ページ送り方向
     /// * `return` - 左矢印のファイルボタンのラベル
-    pub fn left(read_from: &app::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
+    pub fn left(read_from: &config::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
         let prev_label = Self::prev_label(is_current_pages, is_current_books);
         let next_label = Self::next_label(is_current_pages, is_current_books);
 
         match read_from {
-            app::ReadFrom::RightToLeft => {
+            config::ReadFrom::RightToLeft => {
                 next_label
             },
-            app::ReadFrom::LeftToRight => {
+            config::ReadFrom::LeftToRight => {
                 prev_label
             },
         }
@@ -196,15 +196,15 @@ impl MainBottom {
     /// 左端のページボタンのラベル
     /// * `read_from` - ページ送り方向
     /// * `return` - 左端のページボタンのラベル
-    pub fn leftmost(read_from: &app::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
+    pub fn leftmost(read_from: &config::ReadFrom, is_current_pages: (bool, bool), is_current_books: (bool, bool)) -> &str {
         let first_label = Self::firstmost_label(is_current_pages, is_current_books);
         let last_label = Self::lastmost_label(is_current_pages, is_current_books);
 
         match read_from {
-            app::ReadFrom::RightToLeft => {
+            config::ReadFrom::RightToLeft => {
                 last_label
             },
-            app::ReadFrom::LeftToRight => {
+            config::ReadFrom::LeftToRight => {
                 first_label
             },
         }

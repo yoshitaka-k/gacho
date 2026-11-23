@@ -9,9 +9,6 @@ pub struct Render {
     open_file: file::OpenFile,
     pending_actions: Vec<event::EventAction>,
 
-    // ファイルダイアログを開くタイミング
-    open_dialog_token: ui::OpenDialogToken,
-
     // 設定ウィンドウのトークン
     setting_token: ui::SettingToken,
 
@@ -59,7 +56,6 @@ impl Render {
             config,
             open_file: file::OpenFile::new(),
             pending_actions: Vec::new(),
-            open_dialog_token: ui::OpenDialogToken::new(),
             setting_token: ui::SettingToken::new(),
             update_token: update::UpdateToken::new(),
             error_token: ui::ErrorToken::new(),
@@ -81,13 +77,11 @@ impl eframe::App for Render {
     /// * `ui` - UI
     /// * `frame` - フレーム
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        // OS から渡されたファイルを処理
+        self.open_from_os();
+
         // 入力イベントを処理
         self.input_events(ui);
-
-        // ファイルを開く
-        self.open_dialog();
-        self.open_from_os();
-        self.drop_files(ui);
 
         // イベントアクションを処理
         self.process_pending_actions(ui);
@@ -96,7 +90,6 @@ impl eframe::App for Render {
         top::view(
             ui,
             &mut self.open_file,
-            &mut self.open_dialog_token,
             &mut self.pending_actions,
         );
 
@@ -144,8 +137,11 @@ impl Render {
     /// 入力イベントを処理
     /// * `ui` - UI
     fn input_events(&mut self, ui: &mut egui::Ui) {
+        // ドラッグ&ドロップされたファイルを処理
+        input::drop(ui, &mut self.pending_actions);
+
         // Command + O キーが押されたらファイルダイアログを開く
-        input::command_open(ui, &mut self.open_dialog_token);
+        input::command_open(ui, &mut self.pending_actions);
 
         // Command + Comma キーが押されたら設定ウィンドウを開く
         input::command_comma(ui, &mut self.pending_actions);
@@ -156,37 +152,6 @@ impl Render {
         // キーイベントを処理
         input::arrow_left(ui, &mut self.pending_actions);
         input::arrow_right(ui, &mut self.pending_actions);
-    }
-
-    /// ダイアログを開く
-    fn open_dialog(&mut self) {
-        // ファイルダイアログを開くボタンが押されてたらファイルダイアログを開く
-        if self.open_dialog_token.file_dialog {
-            self.open_dialog_token.file_dialog = false;
-
-            // ファイルを開く
-            let result = open::file(
-                lang::current().file_dialog.archive,
-                &mut self.open_file,
-                &mut self.book_model,
-                *self.config.open_last_page(),
-            );
-            self.open_result(result);
-        }
-
-        // フォルダダイアログを開くボタンが押されてたらフォルダダイアログを開く
-        if self.open_dialog_token.folder_dialog {
-            self.open_dialog_token.folder_dialog = false;
-
-            // フォルダを開く
-            let result = open::folder(
-                lang::current().file_dialog.archive,
-                &mut self.open_file,
-                &mut self.book_model,
-                *self.config.open_last_page(),
-            );
-            self.open_result(result);
-        }
     }
 
     /// OS の「このアプリで開く」やコマンドライン引数のファイルを処理
@@ -203,29 +168,6 @@ impl Render {
             *self.config.open_last_page(),
         );
         self.open_result(result);
-    }
-
-    /// ドラッグ&ドロップされたファイルを処理
-    /// * `ui` - UI
-    fn drop_files(&mut self, ui: &egui::Ui) {
-        // ドラッグ&ドロップされたファイルを処理
-        let Some(result) = input::drop(
-            ui,
-            &mut self.open_file,
-            &mut self.book_model,
-            *self.config.open_last_page(),
-        ) else {
-            return;
-        };
-
-        // ファイルを開く結果を処理
-        self.open_result(result);
-
-        // ウィンドウを前面に
-        ui.ctx().send_viewport_cmd_to(
-            egui::ViewportId::ROOT,
-            egui::ViewportCommand::Focus,
-        );
     }
 
     /// ファイルを開く結果を処理
@@ -255,19 +197,54 @@ impl Render {
 
     /// イベントアクションを処理
     /// * `ui` - UI
-    fn process_pending_actions(&mut self, ui: &egui::Ui) {
+    fn process_pending_actions(&mut self, ui: &mut egui::Ui) {
         // イベントアクションがない場合は何もしない
-        if self.pending_actions.is_empty() {
-            return;
-        }
+        if self.pending_actions.is_empty() { return; }
 
         // エラーモーダルをリセット
         self.error_token.reset();
 
+        // 最後に読んだページを保存するかどうか
         let mut is_saved = false;
 
-        for action in self.pending_actions.drain(..) {
+        // 処理予約されたアクションを取り出して空にする
+        let mut pending_actions = std::mem::take(&mut self.pending_actions);
+
+        // 取り出されたアクションを処理
+        for action in pending_actions.drain(..) {
             match action {
+                // ファイルダイアログを開くイベント
+                event::EventAction::FilesOpen => {
+                    let result = open::file(
+                        lang::current().file_dialog.archive,
+                        &mut self.open_file,
+                        &mut self.book_model,
+                        *self.config.open_last_page(),
+                    );
+                    self.open_result(result);
+                }
+                // フォルダダイアログを開くイベント
+                event::EventAction::FolderOpen => {
+                    let result = open::folder(
+                        lang::current().file_dialog.archive,
+                        &mut self.open_file,
+                        &mut self.book_model,
+                        *self.config.open_last_page(),
+                    );
+                    self.open_result(result);
+                }
+                // ドラッグ&ドロップされたファイルを処理
+                event::EventAction::DropOpen(files) => {
+                    let result = open::drop(
+                        ui.ctx(),
+                        files,
+                        &mut self.open_file,
+                        &mut self.book_model,
+                        *self.config.open_last_page(),
+                    );
+
+                    self.open_result(result);
+                }
                 // 閉じるボタンイベント
                 event::EventAction::Close => {
                     // 開いている本を閉じる

@@ -48,18 +48,20 @@ pub(crate) fn folder(
 }
 
 /// ドロップされたファイルを処理
-/// * `files` - ドロップされたファイル
+/// * `ctx` - コンテキスト
+/// * `dropped_files` - ドロップされたファイル
 /// * `open_file` - 開いているファイル
 /// * `book_model` - 本のモデル
 /// * `is_open_last_page` - 最後に読んだページを開くかどうか
 /// * `return` - ファイルを開けたかどうか
 pub(crate) fn drop(
-    files: &[eframe::egui::DroppedFileHandle],
+    ctx: &egui::Context,
+    dropped_files: Vec<PathBuf>,
     open_file: &mut file::OpenFile,
     book_model: &mut model::Book,
     is_open_last_page: bool,
 ) -> error::Result<bool> {
-    let Some(file) = files.first() else {
+    let Some(file) = dropped_files.first() else {
         return Ok(false);
     };
 
@@ -69,8 +71,14 @@ pub(crate) fn drop(
         Vec::new()
     };
 
+    // ウィンドウを前面に
+    ctx.send_viewport_cmd_to(
+        egui::ViewportId::ROOT,
+        egui::ViewportCommand::Focus,
+    );
+
     // ファイルを追加
-    open_file.build_book(file.path().to_path_buf(), books)
+    open_file.build_book(file.to_path_buf(), books)
 }
 
 /// OS の「このアプリで開く」やコマンドライン引数のファイルを処理

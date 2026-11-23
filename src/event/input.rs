@@ -1,5 +1,20 @@
-use crate::{error, event, file, model, ui};
-use crate::event::{open, button};
+use crate::event;
+
+/// ドロップされたファイルを処理する
+/// * `ui` - ウィジェットのUI
+/// * `pending_actions` - 処理予約
+pub fn drop(
+    ui: &egui::Ui,
+    pending_actions: &mut Vec<event::EventAction>,
+) {
+    let files: Vec<std::path::PathBuf> = ui.ctx().input(|input| {
+        input.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).collect()
+    });
+
+    if files.is_empty() { return; }
+
+    pending_actions.push(event::EventAction::DropOpen(files));
+}
 
 /// 左矢印キーが押されたら次に移動する
 /// * `ui` - ウィジェットのUI
@@ -27,39 +42,19 @@ pub fn arrow_right(
     }
 }
 
-/// ドロップされたファイルを処理する
-/// * `ui` - ウィジェットのUI
-/// * `open_file` - 開いているファイル
-/// * `return` - ドロップがなければ `None`、あれば処理結果
-pub fn drop(
-    ui: &egui::Ui,
-    open_file: &mut file::OpenFile,
-    book_model: &mut model::Book,
-    is_open_last_page: bool,
-) -> Option<error::Result<bool>> {
-    ui.ctx().input(|input| {
-        let files = input.raw.dropped_files.clone();
-        if files.is_empty() {
-            None
-        } else {
-            Some(open::drop(&files, open_file, book_model, is_open_last_page))
-        }
-    })
-}
-
 /// Command + O キーが押されたらファイルダイアログを開く
 /// * `ui` - ウィジェットのUI
-/// * `open_dialog_token` - ダイアログトークン
+/// * `pending_actions` - 処理予約
 pub fn command_open(
     ui: &mut egui::Ui,
-    open_dialog_token: &mut ui::OpenDialogToken,
+    pending_actions: &mut Vec<event::EventAction>,
 ) {
     // Command + O キーが押されたらファイルダイアログを開く
     if ui.input(|input| {
         input.modifiers.matches_exact(egui::Modifiers::COMMAND)
         && input.key_pressed(egui::Key::O)
     }) {
-        button::files_open(ui, open_dialog_token);
+        pending_actions.push(event::EventAction::FilesOpen);
     }
 
     // Command + Shift + O キーが押されたらフォルダダイアログを開く
@@ -67,7 +62,7 @@ pub fn command_open(
         input.modifiers.matches_exact(egui::Modifiers::COMMAND | egui::Modifiers::SHIFT)
         && input.key_pressed(egui::Key::O)
     }) {
-        button::folder_open(ui, open_dialog_token);
+        pending_actions.push(event::EventAction::FolderOpen);
     }
 }
 

@@ -1,16 +1,13 @@
 use crate::{lang, file, event, ui};
-use crate::event::button;
 use crate::ui::assets::{self, icon, svg};
 
 /// 上部パネル
 /// * `ui` - UI
 /// * `open_file` - 開いているファイル
-/// * `open_dialog_token` - ファイルダイアログのトークン
 /// * `pending_actions` - 待機中のアクション
 pub(crate) fn view(
     ui: &mut egui::Ui,
     open_file: &mut file::OpenFile,
-    open_dialog_token: &mut ui::OpenDialogToken,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
     let style = ui::panel_style(ui, ui::TOP_PANEL_INNER_MARGIN);
@@ -53,7 +50,7 @@ pub(crate) fn view(
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
                     .on_hover_text(hover_text).clicked()
                 {
-                    button::folder_open(ui, open_dialog_token);
+                    pending_actions.push(event::EventAction::FolderOpen);
                 }
 
                 // ファイルダイアログを開くボタン
@@ -62,7 +59,7 @@ pub(crate) fn view(
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
                     .on_hover_text(hover_text).clicked()
                 {
-                    button::files_open(ui, open_dialog_token);
+                    pending_actions.push(event::EventAction::FilesOpen);
                 }
             },
         );

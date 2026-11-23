@@ -37,21 +37,6 @@ pub(crate) fn install(ctx: &egui::Context) {
     svg::install(ctx);
 }
 
-/// ファイルダイアログを表示するためのトークン
-pub struct OpenDialogToken {
-    pub file_dialog: bool,
-    pub folder_dialog: bool,
-}
-
-impl OpenDialogToken {
-    pub fn new() -> Self {
-        Self {
-            file_dialog: false,
-            folder_dialog: false,
-        }
-    }
-}
-
 /// 設定タブ
 #[derive(PartialEq)]
 pub enum SettingTab {

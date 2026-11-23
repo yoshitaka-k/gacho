@@ -7,6 +7,7 @@ mod ui;
 mod error;
 mod model;
 mod update;
+mod lang;
 
 pub use config::Config;
 pub use ui::Render;

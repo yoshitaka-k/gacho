@@ -2,9 +2,9 @@ pub(crate) mod view;
 mod general;
 mod about;
 
-use crate::update;
+use crate::{lang, update};
 use crate::event::button;
-use crate::ui::assets::{self, label, icon, svg};
+use crate::ui::assets::{self, icon, svg};
 
 // ウィンドウのID
 pub(crate) const SETTING_WINDOW_ID: &str = "setting_window";
@@ -61,7 +61,7 @@ pub(crate) fn about_header_panel(
         // アップデート確認ボタン
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             ui.add_enabled_ui(!update_token.running, |ui| {
-                if ui.button(label::Setting::update_check()).clicked() {
+                if ui.button(lang::current().setting_about.check_for_updates).clicked() {
                     button::check_for_update(update_job, update_token);
                 }
             });

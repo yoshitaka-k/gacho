@@ -1,0 +1,73 @@
+{
+  "code": "ja",
+  "name": "日本語",
+  "labels": {
+    "main_top": {
+      "settings": "設定",
+      "files_open": "ファイルを開く",
+      "folder_open": "フォルダを開く",
+      "close": "本を閉じる"
+    },
+    "main_bottom": {
+      "first_page": "最初のページ",
+      "last_page": "最後のページ",
+      "prev_page": "前のページ",
+      "next_page": "次のページ",
+      "first_page_prev_book": "最初のページ（前の本）",
+      "last_page_next_book": "最後のページ（次の本）",
+      "prev_page_prev_book": "前のページ（前の本）",
+      "next_page_next_book": "次のページ（次の本）"
+    },
+    "setting": {
+      "heading": "設定",
+      "general": "一般",
+      "layout": "レイアウト",
+      "memory": "メモリ",
+      "about": "情報"
+    },
+    "setting_general": {
+      "language": "言語",
+      "theme": "テーマ",
+      "dark": "Dark",
+      "light": "Light",
+      "layout": "レイアウト",
+      "read_from": "読み方向",
+      "rtl": "右から左",
+      "ltr": "左から右",
+      "page_layout": "ページレイアウト",
+      "single_page": "単ページ",
+      "spread_page": "見開き",
+      "cover_layout": "表紙レイアウト",
+      "single_cover": "単ページ表紙",
+      "spread_cover": "見開き表紙",
+      "layout_warning": "レイアウトの変更を反映するには、本を開き直してください。",
+      "remembered_last_page": "最終ページを記憶",
+      "open_last_page": "最終ページを開く",
+      "memory": "メモリ",
+      "yes": "はい",
+      "no": "いいえ",
+      "memory_warning": "保存したページから再開するには、本を開き直してください。",
+      "preloading": "先読み",
+      "load_pages": "読み込むページ数"
+    },
+    "setting_about": {
+      "about": "情報",
+      "check_for_updates": "アップデートを確認"
+    },
+    "modal_error": {
+      "heading": "エラーが発生しました"
+    },
+    "modal_update": {
+      "available": "新しいバージョンがあります。",
+      "latest": "アプリケーションは最新です。",
+      "failed": "アップデートの確認に失敗しました。",
+      "new_version": "新しいバージョン",
+      "current_version": "現在のバージョン",
+      "download": "ダウンロード"
+    },
+    "file_dialog": {
+      "archive": "圧縮ファイル",
+      "image_files": "画像ファイル"
+    }
+  }
+}

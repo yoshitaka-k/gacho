@@ -1,7 +1,7 @@
-use crate::{config, error, event, file, ui, model, update};
+use crate::{config, error, lang, event, file, ui, model, update};
 use crate::event::{button, open, input};
 use crate::ui::modal;
-use crate::ui::assets::{font, svg, label};
+use crate::ui::assets::{font, svg};
 use crate::ui::main::{top, bottom, middle};
 use crate::ui::setting::view as setting_window;
 
@@ -160,7 +160,7 @@ impl Render {
 
             // ファイルを開く
             let result = open::file(
-                label::OpenDialog::archive(),
+                lang::current().file_dialog.archive,
                 &mut self.open_file,
                 &mut self.book_model,
                 *self.config.open_last_page(),
@@ -174,7 +174,7 @@ impl Render {
 
             // フォルダを開く
             let result = open::folder(
-                label::OpenDialog::archive(),
+                lang::current().file_dialog.archive,
                 &mut self.open_file,
                 &mut self.book_model,
                 *self.config.open_last_page(),

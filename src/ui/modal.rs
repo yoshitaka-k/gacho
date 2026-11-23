@@ -1,6 +1,6 @@
-use crate::{ui, update};
+use crate::{lang, ui, update};
 use crate::ui::ErrorToken;
-use crate::ui::assets::{icon, label, svg};
+use crate::ui::assets::{icon, svg};
 
 // モーダルのラベルの幅
 pub(crate) const MODAL_LABEL_WIDTH: f32 = 130.0;
@@ -21,7 +21,7 @@ pub(crate) fn error(ctx: &egui::Context, error_token: &mut ErrorToken) {
         // 見出し部分
         ui.horizontal(|ui| {
             ui.add(heading_icon(svg::ERROR, icon::MODAL_ERROR_ICON_SIZE, egui::Color32::RED));
-            ui.heading(label::ModalError::heading());
+            ui.heading(lang::current().modal_error.heading);
         });
 
         ui.separator();
@@ -67,17 +67,17 @@ pub(crate) fn updated(ctx: &egui::Context, update_token: &mut update::UpdateToke
                 // アップデートがある場合
                 update::UpdateCheck::Available { .. } => {
                     ui.add(heading_icon(svg::UPDATE, icon::MODAL_UPDATE_ICON_SIZE, egui::Color32::GREEN));
-                    ui.heading(label::ModalUpdated::available());
+                    ui.heading(lang::current().modal_update.available);
                 }
                 // アップデートが最新の場合
                 update::UpdateCheck::Latest => {
                     ui.add(heading_icon(svg::UPDATE, icon::MODAL_UPDATE_ICON_SIZE, ui.visuals().text_color()));
-                    ui.heading(label::ModalUpdated::latest());
+                    ui.heading(lang::current().modal_update.latest);
                 }
                 // アップデートが取得できなかった場合
                 update::UpdateCheck::Failed(_) => {
                     ui.add(heading_icon(svg::ERROR, icon::MODAL_ERROR_ICON_SIZE, egui::Color32::RED));
-                    ui.heading(label::ModalUpdated::failed());
+                    ui.heading(lang::current().modal_update.failed);
                 }
             }
         });
@@ -91,9 +91,9 @@ pub(crate) fn updated(ctx: &egui::Context, update_token: &mut update::UpdateToke
             // アップデートがある場合
             update::UpdateCheck::Available { version, url } => {
                 egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
-                    ui::add_label(ui, &format!("{}{}", label::ModalUpdated::new_version(), version), MODAL_LABEL_WIDTH);
+                    ui::add_label(ui, &format!("{}{}", lang::current().modal_update.new_version, version), MODAL_LABEL_WIDTH);
                     ui.add(egui::Label::new(
-                        egui::RichText::new(format!("{}{}", label::ModalUpdated::current_version(), env!("CARGO_PKG_VERSION"))).weak(),
+                        egui::RichText::new(format!("{}{}", lang::current().modal_update.current_version, env!("CARGO_PKG_VERSION"))).weak(),
                     ));
                     ui.add_space(ui::MODAL_WINDOW_SPACING);
                 });
@@ -101,7 +101,7 @@ pub(crate) fn updated(ctx: &egui::Context, update_token: &mut update::UpdateToke
                 ui.separator();
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.button(label::ModalUpdated::download()).clicked() {
+                    if ui.button(lang::current().modal_update.download).clicked() {
                         ui.ctx().open_url(egui::OpenUrl::new_tab(url));
                     }
                 });
@@ -109,7 +109,7 @@ pub(crate) fn updated(ctx: &egui::Context, update_token: &mut update::UpdateToke
             // アップデートが最新の場合
             update::UpdateCheck::Latest => {
                 egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
-                    ui.label(format!("{}{}", label::ModalUpdated::current_version(), env!("CARGO_PKG_VERSION")));
+                    ui.label(format!("{}{}", lang::current().modal_update.current_version, env!("CARGO_PKG_VERSION")));
                     ui.add_space(ui::MODAL_WINDOW_SPACING);
                 });
             }

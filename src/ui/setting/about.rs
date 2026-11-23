@@ -1,6 +1,6 @@
-use crate::{GITHUB_URL, ui, update};
+use crate::{GITHUB_URL, lang, ui, update};
 use crate::ui::{assets, setting};
-use crate::ui::assets::{label, svg, icon};
+use crate::ui::assets::{svg, icon};
 
 /// バージョンを表示
 /// * `ui` - UI
@@ -12,7 +12,7 @@ pub(crate) fn view(
     update_token: &mut update::UpdateToken,
 ) {
     // ヘッダーパネルを表示
-    setting::about_header_panel(ui, svg::INFO, label::SettingAbout::heading(), update_job, update_token);
+    setting::about_header_panel(ui, svg::INFO, lang::current().setting.about, update_job, update_token);
 
     ui.add_space(setting::HEADER_BOTTOM_SPACING);
 

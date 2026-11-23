@@ -1,6 +1,6 @@
+use crate::{lang, file, event, ui};
 use crate::event::button;
-use crate::{event, file, ui};
-use crate::ui::assets::{self, icon, label, svg};
+use crate::ui::assets::{self, icon, svg};
 
 /// 上部パネル
 /// * `ui` - UI
@@ -28,7 +28,7 @@ pub(crate) fn view(
             },
             |ui| {
                 // 設定ボタン
-                let hover_text = label::MainTop::settings();
+                let hover_text = lang::current().main_top.settings;
                 let settings_button_image = egui::Image::new(svg::SETTINGS).tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(settings_button_image))
                     .on_hover_text(hover_text).clicked()
@@ -37,7 +37,7 @@ pub(crate) fn view(
                 }
 
                 // 閉じるボタン
-                let hover_text = label::MainTop::close();
+                let hover_text = lang::current().main_top.close;
                 let close_button_image = egui::Image::new(svg::CLEAR_ALL).tint(button_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(close_button_image))
@@ -46,7 +46,7 @@ pub(crate) fn view(
                 }
 
                 // フォルダダイアログを開くボタン
-                let hover_text = label::MainTop::folder_open();
+                let hover_text = lang::current().main_top.folder_open;
                 let open_button_image = egui::Image::new(svg::FOLDER_OPEN).tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
                     .on_hover_text(hover_text).clicked()
@@ -55,7 +55,7 @@ pub(crate) fn view(
                 }
 
                 // ファイルダイアログを開くボタン
-                let hover_text = label::MainTop::files_open();
+                let hover_text = lang::current().main_top.files_open;
                 let open_button_image = egui::Image::new(svg::FILE_OPEN).tint(button_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
                     .on_hover_text(hover_text).clicked()

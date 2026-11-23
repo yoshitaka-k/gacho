@@ -1,0 +1,73 @@
+{
+  "code": "en",
+  "name": "English",
+  "labels": {
+    "main_top": {
+      "settings": "Settings",
+      "files_open": "Files Open",
+      "folder_open": "Folder Open",
+      "close": "File Close"
+    },
+    "main_bottom": {
+      "first_page": "First page",
+      "last_page": "Last page",
+      "prev_page": "Previous page",
+      "next_page": "Next page",
+      "first_page_prev_book": "First page (Prev book)",
+      "last_page_next_book": "Last page (Next book)",
+      "prev_page_prev_book": "Prev page (Prev book)",
+      "next_page_next_book": "Next page (Next book)"
+    },
+    "setting": {
+      "heading": "Settings",
+      "general": "General",
+      "layout": "Layout",
+      "memory": "Memory",
+      "about": "About"
+    },
+    "setting_general": {
+      "language": "Language",
+      "theme": "Theme",
+      "dark": "Dark",
+      "light": "Light",
+      "layout": "Layout",
+      "read_from": "Read from",
+      "rtl": "Right to Left",
+      "ltr": "Left to Right",
+      "page_layout": "Page Layout",
+      "single_page": "Single page",
+      "spread_page": "Two-Page Spread",
+      "cover_layout": "Cover Layout",
+      "single_cover": "Single Cover",
+      "spread_cover": "Two-Cover Spread",
+      "layout_warning": "Reopen the book file to apply the layout changes.",
+      "remembered_last_page": "Remembered last page",
+      "open_last_page": "Open last page",
+      "memory": "Memory",
+      "yes": "Yes",
+      "no": "No",
+      "memory_warning": "Reopen the book to resume from the saved page.",
+      "preloading": "Preloading",
+      "load_pages": "Load pages"
+    },
+    "setting_about": {
+      "about": "About",
+      "check_for_updates": "Check for updates"
+    },
+    "modal_error": {
+      "heading": "An error occurred"
+    },
+    "modal_update": {
+      "available": "Update available",
+      "latest": "Update not available",
+      "failed": "Couldn't check for updates.",
+      "new_version": "New version",
+      "current_version": "Current version",
+      "download": "Download"
+    },
+    "file_dialog": {
+      "archive": "Archive",
+      "image_files": "Image files"
+    }
+  }
+}

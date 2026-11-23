@@ -19,6 +19,11 @@ fn main() {
     println!("cargo:rerun-if-changed={}", svg_dir.display());
     build::svg::generate_svg_generated(&svg_dir, &out_dir);
 
+    // 言語のディレクトリを取得
+    let lang_dir = manifest_path.join("assets/lang");
+    println!("cargo:rerun-if-changed={}", lang_dir.display());
+    build::lang::generate_lang_generated(&lang_dir, &out_dir);
+
     // バンドル用アイコンと Windows の実行ファイルアイコンを生成する
     println!("cargo:rerun-if-changed={}", manifest_path.display());
     build::appicon::generate_icons(manifest_path, &out_dir);

@@ -1,9 +1,11 @@
-pub(crate) mod view;
+mod view;
 mod top;
 mod general;
 mod layout;
 mod memory;
 mod about;
+
+pub(crate) use view::view;
 
 use crate::{lang, update};
 use crate::event::button;

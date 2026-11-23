@@ -1,8 +1,7 @@
 use crate::{config, error, lang, event, file, ui, model, update};
 use crate::event::{button, open, input};
-use crate::ui::modal;
+use crate::ui::{setting, modal};
 use crate::ui::main::{top, bottom, middle};
-use crate::ui::setting::view as setting_window;
 
 /// 描画用のウィジェット
 pub struct Render {
@@ -93,12 +92,10 @@ impl eframe::App for Render {
         // イベントアクションを処理
         self.process_actions(ui);
 
-        // パネルのスタイルを設定
         // 上部パネルを表示
         top::view(
             ui,
             &mut self.open_file,
-            &mut self.setting_token,
             &mut self.open_dialog_token,
             &mut self.pending_actions,
         );
@@ -122,12 +119,13 @@ impl eframe::App for Render {
 
         // 設定ウィンドウを表示
         if self.setting_token.open {
-            setting_window::view(
+            setting::view(
                 ui.ctx(),
                 &mut self.config,
                 &mut self.setting_token,
                 &mut self.update_token,
                 &mut self.update_job,
+                &mut self.pending_actions,
             );
         }
 
@@ -145,15 +143,15 @@ impl eframe::App for Render {
 impl Render {
     /// 入力イベントを処理
     /// * `ui` - UI
-    fn input_events(&mut self, ui: &egui::Ui) {
+    fn input_events(&mut self, ui: &mut egui::Ui) {
         // Command + O キーが押されたらファイルダイアログを開く
         input::command_open(ui, &mut self.open_dialog_token);
 
         // Command + Comma キーが押されたら設定ウィンドウを開く
-        input::command_comma(ui, &mut self.setting_token);
+        input::command_comma(ui, &mut self.pending_actions);
 
         // Command + W キーが押されたら開いている本を閉じる
-        input::command_w(ui, &mut self.open_file);
+        input::command_w(ui, &mut self.pending_actions);
 
         // キーイベントを処理
         input::arrow_left(ui, &mut self.pending_actions);
@@ -270,6 +268,19 @@ impl Render {
 
         for action in self.pending_actions.drain(..) {
             match action {
+                // 閉じるボタンイベント
+                event::EventAction::Close => {
+                    // 開いている本を閉じる
+                    button::close_open_file(&mut self.open_file);
+                }
+                // 設定ウィンドウを開くイベント
+                event::EventAction::SettingOpen(pos) => {
+                    button::setting_open(&mut self.setting_token, pos);
+                }
+                // 設定ウィンドウを閉じるイベント
+                event::EventAction::SettingClose => {
+                    self.setting_token.open = false;
+                }
                 // クリックイベント
                 event::EventAction::Click(pos) => {
                     // クリックした位置が左半分の場合は次のファイルを表示
@@ -319,11 +330,10 @@ impl Render {
 
                     is_saved = true;
                 }
-                // 閉じるボタンイベント
-                event::EventAction::Close => {
-                    button::close_open_file(&mut self.open_file);
-                }
             }
+
+            // 再描画を要求
+            ui.ctx().request_repaint();
         }
 
         // 最後に読んだページを保存

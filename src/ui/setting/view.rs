@@ -1,4 +1,5 @@
-use crate::{config, lang, ui, update};
+use crate::{config, lang, event, ui, update};
+use crate::event::input;
 use crate::ui::{setting, modal};
 use crate::ui::setting::{top, general, layout, memory, about};
 
@@ -13,6 +14,7 @@ pub(crate) fn view(
     setting_token: &mut ui::SettingToken,
     update_token: &mut update::UpdateToken,
     mut update_job: &mut update::UpdateJob,
+    pending_actions: &mut Vec<event::EventAction>,
 ) {
     let window_id = egui::ViewportId::from_hash_of(setting::SETTING_WINDOW_ID);
 
@@ -29,9 +31,6 @@ pub(crate) fn view(
         // ウィンドウの位置を指定
         options = options.with_position(pos);
 
-        // タブを初期化
-        setting_token.tab = ui::SettingTab::General;
-
         // 表示していたら、ウィンドウの位置を更新して前面に出す
         ctx.send_viewport_cmd_to(window_id, egui::ViewportCommand::OuterPosition(pos));
         ctx.send_viewport_cmd_to(window_id, egui::ViewportCommand::Focus);
@@ -42,8 +41,10 @@ pub(crate) fn view(
         // 更新結果を取得
         update_job.result(update_token);
 
+        // 設定ウィンドウの上部パネルを描画
         top::view(ui, setting_token);
 
+        // 設定ウィンドウの中央パネルを描画
         egui::CentralPanel::default().show(ui, |ui| {
             // タブに応じて表示内容を切り替え
             match setting_token.tab {
@@ -55,16 +56,11 @@ pub(crate) fn view(
         });
 
         // Command + W キーが押されたら閉じる
-        if ui.input(|input| {
-            input.modifiers.matches_exact(egui::Modifiers::COMMAND)
-            && input.key_pressed(egui::Key::W)
-        }) {
-            setting_token.open = false;
-        }
+        input::command_w(ui, pending_actions);
 
         // ウィンドウの閉じるボタンが押されたら閉じる
         if ui.input(|input| input.viewport().close_requested()) {
-            setting_token.open = false;
+            pending_actions.push(event::EventAction::SettingClose);
         }
 
         // 更新モーダルを表示

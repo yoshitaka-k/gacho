@@ -23,19 +23,20 @@ pub(crate) fn folder_open(ui: &mut egui::Ui, open_dialog_token: &mut ui::OpenDia
 }
 
 /// 設定ダイアログを開く
-/// * `ui` - UI
 /// * `setting_token` - 設定ダイアログを開くためのトークン
-pub(crate) fn setting_open(ui: &mut egui::Ui, setting_token: &mut ui::SettingToken) {
-    // 設定ダイアログを開く
-    setting_token.open = true;
+/// * `pos` - 設定ダイアログの表示位置
+pub(crate) fn setting_open(
+    setting_token: &mut ui::SettingToken,
+    pos: Option<egui::Pos2>,
+) {
+    // 設定ダイアログのタブを設定
+    setting_token.tab = ui::SettingTab::General;
 
     // 設定ダイアログの表示位置を設定
-    setting_token.pos = ui.ctx().input(|input| {
-        input.viewport().outer_rect.map(|rect| rect.min)
-    });
+    setting_token.pos = pos;
 
-    // 再描画を要求
-    ui.ctx().request_repaint();
+    // 設定ダイアログを開く
+    setting_token.open = true;
 }
 
 /// アップデートを確認する

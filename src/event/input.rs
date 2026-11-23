@@ -73,28 +73,41 @@ pub fn command_open(
 
 /// Command + Comma キーが押されたら設定ウィンドウを開く
 /// * `ui` - ウィジェットのUI
-/// * `setting_token` - 設定ウィンドウトークン
+/// * `pending_actions` - 処理予約
 pub fn command_comma(
     ui: &mut egui::Ui,
-    setting_token: &mut ui::SettingToken,
+    pending_actions: &mut Vec<event::EventAction>,
 ) {
     if ui.input(|input| {
         input.modifiers.matches_exact(egui::Modifiers::COMMAND)
         && input.key_pressed(egui::Key::Comma)
     }) {
-        button::setting_open(ui, setting_token);
+        let pos = ui.ctx().input(|input| {
+            input.viewport().outer_rect.map(|rect| rect.min)
+        });
+        pending_actions.push(event::EventAction::SettingOpen(pos));
     }
 }
 
-/// Command + W キーが押されたら開いている本を閉じる
+/// Command + W キーイベント
+///
+/// メインウィンドウでは開いている本を閉じる
+/// メインウィンドウ以外では設定ウィンドウを閉じる
+///
+/// * `ui` - ウィジェットのUI
+/// * `pending_actions` - 処理予約
 pub fn command_w(
     ui: &mut egui::Ui,
-    open_file: &mut file::OpenFile,
+    pending_actions: &mut Vec<event::EventAction>,
 ) {
     if ui.input(|input| {
         input.modifiers.matches_exact(egui::Modifiers::COMMAND)
         && input.key_pressed(egui::Key::W)
     }) {
-        button::close_open_file(open_file);
+        if ui.ctx().viewport_id() == egui::ViewportId::ROOT {
+            pending_actions.push(event::EventAction::Close);
+        } else {
+            pending_actions.push(event::EventAction::SettingClose);
+        }
     }
 }

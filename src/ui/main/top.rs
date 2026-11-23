@@ -5,13 +5,11 @@ use crate::ui::assets::{self, icon, svg};
 /// 上部パネル
 /// * `ui` - UI
 /// * `open_file` - 開いているファイル
-/// * `setting_token` - 設定ダイアログのトークン
 /// * `open_dialog_token` - ファイルダイアログのトークン
 /// * `pending_actions` - 待機中のアクション
 pub(crate) fn view(
     ui: &mut egui::Ui,
     open_file: &mut file::OpenFile,
-    setting_token: &mut ui::SettingToken,
     open_dialog_token: &mut ui::OpenDialogToken,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
@@ -33,7 +31,10 @@ pub(crate) fn view(
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(settings_button_image))
                     .on_hover_text(hover_text).clicked()
                 {
-                    button::setting_open(ui, setting_token);
+                    let pos = ui.ctx().input(|input| {
+                        input.viewport().outer_rect.map(|rect| rect.min)
+                    });
+                    pending_actions.push(event::EventAction::SettingOpen(pos));
                 }
 
                 // 閉じるボタン

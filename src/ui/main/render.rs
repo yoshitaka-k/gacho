@@ -1,7 +1,6 @@
 use crate::{config, error, lang, event, file, ui, model, update};
 use crate::event::{button, open, input};
 use crate::ui::modal;
-use crate::ui::assets::{font, svg};
 use crate::ui::main::{top, bottom, middle};
 use crate::ui::setting::view as setting_window;
 
@@ -34,9 +33,14 @@ pub struct Render {
 /// public methods
 impl Render {
     pub fn new(cc: &eframe::CreationContext<'_>, config: config::Config) -> Self {
-        // フォントと SVG ローダーを追加
-        font::install(&cc.egui_ctx);
-        svg::install(&cc.egui_ctx);
+        // フォントと SVG を追加
+        ui::install(&cc.egui_ctx);
+
+        // スタイルを設定
+        cc.egui_ctx.global_style_mut(|style| {
+            // ラベルを選択できないようにする
+            style.interaction.selectable_labels = false;
+        });
 
         // イベントコンテキストを設定
         event::launch::set_ctx(cc.egui_ctx.clone());
@@ -78,24 +82,8 @@ impl eframe::App for Render {
     /// * `ui` - UI
     /// * `frame` - フレーム
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
-        // スタイルを設定
-        ui.ctx().global_style_mut(|style| {
-            // ラベルを選択できないようにする
-            style.interaction.selectable_labels = false;
-        });
-
-        // Command + O キーが押されたらファイルダイアログを開く
-        input::command_open(ui, &mut self.open_dialog_token);
-
-        // Command + Comma キーが押されたら設定ウィンドウを開く
-        input::command_comma(ui, &mut self.setting_token);
-
-        // Command + W キーが押されたら開いている本を閉じる
-        input::command_w(ui, &mut self.open_file);
-
-        // キーイベントを処理
-        input::arrow_left(ui, &mut self.pending_actions);
-        input::arrow_right(ui, &mut self.pending_actions);
+        // 入力イベントを処理
+        self.input_events(ui);
 
         // ファイルを開く
         self.open_dialog();
@@ -155,6 +143,23 @@ impl eframe::App for Render {
 
 /// private methods
 impl Render {
+    /// 入力イベントを処理
+    /// * `ui` - UI
+    fn input_events(&mut self, ui: &egui::Ui) {
+        // Command + O キーが押されたらファイルダイアログを開く
+        input::command_open(ui, &mut self.open_dialog_token);
+
+        // Command + Comma キーが押されたら設定ウィンドウを開く
+        input::command_comma(ui, &mut self.setting_token);
+
+        // Command + W キーが押されたら開いている本を閉じる
+        input::command_w(ui, &mut self.open_file);
+
+        // キーイベントを処理
+        input::arrow_left(ui, &mut self.pending_actions);
+        input::arrow_right(ui, &mut self.pending_actions);
+    }
+
     /// ダイアログを開く
     fn open_dialog(&mut self) {
         // ファイルダイアログを開くボタンが押されてたらファイルダイアログを開く

@@ -6,6 +6,7 @@ mod modal;
 pub use main::render::Render;
 
 use crate::{error, lang};
+use crate::ui::assets::{font, svg};
 
 // モーダルウィンドウの幅
 pub(crate) const MODAL_WINDOW_WIDTH: f32 = 320.0;
@@ -28,6 +29,13 @@ pub(crate) const TOP_PANEL_INNER_MARGIN: egui::Margin = egui::Margin {
 pub(crate) const BOTTOM_PANEL_INNER_MARGIN: egui::Margin = egui::Margin {
     left: 10, right: 10, top: 4, bottom: 6,
 };
+
+/// フォントと SVG ローダーを追加
+/// * `ctx` - コンテキスト
+pub(crate) fn install(ctx: &egui::Context) {
+    font::install(ctx);
+    svg::install(ctx);
+}
 
 /// ファイルダイアログを表示するためのトークン
 pub struct OpenDialogToken {

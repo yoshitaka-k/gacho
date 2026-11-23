@@ -90,7 +90,7 @@ impl eframe::App for Render {
         self.drop_files(ui);
 
         // イベントアクションを処理
-        self.process_actions(ui);
+        self.process_pending_actions(ui);
 
         // 上部パネルを表示
         top::view(
@@ -255,7 +255,7 @@ impl Render {
 
     /// イベントアクションを処理
     /// * `ui` - UI
-    fn process_actions(&mut self, ui: &egui::Ui) {
+    fn process_pending_actions(&mut self, ui: &egui::Ui) {
         // イベントアクションがない場合は何もしない
         if self.pending_actions.is_empty() {
             return;

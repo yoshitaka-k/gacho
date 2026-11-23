@@ -38,9 +38,6 @@ pub(crate) fn view(
 
     // 設定ウィンドウを表示
     ctx.show_viewport_immediate(window_id, options, |ui, _class| {
-        // 更新結果を取得
-        update_job.result(update_token);
-
         // 設定ウィンドウの上部パネルを描画
         top::view(ui, setting_token);
 

@@ -77,6 +77,9 @@ impl eframe::App for Render {
     /// * `ui` - UI
     /// * `frame` - フレーム
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        // 更新結果を取得
+        self.update_job.result(&mut self.update_token);
+
         // OS から渡されたファイルを処理
         self.open_from_os();
 

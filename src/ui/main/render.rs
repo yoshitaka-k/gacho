@@ -196,7 +196,7 @@ impl Render {
         };
 
         // ファイルを開く
-        let result = event::drop::path(
+        let result = event::open::launch(
             path,
             &mut self.open_file,
             &mut self.book_model,

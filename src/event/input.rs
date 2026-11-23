@@ -1,5 +1,5 @@
 use crate::{error, event, file, model, ui};
-use crate::event::{drop, button};
+use crate::event::{open, button};
 
 /// 左矢印キーが押されたら次に移動する
 /// * `ui` - ウィジェットのUI
@@ -42,7 +42,7 @@ pub fn drop(
         if files.is_empty() {
             None
         } else {
-            Some(drop::files(&files, open_file, book_model, is_open_last_page))
+            Some(open::drop(&files, open_file, book_model, is_open_last_page))
         }
     })
 }

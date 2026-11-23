@@ -47,6 +47,51 @@ pub(crate) fn folder(
     open_path(path, open_file, book_model, is_open_last_page)
 }
 
+/// ドロップされたファイルを処理
+/// * `files` - ドロップされたファイル
+/// * `open_file` - 開いているファイル
+/// * `book_model` - 本のモデル
+/// * `is_open_last_page` - 最後に読んだページを開くかどうか
+/// * `return` - ファイルを開けたかどうか
+pub(crate) fn drop(
+    files: &[eframe::egui::DroppedFileHandle],
+    open_file: &mut file::OpenFile,
+    book_model: &mut model::Book,
+    is_open_last_page: bool,
+) -> error::Result<bool> {
+    let Some(file) = files.first() else {
+        return Ok(false);
+    };
+
+    let books = if is_open_last_page {
+        book_model.get_all()?
+    } else {
+        Vec::new()
+    };
+
+    // ファイルを追加
+    open_file.build_book(file.path().to_path_buf(), books)
+}
+
+/// OS の「このアプリで開く」やコマンドライン引数のファイルを処理
+/// * `path` - ファイルのパス
+/// * `open_file` - 開いているファイル
+pub(crate) fn launch(
+    path: PathBuf,
+    open_file: &mut file::OpenFile,
+    book_model: &mut model::Book,
+    is_open_last_page: bool,
+) -> error::Result<bool> {
+    let books = if is_open_last_page {
+        book_model.get_all()?
+    } else {
+        Vec::new()
+    };
+
+    // ファイルを追加
+    open_file.build_book(path, books)
+}
+
 /// ファイルを追加
 /// * `path` - ファイルのパス
 /// * `open_file` - 開いているファイル

@@ -36,6 +36,8 @@ pub fn take_path() -> Option<PathBuf> {
     paths.into_iter().next()
 }
 
+/// コマンドライン引数のファイルパスを取得
+/// * `return` - ファイルパスのベクタ
 fn argv_paths() -> Vec<PathBuf> {
     std::env::args_os()
         .skip(1)

@@ -17,8 +17,8 @@ pub(crate) fn view(
     pending_actions: &mut Vec<event::EventAction>,
 ) {
     // スタイルとボタンの色を設定
-    let bottom_panel_style = ui::panel_style(ui, ui::BOTTOM_PANEL_INNER_MARGIN);
-    let button_color = assets::button_icon_color(ui);
+    let style = ui::panel_style(ui, ui::BOTTOM_PANEL_INNER_MARGIN);
+    let icon_color = assets::button_icon_color(ui);
 
     // ファイルのIDリストと選択されたファイルを取得
     let all_images_ids = open_file.book_image_ids();
@@ -49,7 +49,7 @@ pub(crate) fn view(
     }
 
     // 下部パネルを表示
-    egui::Panel::bottom("bottom_taskbar").frame(bottom_panel_style).show(ui, |ui| {
+    egui::Panel::bottom("bottom_taskbar").frame(style).show(ui, |ui| {
         // 左右分割のレイアウトで、左にページャー・ファイル名、右にボタンを配置する
         egui::Sides::new().shrink_left().truncate().show(ui,
             |ui| {
@@ -65,7 +65,7 @@ pub(crate) fn view(
                 // 右端のページボタン
                 let hover_text = label::MainBottom::rightmost(config.read_from(), open_file.is_current_pages(), open_file.is_current_books());
                 let rightmost_button_image = egui::Image::new(svg::LAST_PAGE)
-                    .tint(button_color);
+                    .tint(icon_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(rightmost_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
@@ -76,7 +76,7 @@ pub(crate) fn view(
                 // 右矢印のファイルボタン
                 let hover_text = label::MainBottom::right(config.read_from(), open_file.is_current_pages(), open_file.is_current_books());
                 let right_button_image = egui::Image::new(svg::KEYBOARD_ARROW_RIGHT)
-                    .tint(button_color);
+                    .tint(icon_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(right_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
@@ -87,7 +87,7 @@ pub(crate) fn view(
                 // 左矢印のファイルボタン
                 let hover_text = label::MainBottom::left(config.read_from(), open_file.is_current_pages(), open_file.is_current_books());
                 let left_button_image = egui::Image::new(svg::KEYBOARD_ARROW_LEFT)
-                    .tint(button_color);
+                    .tint(icon_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(left_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
@@ -98,7 +98,7 @@ pub(crate) fn view(
                 // 左端のページボタン
                 let hover_text = label::MainBottom::leftmost(config.read_from(), open_file.is_current_pages(), open_file.is_current_books());
                 let leftmost_button_image = egui::Image::new(svg::FIRST_PAGE)
-                    .tint(button_color);
+                    .tint(icon_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(leftmost_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()

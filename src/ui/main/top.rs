@@ -13,11 +13,11 @@ pub(crate) fn view(
     open_dialog_token: &mut ui::OpenDialogToken,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
-    let top_panel_style = ui::panel_style(ui, ui::TOP_PANEL_INNER_MARGIN);
-    let button_color = assets::button_icon_color(ui);
+    let style = ui::panel_style(ui, ui::TOP_PANEL_INNER_MARGIN);
+    let icon_color = assets::button_icon_color(ui);
 
     // 上部パネルを表示
-    egui::Panel::top("top_taskbar").frame(top_panel_style).show(ui, |ui| {
+    egui::Panel::top("top_taskbar").frame(style).show(ui, |ui| {
         // 左右分割のレイアウトで、左にタイトル、右にボタンを配置する
         egui::Sides::new().shrink_left().truncate().show(ui,
             |ui| {
@@ -27,7 +27,7 @@ pub(crate) fn view(
             |ui| {
                 // 設定ボタン
                 let hover_text = lang::current().main_top.settings;
-                let settings_button_image = egui::Image::new(svg::SETTINGS).tint(button_color);
+                let settings_button_image = egui::Image::new(svg::SETTINGS).tint(icon_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(settings_button_image))
                     .on_hover_text(hover_text).clicked()
                 {
@@ -39,16 +39,17 @@ pub(crate) fn view(
 
                 // 閉じるボタン
                 let hover_text = lang::current().main_top.close;
-                let close_button_image = egui::Image::new(svg::CLEAR_ALL).tint(button_color);
+                let close_button_image = egui::Image::new(svg::CLEAR_ALL).tint(icon_color);
                 if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(close_button_image))
-                }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked() {
+                }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
+                {
                     pending_actions.push(event::EventAction::Close);
                 }
 
                 // フォルダダイアログを開くボタン
                 let hover_text = lang::current().main_top.folder_open;
-                let open_button_image = egui::Image::new(svg::FOLDER_OPEN).tint(button_color);
+                let open_button_image = egui::Image::new(svg::FOLDER_OPEN).tint(icon_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
                     .on_hover_text(hover_text).clicked()
                 {
@@ -57,7 +58,7 @@ pub(crate) fn view(
 
                 // ファイルダイアログを開くボタン
                 let hover_text = lang::current().main_top.files_open;
-                let open_button_image = egui::Image::new(svg::FILE_OPEN).tint(button_color);
+                let open_button_image = egui::Image::new(svg::FILE_OPEN).tint(icon_color);
                 if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
                     .on_hover_text(hover_text).clicked()
                 {

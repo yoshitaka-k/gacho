@@ -46,6 +46,9 @@ impl Render {
             .and_then(|storage| eframe::get_value(storage, eframe::APP_KEY))
             .unwrap_or(config);
 
+        // 言語を設定
+        lang::set(config.language());
+
         // 本のモデルを作成
         let book_model = model::Book::new();
 

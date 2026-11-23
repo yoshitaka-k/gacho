@@ -30,38 +30,37 @@ pub(crate) enum PageLayout {
 #[getset(get = "pub", get_mut = "pub")]
 #[serde(default)]
 pub struct Config {
-    /// 前処理数
-    preloading: usize,
-
+    /// ページ送り方向
+    read_from: ReadFrom,
+    /// ページ送り表示方式
+    page_layout: PageLayout,
     /// 表紙表示方式
     cover_layout: CoverLayout,
 
-    /// ページ送り方向
-    read_from: ReadFrom,
-
-    /// ページ送り表示方式
-    page_layout: PageLayout,
-
     /// 最後に読んだページを保存するかどうか
-    #[getset(skip)]
-    #[getset(get_mut = "pub")]
     remembered_last_page: bool,
-
     /// 最後に読んだページを開くかどうか
     #[getset(skip)]
     #[getset(get_mut = "pub")]
     open_last_page: bool,
+
+    /// 前処理数
+    preloading: usize,
+
+    /// 言語
+    language: String,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
-            preloading: DEFAULT_PRELOADING,
-            cover_layout: CoverLayout::Single,
             read_from: ReadFrom::RightToLeft,
             page_layout: PageLayout::Single,
+            cover_layout: CoverLayout::Single,
             remembered_last_page: false,
             open_last_page: false,
+            preloading: DEFAULT_PRELOADING,
+            language: "en".to_string(),
         }
     }
 }
@@ -73,14 +72,10 @@ impl Config {
         Self::default()
     }
 
-    /// 最後に読んだページを保存するかどうかを取得
-    /// * `return` - 最後に読んだページを保存するかどうか
-    pub fn remembered_last_page(&self) -> &bool {
-        &self.remembered_last_page
-    }
-
     /// 最後に読んだページを開くかどうかを取得
+    ///
     /// 最後に読んだページを保存していない場合は false を返す
+    ///
     /// * `return` - 最後に読んだページを開くかどうか
     pub fn open_last_page(&self) -> &bool {
         if self.remembered_last_page {

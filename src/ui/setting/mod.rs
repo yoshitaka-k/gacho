@@ -1,34 +1,62 @@
 pub(crate) mod view;
+mod top;
 mod general;
+mod layout;
+mod memory;
 mod about;
 
 use crate::{lang, update};
 use crate::event::button;
 use crate::ui::assets::{self, icon, svg};
 
-// ウィンドウのID
+/// 設定ウィンドウのID
 pub(crate) const SETTING_WINDOW_ID: &str = "setting_window";
 
-// ウィンドウのサイズ
+/// 設定ウィンドウの幅
 const WINDOW_WIDTH: f32 = 420.0;
-const WINDOW_HEIGHT: f32 = 390.0;
+/// 設定ウィンドウの高さ
+const WINDOW_HEIGHT: f32 = 240.0;
 
-// ヘッダーのスペースの幅
+/// 追加のスペースの幅
+const SETTING_ADD_SPACING: f32 = 4.0;
+
+/// ヘッダーのアイコンのスペースの幅
 const HEADER_ICON_SPACING: f32 = 4.0;
+/// ヘッダーの下のスペースの幅
 const HEADER_BOTTOM_SPACING: f32 = 2.0;
+/// 警告ノートのアイコンのスペースの幅
 const WARNING_ICON_SPACING: f32 = 3.0;
 
-// ラベルの幅
-pub(crate) const GENERAL_LABEL_WIDTH: f32 = 80.0;
-pub(crate) const GENERAL_LONG_LABEL_WIDTH: f32 = 140.0;
+// レイアウトのラベルの幅
 
-// 追加のスペースの幅
-pub(crate) const SETTING_ADD_SPACING: f32 = 4.0;
-pub(crate) const SETTING_INDENT_SPACING: f32 = 10.0;
+/// 読み込み方向の英語のラベルの幅
+const READFROM_EN_LABEL_WIDTH: f32 = 80.0;
+/// 読み込み方向の日本語のラベルの幅
+const READFROM_JA_LABEL_WIDTH: f32 = 60.0;
+
+/// レイアウトの英語のラベルの幅
+const LAYOUT_EN_LABEL_WIDTH: f32 = 80.0;
+/// レイアウトの日本語のラベルの幅
+const LAYOUT_JA_LABEL_WIDTH: f32 = 110.0;
+
+// メモリのラベルの幅
+
+/// メモリの英語のラベルの幅
+const MEMORY_EN_LABEL_WIDTH: f32 = 140.0;
+/// メモリの日本語のラベルの幅
+const MEMORY_JA_LABEL_WIDTH: f32 = 110.0;
+
+// 前処理数のラベルの幅
+
+/// 前処理数の英語のラベルの幅
+const PRELOADING_EN_LABEL_WIDTH: f32 = 70.0;
+/// 前処理数の日本語のラベルの幅
+const PRELOADING_JA_LABEL_WIDTH: f32 = 110.0;
 
 /// ヘッダーパネルを表示
 /// * `ui` - UI
 /// * `icon` - アイコン
+/// * `label_width` - ラベルの幅
 pub(crate) fn header_panel(
     ui: &mut egui::Ui,
     icon: egui::ImageSource<'static>,
@@ -66,15 +94,6 @@ pub(crate) fn about_header_panel(
                 }
             });
         });
-    });
-}
-
-/// グループヘッダーパネルを表示
-/// * `ui` - UI
-pub(crate) fn group_header_panel(ui: &mut egui::Ui, label: &str) {
-    ui.horizontal(|ui| {
-        ui.add_space(SETTING_INDENT_SPACING);
-        ui.label(label);
     });
 }
 

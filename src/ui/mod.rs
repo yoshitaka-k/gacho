@@ -5,7 +5,7 @@ mod modal;
 
 pub use main::render::Render;
 
-use crate::error;
+use crate::{error, lang};
 
 // モーダルウィンドウの幅
 pub(crate) const MODAL_WINDOW_WIDTH: f32 = 320.0;
@@ -48,7 +48,19 @@ impl OpenDialogToken {
 #[derive(PartialEq)]
 pub enum SettingTab {
     General,
+    Layout,
+    Memory,
     About,
+}
+impl std::fmt::Display for SettingTab {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SettingTab::General => write!(f, "{}", lang::current().setting.general),
+            SettingTab::Layout => write!(f, "{}", lang::current().setting.layout),
+            SettingTab::Memory => write!(f, "{}", lang::current().setting.memory),
+            SettingTab::About => write!(f, "{}", lang::current().setting.about),
+        }
+    }
 }
 
 /// 設定ウィンドウを表示するためのトークン

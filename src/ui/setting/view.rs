@@ -1,7 +1,6 @@
 use crate::{config, lang, ui, update};
-use crate::ui::{assets, setting, modal};
-use crate::ui::assets::{icon, svg};
-use crate::ui::setting::{general, about};
+use crate::ui::{setting, modal};
+use crate::ui::setting::{top, general, layout, memory, about};
 
 /// 設定ウィンドウを表示
 /// * `ctx` - コンテキスト
@@ -40,6 +39,21 @@ pub(crate) fn view(
 
     // 設定ウィンドウを表示
     ctx.show_viewport_immediate(window_id, options, |ui, _class| {
+        // 更新結果を取得
+        update_job.result(update_token);
+
+        top::view(ui, setting_token);
+
+        egui::CentralPanel::default().show(ui, |ui| {
+            // タブに応じて表示内容を切り替え
+            match setting_token.tab {
+                ui::SettingTab::General => general::view(ui, config),
+                ui::SettingTab::Layout => layout::view(ui, config),
+                ui::SettingTab::Memory => memory::view(ui, config),
+                ui::SettingTab::About => about::view(ui, &mut update_job, update_token),
+            }
+        });
+
         // Command + W キーが押されたら閉じる
         if ui.input(|input| {
             input.modifiers.matches_exact(egui::Modifiers::COMMAND)
@@ -47,40 +61,6 @@ pub(crate) fn view(
         }) {
             setting_token.open = false;
         }
-
-        // 更新結果を取得
-        update_job.result(update_token);
-
-        // パネルのスタイルを設定
-        let panel_style = ui::panel_style(ui, ui::TOP_PANEL_INNER_MARGIN);
-
-        // アイコンの色を取得
-        let icon_color = assets::icon_color(ui);
-
-        // タブを表示
-        egui::Panel::top("setting_top_taskbar").frame(panel_style).show(ui, |ui| {
-            ui.horizontal(|ui| {
-                ui.add(egui::Image::new(svg::SETTINGS).max_height(icon::TOP_MENU_SETTINGS_ICON_SIZE).tint(icon_color));
-
-                // タブの選択時の背景色を保存
-                let selection_bg_fill = ui.style_mut().visuals.selection.bg_fill;
-
-                // タブを表示
-                ui.selectable_value(&mut setting_token.tab, ui::SettingTab::General, lang::current().setting.general);
-                ui.selectable_value(&mut setting_token.tab, ui::SettingTab::About, lang::current().setting.about);
-
-                // タブの選択時の背景色をリセット
-                ui.style_mut().visuals.selection.bg_fill = selection_bg_fill;
-            });
-        });
-
-        egui::CentralPanel::default().show(ui, |ui| {
-            // タブに応じて表示内容を切り替え
-            match setting_token.tab {
-                ui::SettingTab::General => general::view(ui, config),
-                ui::SettingTab::About => about::view(ui, &mut update_job, update_token),
-            }
-        });
 
         // ウィンドウの閉じるボタンが押されたら閉じる
         if ui.input(|input| input.viewport().close_requested()) {

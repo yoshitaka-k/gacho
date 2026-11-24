@@ -3,11 +3,11 @@ use crate::ui::assets::{self, icon, svg};
 
 /// 上部パネル
 /// * `ui` - UI
-/// * `open_file` - 開いているファイル
+/// * `files` - 開いているファイル
 /// * `pending_actions` - 待機中のアクション
 pub(crate) fn view(
     ui: &mut egui::Ui,
-    open_file: &mut file::OpenFile,
+    files: &file::OpenFile,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
     let style = ui::panel_style(ui, ui::TOP_PANEL_INNER_MARGIN);
@@ -18,7 +18,7 @@ pub(crate) fn view(
         // 左右分割のレイアウトで、左にタイトル、右にボタンを配置する
         egui::Sides::new().shrink_left().truncate().show(ui,
             |ui| {
-                let title = open_file.book_title();
+                let title = files.book_title();
                 ui.add(egui::Label::new(title).truncate());
             },
             |ui| {
@@ -37,7 +37,7 @@ pub(crate) fn view(
                 // 閉じるボタン
                 let hover_text = lang::current().main_top.close;
                 let close_button_image = egui::Image::new(svg::CLEAR_ALL).tint(icon_color);
-                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                if ui.add_enabled_ui(!files.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(close_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
                 {

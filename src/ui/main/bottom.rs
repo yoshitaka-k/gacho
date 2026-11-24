@@ -8,12 +8,12 @@ const DEFAULT_MAX_INDEX: usize = 0;
 /// 下部パネル
 /// * `ui` - UI
 /// * `config` - 設定
-/// * `open_file` - 開いているファイル
+/// * `files` - 開いているファイル
 /// * `pending_actions` - 待機中のアクション
 pub(crate) fn view(
     ui: &mut egui::Ui,
     config: &config::Config,
-    open_file: &mut file::OpenFile,
+    files: &mut file::OpenFile,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
     // スタイルとボタンの色を設定
@@ -21,8 +21,8 @@ pub(crate) fn view(
     let icon_color = assets::button_icon_color(ui);
 
     // ファイルのIDリストと選択されたファイルを取得
-    let all_images_ids = open_file.book_image_ids();
-    let selected_images = open_file.page_images(None).unwrap_or(vec![]);
+    let all_images_ids = files.book_image_ids();
+    let selected_images = files.page_images(None).unwrap_or(vec![]);
 
     // ページャーとファイル名を生成
     let mut pagers = vec![];
@@ -63,10 +63,10 @@ pub(crate) fn view(
             },
             |ui| {
                 // 右端のページボタン
-                let hover_text = label::MainBottom::rightmost(config.read_from(), open_file.is_current_pages(), open_file.is_current_books());
+                let hover_text = label::MainBottom::rightmost(config.read_from(), files.is_current_pages(), files.is_current_books());
                 let rightmost_button_image = egui::Image::new(svg::LAST_PAGE)
                     .tint(icon_color);
-                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                if ui.add_enabled_ui(!files.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(rightmost_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
                 {
@@ -74,10 +74,10 @@ pub(crate) fn view(
                 }
 
                 // 右矢印のファイルボタン
-                let hover_text = label::MainBottom::right(config.read_from(), open_file.is_current_pages(), open_file.is_current_books());
+                let hover_text = label::MainBottom::right(config.read_from(), files.is_current_pages(), files.is_current_books());
                 let right_button_image = egui::Image::new(svg::KEYBOARD_ARROW_RIGHT)
                     .tint(icon_color);
-                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                if ui.add_enabled_ui(!files.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(right_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
                 {
@@ -85,10 +85,10 @@ pub(crate) fn view(
                 }
 
                 // 左矢印のファイルボタン
-                let hover_text = label::MainBottom::left(config.read_from(), open_file.is_current_pages(), open_file.is_current_books());
+                let hover_text = label::MainBottom::left(config.read_from(), files.is_current_pages(), files.is_current_books());
                 let left_button_image = egui::Image::new(svg::KEYBOARD_ARROW_LEFT)
                     .tint(icon_color);
-                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                if ui.add_enabled_ui(!files.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(left_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
                 {
@@ -96,10 +96,10 @@ pub(crate) fn view(
                 }
 
                 // 左端のページボタン
-                let hover_text = label::MainBottom::leftmost(config.read_from(), open_file.is_current_pages(), open_file.is_current_books());
+                let hover_text = label::MainBottom::leftmost(config.read_from(), files.is_current_pages(), files.is_current_books());
                 let leftmost_button_image = egui::Image::new(svg::FIRST_PAGE)
                     .tint(icon_color);
-                if ui.add_enabled_ui(!open_file.book_is_empty(), |ui| {
+                if ui.add_enabled_ui(!files.book_is_empty(), |ui| {
                     ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(leftmost_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
                 {
@@ -109,20 +109,20 @@ pub(crate) fn view(
                 ui.separator();
 
                 // ページャースライダー
-                let mut selected = open_file.current_spread_mut().unwrap_or(0);
-                let max = if open_file.spreads_len() > 0 { open_file.spreads_len() - 1 } else { DEFAULT_MAX_INDEX };
+                let mut selected = files.current_spread_mut().unwrap_or(0);
+                let max = if files.spreads_len() > 0 { files.spreads_len() - 1 } else { DEFAULT_MAX_INDEX };
                 ui.scope(|ui| {
                     ui.spacing_mut().slider_width = SLIDER_WIDTH;
                     let slider = match config.read_from() {
                         config::ReadFrom::RightToLeft => {
                             ui.add_enabled(
-                                !open_file.book_is_empty(),
+                                !files.book_is_empty(),
                                 egui::Slider::new(&mut selected, max..=MIN_INDEX).show_value(false)
                             )
                         }
                         config::ReadFrom::LeftToRight => {
                             ui.add_enabled(
-                                !open_file.book_is_empty(),
+                                !files.book_is_empty(),
                                 egui::Slider::new(&mut selected, MIN_INDEX..=max).show_value(false)
                             )
                         }

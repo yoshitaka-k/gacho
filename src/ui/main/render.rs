@@ -95,7 +95,7 @@ impl eframe::App for Render {
         // 上部パネルを表示
         top::view(
             ui,
-            &mut self.state.files,
+            &self.state.files,
             &mut self.pending_actions,
         );
 
@@ -120,9 +120,7 @@ impl eframe::App for Render {
         if self.state.setting_token.open {
             setting::view(
                 ui.ctx(),
-                &mut self.state.config,
-                &mut self.state.setting_token,
-                &mut self.state.update_token,
+                &mut self.state,
                 &mut self.job.update_job,
                 &mut self.pending_actions,
             );

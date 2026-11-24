@@ -1,4 +1,6 @@
-pub(crate) mod render;
-pub(crate) mod top;
-pub(crate) mod bottom;
-pub(crate) mod middle;
+mod view;
+mod top;
+mod bottom;
+mod middle;
+
+pub(crate) use view::view;

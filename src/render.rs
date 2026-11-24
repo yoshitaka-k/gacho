@@ -1,7 +1,5 @@
 use crate::{state, config, error, lang, event, file, ui, model, update};
 use crate::event::{button, open, input};
-use crate::ui::{setting, modal};
-use crate::ui::main::{top, bottom, middle};
 
 /// 描画用のウィジェット
 pub struct Render {
@@ -92,47 +90,13 @@ impl eframe::App for Render {
         // イベントアクションを処理
         self.process_pending_actions(ui);
 
-        // 上部パネルを表示
-        top::view(
+        // メインウィンドウを描画
+        ui::draw(
             ui,
-            &self.state.files,
+            &mut self.state,
+            &mut self.job,
             &mut self.pending_actions,
         );
-
-        // 下部パネルを表示
-        bottom::view(
-            ui,
-            &self.state.config,
-            &mut self.state.files,
-            &mut self.pending_actions,
-        );
-
-        // 中央パネルを表示
-        middle::view(
-            ui,
-            &self.state.config,
-            &mut self.state.files,
-            &mut self.pending_actions,
-            &mut self.state.error_token,
-        );
-
-        // 設定ウィンドウを表示
-        if self.state.setting_token.open {
-            setting::view(
-                ui.ctx(),
-                &mut self.state,
-                &mut self.job.update_job,
-                &mut self.pending_actions,
-            );
-        }
-
-        // エラーモーダルを表示
-        if self.state.error_token.open {
-            modal::error(
-                ui.ctx(),
-                &mut self.state.error_token,
-            );
-        }
     }
 }
 

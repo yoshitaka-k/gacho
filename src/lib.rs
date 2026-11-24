@@ -9,9 +9,10 @@ mod error;
 mod model;
 mod update;
 mod lang;
+mod render;
 
 pub use config::Config;
-pub use ui::Render;
+pub use render::Render;
 
 /// アプリケーション名
 pub const APP_NAME: &str = "Gacho";

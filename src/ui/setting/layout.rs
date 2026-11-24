@@ -11,16 +11,16 @@ pub(crate) fn view(
 ) {
     // 読み込み方向のラベルの幅を設定
     let readfrom_label_width = if lang::current().code == "en" {
-        setting::READFROM_EN_LABEL_WIDTH
+        ui::READFROM_EN_LABEL_WIDTH
     } else {
-        setting::READFROM_JA_LABEL_WIDTH
+        ui::READFROM_JA_LABEL_WIDTH
     };
 
     // ラベルの幅を設定
     let layout_label_width = if lang::current().code == "en" {
-        setting::LAYOUT_EN_LABEL_WIDTH
+        ui::LAYOUT_EN_LABEL_WIDTH
     } else {
-        setting::LAYOUT_JA_LABEL_WIDTH
+        ui::LAYOUT_JA_LABEL_WIDTH
     };
 
     // ヘッダーパネルを表示
@@ -39,9 +39,9 @@ pub(crate) fn view(
             });
         });
 
-        ui.add_space(setting::SETTING_ADD_SPACING);
+        ui.add_space(ui::SETTING_ADD_SPACING);
         ui.separator();
-        ui.add_space(setting::SETTING_ADD_SPACING);
+        ui.add_space(ui::SETTING_ADD_SPACING);
 
         // 画面表示の表示方式を表示
         ui.horizontal(|ui| {

@@ -1,8 +1,9 @@
 use crate::{config, event, file, ui};
 use crate::ui::assets::{self, icon, label, svg};
 
-const SLIDER_WIDTH: f32 = 50.0;
+/// 最小インデックス
 const MIN_INDEX: usize = 0;
+/// デフォルトの最大インデックス
 const DEFAULT_MAX_INDEX: usize = 0;
 
 /// 下部パネル
@@ -112,7 +113,7 @@ pub(crate) fn view(
                 let mut selected = files.current_spread_mut().unwrap_or(0);
                 let max = if files.spreads_len() > 0 { files.spreads_len() - 1 } else { DEFAULT_MAX_INDEX };
                 ui.scope(|ui| {
-                    ui.spacing_mut().slider_width = SLIDER_WIDTH;
+                    ui.spacing_mut().slider_width = ui::SLIDER_WIDTH;
                     let slider = match config.read_from() {
                         config::ReadFrom::RightToLeft => {
                             ui.add_enabled(

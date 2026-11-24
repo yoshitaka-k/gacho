@@ -20,7 +20,7 @@ pub(crate) fn view(
         pending_actions,
     );
 
-    ui.add_space(setting::HEADER_BOTTOM_SPACING);
+    ui.add_space(ui::HEADER_BOTTOM_SPACING);
 
     ui.separator();
 

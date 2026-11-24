@@ -16,16 +16,16 @@ pub(crate) fn view(
 ) {
     // メモリのラベルの幅を設定
     let memory_label_width = if lang::current().code == "en" {
-        setting::MEMORY_EN_LABEL_WIDTH
+        ui::MEMORY_EN_LABEL_WIDTH
     } else {
-        setting::MEMORY_JA_LABEL_WIDTH
+        ui::MEMORY_JA_LABEL_WIDTH
     };
 
     // 前処理数のラベルの幅を設定
     let preloading_label_width = if lang::current().code == "en" {
-        setting::PRELOADING_EN_LABEL_WIDTH
+        ui::PRELOADING_EN_LABEL_WIDTH
     } else {
-        setting::PRELOADING_JA_LABEL_WIDTH
+        ui::PRELOADING_JA_LABEL_WIDTH
     };
 
     // グループヘッダーパネルを表示
@@ -58,7 +58,7 @@ pub(crate) fn view(
         setting::warning_note(ui, lang::current().setting_general.memory_warning);
     });
 
-    ui.add_space(setting::SETTING_ADD_SPACING);
+    ui.add_space(ui::SETTING_ADD_SPACING);
 
     // グループヘッダーパネルを表示
     setting::header_panel(ui, svg::CACHED, lang::current().setting_general.preloading);

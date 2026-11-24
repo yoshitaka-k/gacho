@@ -1,6 +1,6 @@
-use crate::{state, lang, event};
+use crate::{state, lang, event, ui};
 use crate::event::input;
-use crate::ui::{setting, modal};
+use crate::ui::modal;
 use crate::ui::setting::{top, general, layout, memory, about};
 
 /// 設定ウィンドウを表示
@@ -12,12 +12,12 @@ pub(crate) fn view(
     state: &mut state::State,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
-    let window_id = egui::ViewportId::from_hash_of(setting::SETTING_WINDOW_ID);
+    let window_id = egui::ViewportId::from_hash_of(ui::SETTING_WINDOW_ID);
 
     // 設定ウィンドウのオプションを設定
     let mut options = egui::ViewportBuilder::default()
         .with_title(lang::current().setting.heading)
-        .with_inner_size([setting::WINDOW_WIDTH, setting::WINDOW_HEIGHT])
+        .with_inner_size([ui::WINDOW_WIDTH, ui::WINDOW_HEIGHT])
         .with_maximize_button(false)
         .with_resizable(false);
 

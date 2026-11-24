@@ -1,6 +1,5 @@
 pub(crate) mod color;
 pub(crate) mod font;
-pub(crate) mod label;
 pub(crate) mod size;
 pub(crate) mod svg;
 

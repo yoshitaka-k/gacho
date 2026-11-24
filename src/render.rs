@@ -33,12 +33,15 @@ impl Render {
         event::launch::set_ctx(cc.egui_ctx.clone());
 
         // 前回保存した Config があれば復元（なければ引数の config を使う）
-        let config = cc.storage
+        let mut config = cc.storage
             .and_then(|storage| eframe::get_value(storage, eframe::APP_KEY))
             .unwrap_or(config);
 
         // 言語を設定
         lang::set(config.language());
+
+        // 範囲外の値をクランプ
+        config.clamp_values();
 
         // 本のモデルを作成
         let book_model = model::Book::new();

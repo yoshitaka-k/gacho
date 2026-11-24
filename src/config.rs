@@ -4,6 +4,16 @@ use serde::{Deserialize, Serialize};
 /// 次の画像の表示数
 const DEFAULT_PRELOADING: usize = 5;
 
+/// 最小ページインデックス
+pub(crate) const MIN_PAGE_INDEX: usize = 0;
+/// 最大ページインデックス
+pub(crate) const MAX_PAGE_INDEX: usize = 0;
+
+/// 前処理数の最小値
+pub(crate) const MIN_PRELOADING: usize = 0;
+/// 前処理数の最大値
+pub(crate) const MAX_PRELOADING: usize = 10;
+
 /// 表紙表示方式
 #[derive(Clone, Copy, Deserialize, Serialize, PartialEq)]
 pub(crate) enum CoverLayout {
@@ -83,5 +93,10 @@ impl Config {
         } else {
             &false
         }
+    }
+
+    /// 値をクランプする
+    pub(crate) fn clamp_values(&mut self) {
+        self.preloading = self.preloading.clamp(MIN_PRELOADING, MAX_PRELOADING);
     }
 }

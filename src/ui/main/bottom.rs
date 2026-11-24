@@ -1,11 +1,6 @@
 use crate::{config, event, file, ui};
 use crate::ui::assets::{self, icon, label, svg};
 
-/// 最小インデックス
-const MIN_INDEX: usize = 0;
-/// デフォルトの最大インデックス
-const DEFAULT_MAX_INDEX: usize = 0;
-
 /// 下部パネル
 /// * `ui` - UI
 /// * `config` - 設定
@@ -111,20 +106,20 @@ pub(crate) fn view(
 
                 // ページャースライダー
                 let mut selected = files.current_spread_mut().unwrap_or(0);
-                let max = if files.spreads_len() > 0 { files.spreads_len() - 1 } else { DEFAULT_MAX_INDEX };
+                let max = if files.spreads_len() > 0 { files.spreads_len() - 1 } else { config::MAX_PAGE_INDEX };
                 ui.scope(|ui| {
                     ui.spacing_mut().slider_width = ui::SLIDER_WIDTH;
                     let slider = match config.read_from() {
                         config::ReadFrom::RightToLeft => {
                             ui.add_enabled(
                                 !files.book_is_empty(),
-                                egui::Slider::new(&mut selected, max..=MIN_INDEX).show_value(false)
+                                egui::Slider::new(&mut selected, max..=config::MIN_PAGE_INDEX).show_value(false)
                             )
                         }
                         config::ReadFrom::LeftToRight => {
                             ui.add_enabled(
                                 !files.book_is_empty(),
-                                egui::Slider::new(&mut selected, MIN_INDEX..=max).show_value(false)
+                                egui::Slider::new(&mut selected, config::MIN_PAGE_INDEX..=max).show_value(false)
                             )
                         }
                     };

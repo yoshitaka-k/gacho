@@ -2,11 +2,6 @@ use crate::{config, lang, ui};
 use crate::ui::assets::svg;
 use crate::ui::setting;
 
-/// 前処理数の最小値
-const MIN_PRELOADING: usize = 0;
-/// 前処理数の最大値
-const MAX_PRELOADING: usize = 10;
-
 /// 前処理数を表示
 /// * `config` - 設定
 /// * `ui` - UI
@@ -71,7 +66,7 @@ pub(crate) fn view(
             ui::add_label(ui, lang::current().setting_general.load_pages, preloading_label_width);
             ui.scope(|ui| {
                 ui.spacing_mut().slider_width = setting::remaining_slider_width(ui);
-                ui.add(egui::Slider::new(config.preloading_mut(), MIN_PRELOADING..=MAX_PRELOADING));
+                ui.add(egui::Slider::new(config.preloading_mut(), config::MIN_PRELOADING..=config::MAX_PRELOADING));
             });
         });
     });

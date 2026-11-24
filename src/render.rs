@@ -94,7 +94,6 @@ impl eframe::App for Render {
         ui::draw(
             ui,
             &mut self.state,
-            &mut self.job,
             &mut self.pending_actions,
         );
     }
@@ -274,6 +273,10 @@ impl Render {
                     self.state.files.set_current_spread(index);
 
                     is_saved = true;
+                }
+                // アップデート確認ボタンイベント
+                event::EventAction::CheckForUpdate => {
+                    button::check_for_update(&mut self.job.update_job, &mut self.state.update_token);
                 }
             }
 

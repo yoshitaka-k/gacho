@@ -6,12 +6,10 @@ use crate::ui::main::{top, bottom, middle};
 /// メインウィンドウを表示
 /// * `ui` - UI
 /// * `state` - 状態
-/// * `job` - ジョブ
 /// * `pending_actions` - 待機中のアクション
 pub(crate) fn view(
     ui: &mut egui::Ui,
     state: &mut state::State,
-    job: &mut state::Job,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
     // 上部パネルを表示
@@ -43,7 +41,6 @@ pub(crate) fn view(
         setting::view(
             ui.ctx(),
             state,
-            &mut job.update_job,
             pending_actions,
         );
     }

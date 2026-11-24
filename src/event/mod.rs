@@ -17,4 +17,5 @@ pub(crate) enum EventAction {
     Leftmost,
     Rightmost,
     Slider(usize),
+    CheckForUpdate,
 }

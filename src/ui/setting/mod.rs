@@ -7,8 +7,7 @@ mod about;
 
 pub(crate) use view::view;
 
-use crate::{lang, update};
-use crate::event::button;
+use crate::{lang, event, update};
 use crate::ui::assets::{self, icon, svg};
 
 /// 設定ウィンドウのID
@@ -82,8 +81,8 @@ pub(crate) fn about_header_panel(
     ui: &mut egui::Ui,
     icon: egui::ImageSource<'static>,
     label: &str,
-    update_job: &mut update::UpdateJob,
-    update_token: &mut update::UpdateToken,
+    update_token: &update::UpdateToken,
+    pending_actions: &mut Vec<event::EventAction>,
 ) {
     ui.horizontal(|ui| {
         header_panel(ui, icon, label);
@@ -92,7 +91,7 @@ pub(crate) fn about_header_panel(
         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
             ui.add_enabled_ui(!update_token.running, |ui| {
                 if ui.button(lang::current().setting_about.check_for_updates).clicked() {
-                    button::check_for_update(update_job, update_token);
+                    pending_actions.push(event::EventAction::CheckForUpdate);
                 }
             });
         });

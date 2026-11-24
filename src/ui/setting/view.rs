@@ -1,4 +1,4 @@
-use crate::{state, lang, event, update};
+use crate::{state, lang, event};
 use crate::event::input;
 use crate::ui::{setting, modal};
 use crate::ui::setting::{top, general, layout, memory, about};
@@ -6,12 +6,10 @@ use crate::ui::setting::{top, general, layout, memory, about};
 /// 設定ウィンドウを表示
 /// * `ctx` - コンテキスト
 /// * `state` - 状態
-/// * `update_job` - アップデートジョブ
 /// * `pending_actions` - 待機中のアクション
 pub(crate) fn view(
     ctx: &egui::Context,
     state: &mut state::State,
-    mut update_job: &mut update::UpdateJob,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
     let window_id = egui::ViewportId::from_hash_of(setting::SETTING_WINDOW_ID);
@@ -46,7 +44,7 @@ pub(crate) fn view(
                 state::SettingTab::General => general::view(ui, &mut state.config),
                 state::SettingTab::Layout => layout::view(ui, &mut state.config),
                 state::SettingTab::Memory => memory::view(ui, &mut state.config),
-                state::SettingTab::About => about::view(ui, &mut update_job, &mut state.update_token),
+                state::SettingTab::About => about::view(ui, &state.update_token, pending_actions),
             }
         });
 

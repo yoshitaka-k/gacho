@@ -8,20 +8,26 @@ pub(crate) use main::view as draw;
 
 use crate::ui::assets::{font, svg};
 
-// モーダルウィンドウの幅
-pub(crate) const MODAL_WINDOW_WIDTH: f32 = 320.0;
-pub(crate) const MODAL_WINDOW_SPACING: f32 = 8.0;
+/// ダークモードパネルの背景色
+const DARK_MODE_PANEL_COLOR: egui::Color32 = egui::Color32::from_rgb(35, 35, 35);
+/// ライトモードパネルの背景色
+const LIGHT_MODE_PANEL_COLOR: egui::Color32 = egui::Color32::from_rgb(225, 225, 225);
 
-// パネルの背景色
-pub(crate) const DARK_MODE_PANEL_COLOR: egui::Color32 = egui::Color32::from_rgb(35, 35, 35);
-pub(crate) const LIGHT_MODE_PANEL_COLOR: egui::Color32 = egui::Color32::from_rgb(225, 225, 225);
+// モーダルウィンドウ
 
-// パネルの内側のマージン
+/// モーダルウィンドウの幅
+const MODAL_WINDOW_WIDTH: f32 = 320.0;
+/// モーダルウィンドウのスペーシング
+const MODAL_WINDOW_SPACING: f32 = 8.0;
+/// モーダルのラベルの幅
+const MODAL_LABEL_WIDTH: f32 = 130.0;
+
+/// パネルの内側のマージン
 pub(crate) const PANEL_INNER_MARGIN: egui::Margin = egui::Margin {
     left: 8, right: 8, top: 0, bottom: 0,
 };
 
-// パネルの内側のマージン
+/// トップパネルの内側のマージン
 pub(crate) const TOP_PANEL_INNER_MARGIN: egui::Margin = egui::Margin {
     left: 10, right: 10, top: 4, bottom: 4,
 };

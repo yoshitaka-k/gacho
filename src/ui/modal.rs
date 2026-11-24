@@ -1,5 +1,4 @@
-use crate::{lang, ui, update};
-use crate::ui::ErrorToken;
+use crate::{state, lang, ui, update};
 use crate::ui::assets::{icon, svg};
 
 // モーダルのラベルの幅
@@ -9,7 +8,7 @@ pub(crate) const MODAL_LABEL_WIDTH: f32 = 130.0;
 /// * `show_modal` - モーダルを表示するかどうか
 /// * `ctx` - コンテキスト
 /// * `error_token` - エラーモーダルを表示するためのトークン
-pub(crate) fn error(ctx: &egui::Context, error_token: &mut ErrorToken) {
+pub(crate) fn error(ctx: &egui::Context, error_token: &mut state::ErrorToken) {
     if error_token.value.is_none() {
         return;
     }

@@ -1,4 +1,4 @@
-use crate::ui;
+use crate::{state, ui};
 use crate::ui::assets;
 use crate::ui::assets::{icon, svg};
 
@@ -7,7 +7,7 @@ use crate::ui::assets::{icon, svg};
 /// * `setting_token` - 設定トークン
 pub(crate) fn view(
     ui: &mut egui::Ui,
-    setting_token: &mut ui::SettingToken,
+    setting_token: &mut state::SettingToken,
 ) {
     // パネルのスタイルを設定
     let style = ui::panel_style(ui, ui::TOP_PANEL_INNER_MARGIN);
@@ -23,10 +23,10 @@ pub(crate) fn view(
             let selection_bg_fill = ui.style_mut().visuals.selection.bg_fill;
 
             // タブを表示
-            ui.selectable_value(&mut setting_token.tab, ui::SettingTab::General, ui::SettingTab::General.to_string());
-            ui.selectable_value(&mut setting_token.tab, ui::SettingTab::Layout, ui::SettingTab::Layout.to_string());
-            ui.selectable_value(&mut setting_token.tab, ui::SettingTab::Memory, ui::SettingTab::Memory.to_string());
-            ui.selectable_value(&mut setting_token.tab, ui::SettingTab::About, ui::SettingTab::About.to_string());
+            ui.selectable_value(&mut setting_token.tab, state::SettingTab::General, state::SettingTab::General.to_string());
+            ui.selectable_value(&mut setting_token.tab, state::SettingTab::Layout, state::SettingTab::Layout.to_string());
+            ui.selectable_value(&mut setting_token.tab, state::SettingTab::Memory, state::SettingTab::Memory.to_string());
+            ui.selectable_value(&mut setting_token.tab, state::SettingTab::About, state::SettingTab::About.to_string());
 
             // タブの選択時の背景色をリセット
             ui.style_mut().visuals.selection.bg_fill = selection_bg_fill;

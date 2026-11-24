@@ -1,28 +1,21 @@
-use crate::{config, error, lang, event, file, ui, model, update};
+use crate::{state, config, error, lang, event, file, ui, model, update};
 use crate::event::{button, open, input};
 use crate::ui::{setting, modal};
 use crate::ui::main::{top, bottom, middle};
 
 /// 描画用のウィジェット
 pub struct Render {
-    config: config::Config,
-    open_file: file::OpenFile,
+    /// アプリケーションの状態
+    state: state::State,
+
+    /// ジョブ
+    job: state::Job,
+
+    /// イベントアクション
     pending_actions: Vec<event::EventAction>,
 
-    // 設定ウィンドウのトークン
-    setting_token: ui::SettingToken,
-
-    // アップデートトークン
-    update_token: update::UpdateToken,
-
-    // アップデートジョブ
-    update_job: update::UpdateJob,
-
-    // エラーモーダルのトークン
-    error_token: ui::ErrorToken,
-
-    // 本のモデル
-    // 最後に読んだページ用のモデルを追加
+    /// 本のモデル
+    /// 最後に読んだページ用のモデルを追加
     book_model: model::Book,
 }
 
@@ -52,14 +45,24 @@ impl Render {
         // 本のモデルを作成
         let book_model = model::Book::new();
 
-        Self {
+        // アプリケーションの状態を作成
+        let state = state::State {
             config,
-            open_file: file::OpenFile::new(),
-            pending_actions: Vec::new(),
-            setting_token: ui::SettingToken::new(),
+            files: file::OpenFile::new(),
+            setting_token: state::SettingToken::new(),
             update_token: update::UpdateToken::new(),
-            error_token: ui::ErrorToken::new(),
+            error_token: state::ErrorToken::new(),
+        };
+
+        // ジョブを作成
+        let job = state::Job {
             update_job: update::UpdateJob::new(cc.egui_ctx.clone()),
+        };
+
+        Self {
+            state,
+            job,
+            pending_actions: Vec::new(),
             book_model,
         }
     }
@@ -70,7 +73,7 @@ impl eframe::App for Render {
     /// 終了前に Config の状態を保存
     /// * `storage` - ストレージ
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
-        eframe::set_value(storage, eframe::APP_KEY, &self.config);
+        eframe::set_value(storage, eframe::APP_KEY, &self.state.config);
     }
 
     /// 描画
@@ -78,7 +81,7 @@ impl eframe::App for Render {
     /// * `frame` - フレーム
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         // 更新結果を取得
-        self.update_job.result(&mut self.update_token);
+        self.job.update_job.result(&mut self.state.update_token);
 
         // OS から渡されたファイルを処理
         self.open_from_os();
@@ -92,44 +95,44 @@ impl eframe::App for Render {
         // 上部パネルを表示
         top::view(
             ui,
-            &mut self.open_file,
+            &mut self.state.files,
             &mut self.pending_actions,
         );
 
         // 下部パネルを表示
         bottom::view(
             ui,
-            &self.config,
-            &mut self.open_file,
+            &self.state.config,
+            &mut self.state.files,
             &mut self.pending_actions,
         );
 
         // 中央パネルを表示
         middle::view(
             ui,
-            &self.config,
-            &mut self.open_file,
+            &self.state.config,
+            &mut self.state.files,
             &mut self.pending_actions,
-            &mut self.error_token,
+            &mut self.state.error_token,
         );
 
         // 設定ウィンドウを表示
-        if self.setting_token.open {
+        if self.state.setting_token.open {
             setting::view(
                 ui.ctx(),
-                &mut self.config,
-                &mut self.setting_token,
-                &mut self.update_token,
-                &mut self.update_job,
+                &mut self.state.config,
+                &mut self.state.setting_token,
+                &mut self.state.update_token,
+                &mut self.job.update_job,
                 &mut self.pending_actions,
             );
         }
 
         // エラーモーダルを表示
-        if self.error_token.open {
+        if self.state.error_token.open {
             modal::error(
                 ui.ctx(),
-                &mut self.error_token,
+                &mut self.state.error_token,
             );
         }
     }
@@ -166,9 +169,9 @@ impl Render {
         // ファイルを開く
         let result = event::open::launch(
             path,
-            &mut self.open_file,
+            &mut self.state.files,
             &mut self.book_model,
-            *self.config.open_last_page(),
+            *self.state.config.open_last_page(),
         );
         self.open_result(result);
     }
@@ -177,7 +180,7 @@ impl Render {
     /// * `result` - ファイルを開く結果
     fn open_result(&mut self, result: error::Result<bool>) {
         // エラーモーダルをリセット
-        self.error_token.reset();
+        self.state.error_token.reset();
 
         // ファイルを開く結果を処理
         match result {
@@ -189,13 +192,13 @@ impl Render {
                 self.rebuild_spreads();
             }
             Ok(false) => {},
-            Err(e) => self.error_token.show(e),
+            Err(e) => self.state.error_token.show(e),
         }
     }
 
     /// 画面に表示させるページリストを作成
     fn rebuild_spreads(&mut self) {
-        self.open_file.build_spreads(*self.config.cover_layout(), *self.config.page_layout());
+        self.state.files.build_spreads(*self.state.config.cover_layout(), *self.state.config.page_layout());
     }
 
     /// イベントアクションを処理
@@ -205,7 +208,7 @@ impl Render {
         if self.pending_actions.is_empty() { return; }
 
         // エラーモーダルをリセット
-        self.error_token.reset();
+        self.state.error_token.reset();
 
         // 最後に読んだページを保存するかどうか
         let mut is_saved = false;
@@ -220,9 +223,9 @@ impl Render {
                 event::EventAction::FilesOpen => {
                     let result = open::file(
                         lang::current().file_dialog.archive,
-                        &mut self.open_file,
+                        &mut self.state.files,
                         &mut self.book_model,
-                        *self.config.open_last_page(),
+                        *self.state.config.open_last_page(),
                     );
                     self.open_result(result);
                 }
@@ -230,9 +233,9 @@ impl Render {
                 event::EventAction::FolderOpen => {
                     let result = open::folder(
                         lang::current().file_dialog.archive,
-                        &mut self.open_file,
+                        &mut self.state.files,
                         &mut self.book_model,
-                        *self.config.open_last_page(),
+                        *self.state.config.open_last_page(),
                     );
                     self.open_result(result);
                 }
@@ -241,9 +244,9 @@ impl Render {
                     let result = open::drop(
                         ui.ctx(),
                         files,
-                        &mut self.open_file,
+                        &mut self.state.files,
                         &mut self.book_model,
-                        *self.config.open_last_page(),
+                        *self.state.config.open_last_page(),
                     );
 
                     self.open_result(result);
@@ -251,62 +254,62 @@ impl Render {
                 // 閉じるボタンイベント
                 event::EventAction::Close => {
                     // 開いている本を閉じる
-                    button::close_open_file(&mut self.open_file);
+                    button::close_open_file(&mut self.state.files);
                 }
                 // 設定ウィンドウを開くイベント
                 event::EventAction::SettingOpen(pos) => {
-                    button::setting_open(&mut self.setting_token, pos);
+                    button::setting_open(&mut self.state.setting_token, pos);
                 }
                 // 設定ウィンドウを閉じるイベント
                 event::EventAction::SettingClose => {
-                    self.setting_token.open = false;
+                    self.state.setting_token.open = false;
                 }
                 // クリックイベント
                 event::EventAction::Click(pos) => {
                     // クリックした位置が左半分の場合は次のファイルを表示
                     if pos.x < ui.max_rect().max.x / 2.0 {
-                        if let Err(e) = self.open_file.left_page(&self.config) {
-                            self.error_token.show(e);
+                        if let Err(e) = self.state.files.left_page(&self.state.config) {
+                            self.state.error_token.show(e);
                         }
                     } else {
-                        if let Err(e) = self.open_file.right_page(&self.config) {
-                            self.error_token.show(e);
+                        if let Err(e) = self.state.files.right_page(&self.state.config) {
+                            self.state.error_token.show(e);
                         }
                     }
                     is_saved = true;
                 }
                 // 左矢印ボタンイベント
                 event::EventAction::Left => {
-                    if let Err(e) = self.open_file.left_page(&self.config) {
-                        self.error_token.show(e);
+                    if let Err(e) = self.state.files.left_page(&self.state.config) {
+                        self.state.error_token.show(e);
                     }
                     is_saved = true;
                 }
                 // 右矢印ボタンイベント
                 event::EventAction::Right => {
-                    if let Err(e) = self.open_file.right_page(&self.config) {
-                        self.error_token.show(e);
+                    if let Err(e) = self.state.files.right_page(&self.state.config) {
+                        self.state.error_token.show(e);
                     }
                     is_saved = true;
                 }
                 // 左端ボタンイベント
                 event::EventAction::Leftmost => {
-                    if let Err(e) = self.open_file.leftmost_page(&self.config) {
-                        self.error_token.show(e);
+                    if let Err(e) = self.state.files.leftmost_page(&self.state.config) {
+                        self.state.error_token.show(e);
                     }
                     is_saved = true;
                 }
                 // 右端ボタンイベント
                 event::EventAction::Rightmost => {
-                    if let Err(e) = self.open_file.rightmost_page(&self.config) {
-                        self.error_token.show(e);
+                    if let Err(e) = self.state.files.rightmost_page(&self.state.config) {
+                        self.state.error_token.show(e);
                     }
                     is_saved = true;
                 }
                 // スライダーイベント
                 event::EventAction::Slider(index) => {
                     // インデックスを更新
-                    self.open_file.set_current_spread(index);
+                    self.state.files.set_current_spread(index);
 
                     is_saved = true;
                 }
@@ -324,14 +327,14 @@ impl Render {
 
     /// sqlite に最後に読んだページを保存
     fn save_last_page(&mut self) {
-        if !*self.config.remembered_last_page() {
+        if !*self.state.config.remembered_last_page() {
             return;
         }
 
-        let path = self.open_file.book_path();
-        let page = self.open_file.current_page();
+        let path = self.state.files.book_path();
+        let page = self.state.files.current_page();
         if let Err(e) = self.book_model.save_last_page(&path, page) {
-            self.error_token.show(e);
+            self.state.error_token.show(e);
         }
     }
 }

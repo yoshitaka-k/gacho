@@ -5,7 +5,6 @@ mod modal;
 
 pub use main::render::Render;
 
-use crate::{error, lang};
 use crate::ui::assets::{font, svg};
 
 // モーダルウィンドウの幅
@@ -35,89 +34,6 @@ pub(crate) const BOTTOM_PANEL_INNER_MARGIN: egui::Margin = egui::Margin {
 pub(crate) fn install(ctx: &egui::Context) {
     font::install(ctx);
     svg::install(ctx);
-}
-
-/// 設定タブ
-#[derive(PartialEq)]
-pub enum SettingTab {
-    General,
-    Layout,
-    Memory,
-    About,
-}
-impl std::fmt::Display for SettingTab {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SettingTab::General => write!(f, "{}", lang::current().setting.general),
-            SettingTab::Layout => write!(f, "{}", lang::current().setting.layout),
-            SettingTab::Memory => write!(f, "{}", lang::current().setting.memory),
-            SettingTab::About => write!(f, "{}", lang::current().setting.about),
-        }
-    }
-}
-
-/// 設定ウィンドウを表示するためのトークン
-pub struct SettingToken {
-    pub open: bool,
-    pub pos: Option<egui::Pos2>,
-    pub tab: SettingTab,
-}
-
-impl SettingToken {
-    pub fn new() -> Self {
-        Self {
-            open: false,
-            pos: None,
-            tab: SettingTab::General,
-        }
-    }
-}
-/// エラーモーダルを表示するためのトークン
-pub struct ErrorToken {
-    pub open: bool,
-    pub value: Option<error::GachoError>,
-    pub dismissed: bool,
-}
-
-impl ErrorToken {
-    pub fn new() -> Self {
-        Self {
-            open: false,
-            value: None,
-            dismissed: false,
-        }
-    }
-
-    /// エラーモーダルを表示
-    /// * `error` - エラー内容
-    pub fn show(&mut self, error: error::GachoError) {
-        if self.dismissed {
-            return;
-        }
-
-        // 同じ失敗が毎フレーム来ても、ログは最初の1回だけ出す
-        if self.value.is_none() {
-            let (file, line) = error.location();
-            log::error!("{error} @ {file}:{line}");
-        }
-
-        self.open = true;
-        self.value = Some(error);
-    }
-
-    /// エラーモーダルを非表示
-    pub fn dismiss(&mut self) {
-        self.open = false;
-        self.value = None;
-        self.dismissed = true;
-    }
-
-    /// エラーモーダルをリセット
-    pub fn reset(&mut self) {
-        self.open = false;
-        self.value = None;
-        self.dismissed = false;
-    }
 }
 
 /// パネルの背景色

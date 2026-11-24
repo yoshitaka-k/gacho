@@ -1,5 +1,6 @@
 #![warn(clippy::all, rust_2018_idioms)]
 
+mod state;
 mod config;
 mod event;
 mod file;

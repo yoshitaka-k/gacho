@@ -1,4 +1,4 @@
-use crate::{config, lang, event, ui, update};
+use crate::{state, config, lang, event, update};
 use crate::event::input;
 use crate::ui::{setting, modal};
 use crate::ui::setting::{top, general, layout, memory, about};
@@ -11,7 +11,7 @@ use crate::ui::setting::{top, general, layout, memory, about};
 pub(crate) fn view(
     ctx: &egui::Context,
     config: &mut config::Config,
-    setting_token: &mut ui::SettingToken,
+    setting_token: &mut state::SettingToken,
     update_token: &mut update::UpdateToken,
     mut update_job: &mut update::UpdateJob,
     pending_actions: &mut Vec<event::EventAction>,
@@ -45,10 +45,10 @@ pub(crate) fn view(
         egui::CentralPanel::default().show(ui, |ui| {
             // タブに応じて表示内容を切り替え
             match setting_token.tab {
-                ui::SettingTab::General => general::view(ui, config),
-                ui::SettingTab::Layout => layout::view(ui, config),
-                ui::SettingTab::Memory => memory::view(ui, config),
-                ui::SettingTab::About => about::view(ui, &mut update_job, update_token),
+                state::SettingTab::General => general::view(ui, config),
+                state::SettingTab::Layout => layout::view(ui, config),
+                state::SettingTab::Memory => memory::view(ui, config),
+                state::SettingTab::About => about::view(ui, &mut update_job, update_token),
             }
         });
 

@@ -1,19 +1,19 @@
 use std::sync::Arc;
-use crate::{config, error, event, file, ui};
+use crate::{state, config, error, event, file};
 
 /// メインパネルを表示する
 /// * `ui` - UI
 /// * `config` - 設定
-/// * `open_file` - 開いているファイル
+/// * `files` - 開いているファイル
 /// * `pending_actions` - 処理予約
 /// * `error_token` - エラートークン
 /// メインパネル
 pub(crate) fn view(
     ui: &mut egui::Ui,
     config: &config::Config,
-    open_file: &mut file::OpenFile,
+    files: &mut file::OpenFile,
     pending_actions: &mut Vec<event::EventAction>,
-    error_token: &mut ui::ErrorToken,
+    error_token: &mut state::ErrorToken,
 ) {
     egui::CentralPanel::default().show(ui, |ui| {
         // クリックエリアを作成
@@ -24,7 +24,7 @@ pub(crate) fn view(
         let available_rect = ui.available_rect_before_wrap();
         let available = available_rect.size();
 
-        match open_file.page_images(None) {
+        match files.page_images(None) {
             Ok(images) if !images.is_empty() => {
                 let n = images.len() as f32;
                 let max_each = egui::vec2(available.x / n, available.y);
@@ -64,13 +64,13 @@ pub(crate) fn view(
 
         // 前後の画像を先読み
         for i in 1..=*config.preloading() {
-            if let Ok(images) = open_file.page_images(Some(i as isize)) {
+            if let Ok(images) = files.page_images(Some(i as isize)) {
                 for image_file in images {
                     let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
                 }
             }
 
-            if let Ok(images) = open_file.page_images(Some(-(i as isize))) {
+            if let Ok(images) = files.page_images(Some(-(i as isize))) {
                 for image_file in images {
                     let _ = ui_image(&image_file).load_for_size(ui.ctx(), available);
                 }
@@ -106,6 +106,9 @@ fn ui_image(image_file: &file::Image) -> egui::Image<'static> {
 /// 画像を読み込む
 /// * `ui` - UI
 /// * `image` - 画像
+/// * `image_file` - 画像ファイル
+/// * `size` - 画像サイズ
+/// * `is_loading` - 読み込み中かどうか
 /// * `error_token` - エラートークン
 /// * `return` - 読み込み完了
 fn image_load(
@@ -114,7 +117,7 @@ fn image_load(
     image_file: &file::Image,
     size: egui::Vec2,
     is_loading: bool,
-    error_token: &mut ui::ErrorToken,
+    error_token: &mut state::ErrorToken,
 ) {
     match image.load_for_size(ui.ctx(), size) {
         Ok(egui::load::TexturePoll::Ready { .. }) => {

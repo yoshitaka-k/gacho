@@ -16,7 +16,7 @@ pub enum Spread {
 
 /// ドロップされたファイルを管理する構造体
 #[derive(Getters, MutGetters, Setters)]
-pub struct OpenFile {
+pub struct OpenFiles {
     /// 本の構造体
     book: file::Book,
 
@@ -40,9 +40,9 @@ pub struct OpenFile {
 }
 
 /// public methods
-impl OpenFile {
-    /// 新しい OpenFile を作成
-    /// * `return` - OpenFile のインスタンス
+impl OpenFiles {
+    /// 新しい OpenFiles を作成
+    /// * `return` - OpenFiles のインスタンス
     pub fn new() -> Self {
         Self {
             book: file::Book::new(),
@@ -359,7 +359,7 @@ impl OpenFile {
 }
 
 /// private methods
-impl OpenFile {
+impl OpenFiles {
     /// 最初のページかどうか
     /// * `return` - 最初のページかどうか
     fn is_first_page(&self) -> bool {

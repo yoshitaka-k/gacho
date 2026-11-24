@@ -11,7 +11,7 @@ use crate::{state, config, error, event, file};
 pub(crate) fn view(
     ui: &mut egui::Ui,
     config: &config::Config,
-    files: &mut file::OpenFile,
+    files: &mut file::OpenFiles,
     pending_actions: &mut Vec<event::EventAction>,
     error_token: &mut state::ErrorToken,
 ) {

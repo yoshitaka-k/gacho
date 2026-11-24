@@ -10,7 +10,7 @@ use crate::ui::assets::{size, svg};
 pub(crate) fn view(
     ui: &mut egui::Ui,
     config: &config::Config,
-    files: &mut file::OpenFile,
+    files: &mut file::OpenFiles,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
     // スタイルとボタンの色を設定

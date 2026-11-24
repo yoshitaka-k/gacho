@@ -8,7 +8,7 @@ use crate::{config, file, lang, update};
 /// アプリケーションの状態
 pub(crate) struct State {
     pub config: config::Config,
-    pub files: file::OpenFile,
+    pub files: file::OpenFiles,
     pub setting_token: SettingToken,
     pub update_token: update::UpdateToken,
     pub error_token: ErrorToken,

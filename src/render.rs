@@ -49,7 +49,7 @@ impl Render {
         // アプリケーションの状態を作成
         let state = state::State {
             config,
-            files: file::OpenFile::new(),
+            files: file::OpenFiles::new(),
             setting_token: state::SettingToken::new(),
             update_token: update::UpdateToken::new(),
             error_token: state::ErrorToken::new(),

@@ -8,7 +8,7 @@ use crate::ui::assets::{size, svg};
 /// * `pending_actions` - 待機中のアクション
 pub(crate) fn view(
     ui: &mut egui::Ui,
-    files: &file::OpenFile,
+    files: &file::OpenFiles,
     pending_actions: &mut Vec<event::EventAction>,
 ) {
     let style = ui::panel_style(ui, ui::TOP_PANEL_INNER_MARGIN);

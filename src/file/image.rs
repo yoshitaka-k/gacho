@@ -82,7 +82,7 @@ impl Image {
         } else if file::is_image(&path) {
             // 画像ファイルを読み込む
             let reader = ImageReader::open(&path).map_err(|e| {
-                error::GachoError::file_error(e.to_string(), path.clone())
+                error::GachoError::from_io(e, path.clone())
             })?;
             // ファイルのフォーマットを取得
             let reader_with_format = reader.with_guessed_format().map_err(|e| {

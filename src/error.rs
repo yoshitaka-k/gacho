@@ -4,7 +4,7 @@ pub type Result<T> = std::result::Result<T, GachoError>;
 
 #[derive(Debug)]
 pub enum GachoError {
-    FileNotFound(String, path::PathBuf, String, u32),
+    FileNotFound(path::PathBuf, String, u32),
     FileError(String, path::PathBuf, String, u32),
     ArchiveError(String, String, u32),
     InvalidVersion(String, u32),
@@ -16,7 +16,7 @@ pub enum GachoError {
 impl fmt::Display for GachoError {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            GachoError::FileNotFound(e, p, _, _) => write!(fmt, "File does not exist: {}\n\n{}", e, p.display()),
+            GachoError::FileNotFound(p, _, _) => write!(fmt, "File does not exist: {}", p.display()),
             GachoError::FileError(e, p, _, _) => write!(fmt, "File error: {}\n\n{}", e, p.display()),
             GachoError::ArchiveError(e, _, _) => write!(fmt, "Archive error: {}", e),
             GachoError::InvalidVersion(_, _) => write!(fmt, "Invalid version"),
@@ -30,7 +30,7 @@ impl fmt::Display for GachoError {
 impl error::Error for GachoError {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         match *self {
-            GachoError::FileNotFound(_, _, _, _) => None,
+            GachoError::FileNotFound(_, _, _) => None,
             GachoError::FileError(_, _, _, _) => None,
             GachoError::ArchiveError(_, _, _) => None,
             GachoError::InvalidVersion(_, _) => None,
@@ -50,14 +50,29 @@ impl GachoError {
         (location.file().to_string(), location.line())
     }
 
+    /// I/O エラー
+    ///
+    /// FileNotFound と FileError を分けるためのヘルパー
+    ///
+    /// * `e` - I/O エラー
+    /// * `path` - ファイルパス
+    /// * `return` - I/O エラー
+    #[track_caller]
+    pub fn from_io(e: std::io::Error, path: path::PathBuf) -> Self {
+        if e.kind() == std::io::ErrorKind::NotFound {
+            Self::file_not_found(path)
+        } else {
+            Self::file_error(e.to_string(), path)
+        }
+    }
+
     /// ファイルが見つからない
-    /// * `message` - エラーメッセージ
     /// * `path` - ファイルパス
     /// * `return` - ファイルが見つからないエラー
     #[track_caller]
-    pub fn file_not_found(message: impl Into<String>, path: path::PathBuf) -> Self {
+    pub fn file_not_found(path: path::PathBuf) -> Self {
         let (file, line) = Self::caller();
-        Self::FileNotFound(message.into(), path, file, line)
+        Self::FileNotFound(path, file, line)
     }
 
     /// ファイルエラー
@@ -109,7 +124,7 @@ impl GachoError {
     /// * `return` - ファイル名と行番号
     pub fn location(&self) -> (&str, u32) {
         match self {
-            Self::FileNotFound(_, _, file, line)
+            Self::FileNotFound(_, file, line)
             | Self::FileError(_, _, file, line)
             | Self::ArchiveError(_, file, line)
             | Self::InvalidVersion(file, line)
@@ -123,7 +138,7 @@ impl GachoError {
     /// * `return` - エラーコード
     pub fn code(&self) -> String {
         match self {
-            Self::FileNotFound(_, _, f, l) => format!("FNF_{}_{}", Self::file_to_code(f), l),
+            Self::FileNotFound(_, f, l) => format!("FNF_{}_{}", Self::file_to_code(f), l),
             Self::FileError(_, _, f, l) => format!("FE_{}_{}", Self::file_to_code(f), l),
             Self::ArchiveError(_, f, l) => format!("AE_{}_{}", Self::file_to_code(f), l),
             Self::InvalidVersion(f, l) => format!("IVE_{}_{}", Self::file_to_code(f), l),

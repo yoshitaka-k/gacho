@@ -280,7 +280,7 @@ impl Book {
         base_dir: &Path,
     ) -> error::Result<()> {
         let metadata = path.metadata().map_err(|e| {
-            error::GachoError::file_error(e.to_string(), path.to_path_buf())
+            error::GachoError::from_io(e, path.to_path_buf())
         })?;
 
         // ファイルの場合は、画像を新規作成

@@ -152,7 +152,7 @@ impl Library {
     fn find_file(&mut self, path: &Path, base_dir: &Path, books_last_page: &Vec<(PathBuf, usize)>) -> error::Result<()> {
         // メタデータを取得
         let metadata = path.metadata().map_err(|e| {
-            error::GachoError::file_error(e.to_string(), path.to_path_buf())
+            error::GachoError::from_io(e, path.to_path_buf())
         })?;
 
         // ファイルの場合は、同ディレクトリのファイルを探索してライブラリに追加

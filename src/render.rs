@@ -218,7 +218,7 @@ impl Render {
                 // 閉じるボタンイベント
                 event::EventAction::Close => {
                     // 開いている本を閉じる
-                    button::close_open_file(&mut self.state.files);
+                    self.state.files.clear();
                 }
                 // 設定ウィンドウを開くイベント
                 event::EventAction::SettingOpen(pos) => {
@@ -279,7 +279,7 @@ impl Render {
                 }
                 // アップデート確認ボタンイベント
                 event::EventAction::CheckForUpdate => {
-                    button::check_for_update(&mut self.job.update_job, &mut self.state.update_token);
+                    self.job.update_job.run(&mut self.state.update_token);
                 }
             }
 

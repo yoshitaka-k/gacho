@@ -1,5 +1,5 @@
 use crate::{lang, ui, update};
-use crate::ui::assets::{icon, svg};
+use crate::ui::assets::{size, svg};
 use crate::ui::modal::heading_icon;
 
 /// 更新モーダルを表示
@@ -22,17 +22,17 @@ pub(crate) fn updated(
             match &check {
                 // アップデートがある場合
                 update::UpdateCheck::Available { .. } => {
-                    ui.add(heading_icon(svg::UPDATE, icon::MODAL_UPDATE_ICON_SIZE, egui::Color32::GREEN));
+                    ui.add(heading_icon(svg::UPDATE, size::MODAL_UPDATE_ICON_SIZE, egui::Color32::GREEN));
                     ui.heading(lang::current().modal_update.available);
                 }
                 // アップデートが最新の場合
                 update::UpdateCheck::Latest => {
-                    ui.add(heading_icon(svg::UPDATE, icon::MODAL_UPDATE_ICON_SIZE, ui.visuals().text_color()));
+                    ui.add(heading_icon(svg::UPDATE, size::MODAL_UPDATE_ICON_SIZE, ui.visuals().text_color()));
                     ui.heading(lang::current().modal_update.latest);
                 }
                 // アップデートが取得できなかった場合
                 update::UpdateCheck::Failed(_) => {
-                    ui.add(heading_icon(svg::ERROR, icon::MODAL_ERROR_ICON_SIZE, egui::Color32::RED));
+                    ui.add(heading_icon(svg::ERROR, size::MODAL_ERROR_ICON_SIZE, egui::Color32::RED));
                     ui.heading(lang::current().modal_update.failed);
                 }
             }

@@ -8,7 +8,8 @@ mod about;
 pub(crate) use view::view;
 
 use crate::{lang, event, ui, update};
-use crate::ui::assets::{self, icon, svg};
+use crate::ui::assets;
+use crate::ui::assets::{size, svg};
 
 /// ヘッダーパネルを表示
 /// * `ui` - UI
@@ -24,7 +25,7 @@ pub(crate) fn header_panel(
 
     ui.horizontal(|ui| {
         ui.spacing_mut().item_spacing.x = ui::HEADER_ICON_SPACING;
-        ui.add(egui::Image::new(icon).max_height(icon::SETTINGS_ICON_SIZE).tint(icon_color));
+        ui.add(egui::Image::new(icon).max_height(size::SETTINGS_ICON_SIZE).tint(icon_color));
         ui.spacing_mut().item_spacing.x = spacing;
         ui.label(label);
     });
@@ -73,7 +74,7 @@ pub(crate) fn warning_note(ui: &mut egui::Ui, text: &str) {
     // 出力パスの注意書きを表示
     ui.horizontal(|ui| {
         ui.spacing_mut().item_spacing.x = ui::WARNING_ICON_SPACING;
-        ui.add(egui::Image::new(svg::WARNING).max_height(icon::WARNING_ICON_SIZE).tint(assets::warning_color(ui)));
+        ui.add(egui::Image::new(svg::WARNING).max_height(size::WARNING_ICON_SIZE).tint(assets::warning_color(ui)));
         ui.spacing_mut().item_spacing.x = spacing;
         ui.add(egui::Label::new(
             egui::RichText::new(text).weak(),

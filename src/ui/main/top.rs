@@ -1,5 +1,6 @@
 use crate::{lang, file, event, ui};
-use crate::ui::assets::{self, icon, svg};
+use crate::ui::assets;
+use crate::ui::assets::{size, svg};
 
 /// 上部パネル
 /// * `ui` - UI
@@ -25,7 +26,7 @@ pub(crate) fn view(
                 // 設定ボタン
                 let hover_text = lang::current().main_top.settings;
                 let settings_button_image = egui::Image::new(svg::SETTINGS).tint(icon_color);
-                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(settings_button_image))
+                if ui.add_sized(size::ICON_BUTTON_SIZE, egui::Button::image(settings_button_image))
                     .on_hover_text(hover_text).clicked()
                 {
                     let pos = ui.ctx().input(|input| {
@@ -38,7 +39,7 @@ pub(crate) fn view(
                 let hover_text = lang::current().main_top.close;
                 let close_button_image = egui::Image::new(svg::CLEAR_ALL).tint(icon_color);
                 if ui.add_enabled_ui(!files.book_is_empty(), |ui| {
-                    ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(close_button_image))
+                    ui.add_sized(size::ICON_BUTTON_SIZE, egui::Button::image(close_button_image))
                 }).inner.on_hover_text(hover_text).on_disabled_hover_text(hover_text).clicked()
                 {
                     pending_actions.push(event::EventAction::Close);
@@ -47,7 +48,7 @@ pub(crate) fn view(
                 // フォルダダイアログを開くボタン
                 let hover_text = lang::current().main_top.folder_open;
                 let open_button_image = egui::Image::new(svg::FOLDER_OPEN).tint(icon_color);
-                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
+                if ui.add_sized(size::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
                     .on_hover_text(hover_text).clicked()
                 {
                     pending_actions.push(event::EventAction::FolderOpen);
@@ -56,7 +57,7 @@ pub(crate) fn view(
                 // ファイルダイアログを開くボタン
                 let hover_text = lang::current().main_top.files_open;
                 let open_button_image = egui::Image::new(svg::FILE_OPEN).tint(icon_color);
-                if ui.add_sized(icon::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
+                if ui.add_sized(size::ICON_BUTTON_SIZE, egui::Button::image(open_button_image))
                     .on_hover_text(hover_text).clicked()
                 {
                     pending_actions.push(event::EventAction::FilesOpen);

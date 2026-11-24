@@ -1,6 +1,6 @@
 use crate::{state, lang, ui};
 use crate::ui::modal::heading_icon;
-use crate::ui::assets::{icon, svg};
+use crate::ui::assets::{size, svg};
 
 /// エラーモーダルを表示
 /// * `ctx` - コンテキスト
@@ -17,7 +17,7 @@ pub(crate) fn error(
 
         // 見出し部分
         ui.horizontal(|ui| {
-            ui.add(heading_icon(svg::ERROR, icon::MODAL_ERROR_ICON_SIZE, egui::Color32::RED));
+            ui.add(heading_icon(svg::ERROR, size::MODAL_ERROR_ICON_SIZE, egui::Color32::RED));
             ui.heading(lang::current().modal_error.heading);
         });
 

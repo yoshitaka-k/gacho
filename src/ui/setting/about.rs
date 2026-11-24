@@ -1,6 +1,6 @@
 use crate::{GITHUB_URL, lang, ui, update, event};
 use crate::ui::{assets, setting};
-use crate::ui::assets::{svg, icon};
+use crate::ui::assets::{size, svg};
 
 /// バージョンを表示
 /// * `ui` - UI
@@ -26,7 +26,7 @@ pub(crate) fn view(
 
     egui::Frame::default().inner_margin(ui::PANEL_INNER_MARGIN).show(ui, |ui| {
         // アプリのアイコンを表示
-        ui.add(egui::Image::new(assets::APP_ICON).max_height(icon::APP_ICON_SIZE));
+        ui.add(egui::Image::new(assets::APP_ICON).max_height(size::APP_ICON_SIZE));
 
         // バージョンを表示
         ui.label(format!("Gacho v{}", env!("CARGO_PKG_VERSION")));

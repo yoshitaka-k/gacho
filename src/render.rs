@@ -1,5 +1,5 @@
 use crate::{state, config, error, lang, event, file, ui, model, update};
-use crate::event::{button, open, input};
+use crate::event::input;
 
 /// 描画用のウィジェット
 pub struct Render {
@@ -153,16 +153,14 @@ impl Render {
                 self.save_last_page();
 
                 // 画面に表示させるページリストを作成
-                self.rebuild_spreads();
+                self.state.files.build_spreads(
+                    *self.state.config.cover_layout(),
+                    *self.state.config.page_layout()
+                );
             }
             Ok(false) => {},
             Err(e) => self.state.error_token.show(e),
         }
-    }
-
-    /// 画面に表示させるページリストを作成
-    fn rebuild_spreads(&mut self) {
-        self.state.files.build_spreads(*self.state.config.cover_layout(), *self.state.config.page_layout());
     }
 
     /// イベントアクションを処理
@@ -174,112 +172,24 @@ impl Render {
         // エラーモーダルをリセット
         self.state.error_token.reset();
 
-        // 最後に読んだページを保存するかどうか
-        let mut is_saved = false;
+        // アクション処理後に最後に読んだページを保存するかどうか
+        let mut is_save_page = false;
 
         // 処理予約されたアクションを取り出して空にする
         let mut pending_actions = std::mem::take(&mut self.pending_actions);
 
         // 取り出されたアクションを処理
         for action in pending_actions.drain(..) {
-            match action {
-                // ファイルダイアログを開くイベント
-                event::EventAction::FilesOpen => {
-                    let result = open::file(
-                        lang::current().file_dialog.archive,
-                        &mut self.state.files,
-                        &mut self.book_model,
-                        *self.state.config.open_last_page(),
-                    );
-                    self.open_result(result);
+            match event::handle(ui.ctx(), &mut self.state, &mut self.job, &mut self.book_model, action) {
+                Ok(event::ActionResult::None) => {},
+                Ok(event::ActionResult::SaveLastPage) => {
+                    is_save_page = true;
                 }
-                // フォルダダイアログを開くイベント
-                event::EventAction::FolderOpen => {
-                    let result = open::folder(
-                        lang::current().file_dialog.archive,
-                        &mut self.state.files,
-                        &mut self.book_model,
-                        *self.state.config.open_last_page(),
-                    );
-                    self.open_result(result);
+                Ok(event::ActionResult::OpenFileSuccess) => {
+                    self.open_result(Ok(true));
                 }
-                // ドラッグ&ドロップされたファイルを処理
-                event::EventAction::DropOpen(files) => {
-                    let result = open::drop(
-                        ui.ctx(),
-                        files,
-                        &mut self.state.files,
-                        &mut self.book_model,
-                        *self.state.config.open_last_page(),
-                    );
-
-                    self.open_result(result);
-                }
-                // 閉じるボタンイベント
-                event::EventAction::Close => {
-                    // 開いている本を閉じる
-                    self.state.files.clear();
-                }
-                // 設定ウィンドウを開くイベント
-                event::EventAction::SettingOpen(pos) => {
-                    button::setting_open(&mut self.state.setting_token, pos);
-                }
-                // 設定ウィンドウを閉じるイベント
-                event::EventAction::SettingClose => {
-                    self.state.setting_token.open = false;
-                }
-                // クリックイベント
-                event::EventAction::Click(pos) => {
-                    // クリックした位置が左半分の場合は次のファイルを表示
-                    if pos.x < ui.max_rect().max.x / 2.0 {
-                        if let Err(e) = self.state.files.left_page(&self.state.config) {
-                            self.state.error_token.show(e);
-                        }
-                    } else {
-                        if let Err(e) = self.state.files.right_page(&self.state.config) {
-                            self.state.error_token.show(e);
-                        }
-                    }
-                    is_saved = true;
-                }
-                // 左矢印ボタンイベント
-                event::EventAction::Left => {
-                    if let Err(e) = self.state.files.left_page(&self.state.config) {
-                        self.state.error_token.show(e);
-                    }
-                    is_saved = true;
-                }
-                // 右矢印ボタンイベント
-                event::EventAction::Right => {
-                    if let Err(e) = self.state.files.right_page(&self.state.config) {
-                        self.state.error_token.show(e);
-                    }
-                    is_saved = true;
-                }
-                // 左端ボタンイベント
-                event::EventAction::Leftmost => {
-                    if let Err(e) = self.state.files.leftmost_page(&self.state.config) {
-                        self.state.error_token.show(e);
-                    }
-                    is_saved = true;
-                }
-                // 右端ボタンイベント
-                event::EventAction::Rightmost => {
-                    if let Err(e) = self.state.files.rightmost_page(&self.state.config) {
-                        self.state.error_token.show(e);
-                    }
-                    is_saved = true;
-                }
-                // スライダーイベント
-                event::EventAction::Slider(index) => {
-                    // インデックスを更新
-                    self.state.files.set_current_spread(index);
-
-                    is_saved = true;
-                }
-                // アップデート確認ボタンイベント
-                event::EventAction::CheckForUpdate => {
-                    self.job.update_job.run(&mut self.state.update_token);
+                Err(e) => {
+                    self.state.error_token.show(e);
                 }
             }
 
@@ -288,7 +198,7 @@ impl Render {
         }
 
         // 最後に読んだページを保存
-        if is_saved {
+        if is_save_page {
             self.save_last_page();
         }
     }

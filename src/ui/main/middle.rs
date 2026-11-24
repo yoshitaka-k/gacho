@@ -80,7 +80,13 @@ pub(crate) fn view(
         // クリックイベントを処理
         if click.clicked() {
             if let Some(pos) = click.interact_pointer_pos() {
-                pending_actions.push(event::EventAction::Click(pos));
+                // クリックした位置の左右を判断
+                let position = if pos.x < ui.max_rect().max.x / 2.0 {
+                    event::EventAction::Left
+                } else {
+                    event::EventAction::Right
+                };
+                pending_actions.push(position);
             }
         }
     });

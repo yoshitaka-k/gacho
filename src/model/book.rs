@@ -20,7 +20,10 @@ impl Book {
     /// * `path`: 本のパス
     /// * `page`: 最後に読んだページ
     /// * `return`: 成功したかどうか
-    pub fn save_last_page(&mut self, path: &Path, page: usize) -> error::Result<bool> {
+    pub fn save_last_page(&mut self,
+        path: &Path,
+        page: usize
+    ) -> error::Result<bool> {
         let id = self.get_id(path)?;
         if id.is_none() {
             self.insert_page(path, page)

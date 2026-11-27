@@ -42,7 +42,10 @@ struct UpdateInfo {
 /// * `new` - 新しいバージョン
 /// * `old` - 古いバージョン
 /// * `return` - 新しいバージョンが古いバージョンより新しいかどうか
-pub(crate) fn version_compare(new: &str, old: &str) -> error::Result<bool> {
+pub(crate) fn version_compare(
+    new: &str,
+    old: &str,
+) -> error::Result<bool> {
     let new = new.replace("v", "");
     let old = old.replace("v", "");
 

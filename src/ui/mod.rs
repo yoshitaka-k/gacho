@@ -109,7 +109,10 @@ fn panel_fill_color(ui: &egui::Ui) -> egui::Color32 {
 /// * `ui` - UI
 /// * `inner_margin` - パネルの内側のマージン
 /// * `return` - パネルのスタイル
-pub(crate) fn panel_style(ui: &mut egui::Ui, inner_margin: egui::Margin) -> egui::Frame {
+pub(crate) fn panel_style(
+    ui: &mut egui::Ui,
+    inner_margin: egui::Margin,
+) -> egui::Frame {
     let panel_fill_color = panel_fill_color(ui);
     egui::Frame::default()
         .fill(panel_fill_color)
@@ -121,7 +124,11 @@ pub(crate) fn panel_style(ui: &mut egui::Ui, inner_margin: egui::Margin) -> egui
 /// * `label` - ラベルのテキスト
 /// * `width` - ラベルの幅
 /// * `return` - ラベルのレスポンス
-pub(crate) fn add_label(ui: &mut egui::Ui, label: &str, width: f32) -> egui::Response {
+pub(crate) fn add_label(
+    ui: &mut egui::Ui,
+    label: &str,
+    width: f32
+) -> egui::Response {
     ui.allocate_ui_with_layout(
         egui::vec2(width, ui.spacing().interact_size.y),
         egui::Layout::right_to_left(egui::Align::Center),

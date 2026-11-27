@@ -67,7 +67,10 @@ pub(crate) fn remaining_slider_width(ui: &egui::Ui) -> f32 {
 /// * `ui` - UI
 /// * `text` - 警告ノートのテキスト
 /// * `return` - 警告ノートのリッチテキスト
-pub(crate) fn warning_note(ui: &mut egui::Ui, text: &str) {
+pub(crate) fn warning_note(
+    ui: &mut egui::Ui,
+    text: &str,
+) {
     // デフォルトのスペースの幅を避けておく
     let spacing = ui.spacing().item_spacing.x;
 

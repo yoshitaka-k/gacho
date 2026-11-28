@@ -58,14 +58,12 @@ pub(crate) fn folder(
 }
 
 /// ドロップされたファイルを処理
-/// * `ctx` - コンテキスト
 /// * `dropped_files` - ドロップされたファイル
 /// * `open_files` - 開いているファイル
 /// * `book_model` - 本のモデル
 /// * `is_open_last_page` - 最後に読んだページを開くかどうか
 /// * `return` - ファイルを開けたかどうか
 pub(crate) fn drop(
-    ctx: &egui::Context,
     dropped_files: Vec<PathBuf>,
     open_files: &mut file::OpenFiles,
     book_model: &mut model::Book,
@@ -80,12 +78,6 @@ pub(crate) fn drop(
     } else {
         Vec::new()
     };
-
-    // ウィンドウを前面に
-    ctx.send_viewport_cmd_to(
-        egui::ViewportId::ROOT,
-        egui::ViewportCommand::Focus,
-    );
 
     // ファイルを追加
     open_path(

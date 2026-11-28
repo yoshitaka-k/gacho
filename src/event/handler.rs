@@ -49,12 +49,18 @@ pub(crate) fn handle(
         // ドラッグ&ドロップされたファイルを処理
         event::EventAction::DropOpen(files) => {
             let result = open::drop(
-                ctx,
                 files,
                 &mut state.files,
                 book_model,
                 *state.config.open_last_page(),
             )?;
+
+            // ウィンドウを前面に
+            ctx.send_viewport_cmd_to(
+                egui::ViewportId::ROOT,
+                egui::ViewportCommand::Focus,
+            );
+
             // ファイルを開く結果を処理
             if result {
                 Ok(event::ActionResult::OpenFileSuccess)

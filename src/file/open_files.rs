@@ -18,6 +18,9 @@ pub enum Spread {
 #[derive(Getters, MutGetters, Setters)]
 pub struct OpenFiles {
     /// 本の構造体
+    ///
+    /// 開いている本の情報を管理する
+    ///
     book: file::Book,
 
     /// 選択されたファイルのインデックス
@@ -32,7 +35,9 @@ pub struct OpenFiles {
     current_spread: Option<usize>,
 
     /// ライブラリの構造体
-    // cbz (zip) ファイルだったら同階層の cbz (zip) ファイルをライブラリに追加
+    ///
+    /// cbz (zip) ファイルだったら同階層の cbz (zip) ファイルをライブラリに追加
+    ///
     library: file::Library,
 
     /// ライブラリのインデックス

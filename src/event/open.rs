@@ -21,7 +21,12 @@ pub(crate) fn file(
         .pick_file();
 
     // ファイルを追加
-    open_path(path, open_files, book_model, is_open_last_page)
+    open_path(
+        path,
+        open_files,
+        book_model,
+        is_open_last_page,
+    )
 }
 
 /// フォルダオープンダイアログを開いて選択結果を追加する
@@ -44,7 +49,12 @@ pub(crate) fn folder(
         .pick_folder();
 
     // ファイルを追加
-    open_path(path, open_files, book_model, is_open_last_page)
+    open_path(
+        path,
+        open_files,
+        book_model,
+        is_open_last_page,
+    )
 }
 
 /// ドロップされたファイルを処理
@@ -78,7 +88,12 @@ pub(crate) fn drop(
     );
 
     // ファイルを追加
-    open_files.build_book(file.to_path_buf(), books)
+    open_path(
+        Some(file.to_path_buf()),
+        open_files,
+        book_model,
+        is_open_last_page,
+    )
 }
 
 /// OS の「このアプリで開く」やコマンドライン引数のファイルを処理
@@ -97,7 +112,12 @@ pub(crate) fn launch(
     };
 
     // ファイルを追加
-    open_files.build_book(path, books)
+    open_path(
+        Some(path),
+        open_files,
+        book_model,
+        is_open_last_page,
+    )
 }
 
 /// ファイルを追加

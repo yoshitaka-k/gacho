@@ -139,8 +139,12 @@ impl OpenFiles {
     }
 
     /// 画面に表示させるページリストを作成
+    /// * `cover_layout` - 表紙表示方式
     /// * `page_layout` - ページ送り表示方式
-    pub fn build_spreads(&mut self, cover_layout: config::CoverLayout, page_layout: config::PageLayout) {
+    pub fn build_spreads(&mut self,
+        cover_layout: config::CoverLayout,
+        page_layout: config::PageLayout,
+    ) {
         self.spreads.clear();
         let mut page_index = 0;
 
@@ -316,7 +320,10 @@ impl OpenFiles {
     /// * `path` - ドロップされたファイルのパス
     /// * `books_last_page` - 本のリスト
     /// * `return` - 結果
-    pub fn build_book(&mut self, path: PathBuf, books_last_page: Vec<(PathBuf, usize)>) -> error::Result<bool> {
+    pub fn build_book(&mut self,
+        path: PathBuf,
+        books_last_page: Vec<(PathBuf, usize)>,
+    ) -> error::Result<bool> {
         // ライブラリにファイルを追加
         let mut library = file::Library::new();
         library.build_entries(path.clone(), &books_last_page)?;

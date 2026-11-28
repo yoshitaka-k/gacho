@@ -24,12 +24,7 @@ pub(crate) fn handle(
                 book_model,
                 *state.config.open_last_page(),
             )?;
-            // ファイルを開く結果を処理
-            if result {
-                Ok(event::ActionResult::OpenFileSuccess)
-            } else {
-                Ok(event::ActionResult::None)
-            }
+            action_result(result)
         }
         // フォルダダイアログを開くイベント
         event::EventAction::FolderOpen => {
@@ -39,12 +34,7 @@ pub(crate) fn handle(
                 book_model,
                 *state.config.open_last_page(),
             )?;
-            // ファイルを開く結果を処理
-            if result {
-                Ok(event::ActionResult::OpenFileSuccess)
-            } else {
-                Ok(event::ActionResult::None)
-            }
+            action_result(result)
         }
         // ドラッグ&ドロップされたファイルを処理
         event::EventAction::DropOpen(files) => {
@@ -61,12 +51,7 @@ pub(crate) fn handle(
                 egui::ViewportCommand::Focus,
             );
 
-            // ファイルを開く結果を処理
-            if result {
-                Ok(event::ActionResult::OpenFileSuccess)
-            } else {
-                Ok(event::ActionResult::None)
-            }
+            action_result(result)
         }
         // 閉じるボタンイベント
         event::EventAction::Close => {
@@ -89,7 +74,6 @@ pub(crate) fn handle(
             if let Err(e) = state.files.left_page(&state.config) {
                 state.error_token.show(e);
             }
-            // 最後に読んだページを保存
             Ok(event::ActionResult::SaveLastPage)
         }
         // 右矢印ボタンイベント
@@ -97,7 +81,6 @@ pub(crate) fn handle(
             if let Err(e) = state.files.right_page(&state.config) {
                 state.error_token.show(e);
             }
-            // 最後に読んだページを保存
             Ok(event::ActionResult::SaveLastPage)
         }
         // 左端ボタンイベント
@@ -105,7 +88,6 @@ pub(crate) fn handle(
             if let Err(e) = state.files.leftmost_page(&state.config) {
                 state.error_token.show(e);
             }
-            // 最後に読んだページを保存
             Ok(event::ActionResult::SaveLastPage)
         }
         // 右端ボタンイベント
@@ -113,14 +95,11 @@ pub(crate) fn handle(
             if let Err(e) = state.files.rightmost_page(&state.config) {
                 state.error_token.show(e);
             }
-            // 最後に読んだページを保存
             Ok(event::ActionResult::SaveLastPage)
         }
         // スライダーイベント
         event::EventAction::Slider(index) => {
-            // インデックスを更新
             state.files.set_current_spread(index);
-            // 最後に読んだページを保存
             Ok(event::ActionResult::SaveLastPage)
         }
         // アップデート確認ボタンイベント
@@ -128,5 +107,16 @@ pub(crate) fn handle(
             job.update_job.run(&mut state.update_token);
             Ok(event::ActionResult::None)
         }
+    }
+}
+
+/// アクション結果を返す
+/// * `result` - ファイルを開けたかどうか
+/// * `return` - アクション結果
+fn action_result(result: bool) -> error::Result<event::ActionResult> {
+    if result {
+        Ok(event::ActionResult::OpenFileSuccess)
+    } else {
+        Ok(event::ActionResult::None)
     }
 }
